@@ -1,0 +1,499 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>LMCP Design</title>
+        <style>
+            body {
+                font-family: sans-serif;
+            }
+
+            body{counter-reset: section}
+            h2{counter-reset: sub-section}
+            h3{counter-reset: composite}
+            h4{counter-reset: detail}
+
+            h2:before{
+                counter-increment: section;
+                content: counter(section) ".   ";
+            }
+            h3:before{
+                counter-increment: sub-section;
+                content: counter(section) "." counter(sub-section) "   ";
+            }
+            h4:before{
+                counter-increment: composite;
+                content: counter(section) "." counter(sub-section) "." counter(composite) "   ";
+            }
+            h5:before{
+                counter-increment: detail;
+                content: counter(section) "." counter(sub-section) "." counter(composite) "." counter(detail) "   ";
+            }
+
+        </style>
+
+    </head>
+    <body>
+
+        <div align="center"><img src="lmcp_logo.png" width="282" height="276" alt="lmcp_logo"/></div>
+
+        <h1>Lightweight Message Construction Protocol (LMCP) </h1>
+
+        <p><em>Updated 24 Feb 2014</em></p>
+        <p><em>Edited by</em> Matt Duquette, Air Force Research Laboratory (AFRL/RQQD)</p>
+
+        <h2>Introduction</h2>
+
+        <p>
+            The Lightweight Message Construction Protocol (LMCP) is a standard that serves two purposes.  First, it defines
+            a structure for common structured data and a process for serializing objects based on those types.  Secondly,
+            it defines a method for encapsulating objects for transmission between applications.  This specification describes
+            the structure of data, without specifying how applications implement the handling instantiations of those data types.
+            Applications that implement this specification can send and receive objects regardless of the operating system, 
+            platform, or programming language used.  LMCP is a simple and extensible specification, so it can be implemented
+            without a central runtime, proprietary libraries, or with the complexity of other protocols such as HLA and DIS.
+            This system offers several advantages to the end-user, including:
+
+            <ul>
+                <li>	A design independent of language, platform, and transport protocol.</li>
+                <li>	Object-oriented approach through structured data types, including support for null objects.</li>
+                <li>	A high level of customizability through user-defined data models.</li>
+                <li>	Support for variable length arrays and nested objects.</li>
+                <li>	Simple and open design, free of proprietary code and requiring no runtime infrastructure or special libraries.</li>
+            </ul>
+
+            LMCP also defines the structure of a message.  A message is a LMCP object which is encapsulated with header and footer
+            items to enable communication of LMCP objects between applications. LMCP allows developers to create custom data types
+            (structs) easily through a message data model (MDM).  Custom classes can be created for a given MDM through automatic
+            code generation or other means to recognize and handle messages.
+        </p>
+
+        <p>
+            LMCP was created at the Air Force Research Library as a way to ease communications between applications written in a 
+            variety of computing languages and running on different computing platforms. 
+        </p>
+
+
+
+        <h2>DataModel</h2>
+
+        LMCP implements an object-oriented data model.  The data model describes all of the LMCP data types that are valid
+        for a given LMCP network. An LMCP struct is a structure of other valid LMCP structs, similar to how a class is
+        defined in an object-oriented computer language.  Only objects that are reserved by this standard or declared in the
+        same Message Data Model (MDM) may be members of a struct. Section 5 describes how a data model is created.
+
+        <h3 id="primitive_types">Primitive Types</h3>
+        <p>LMCP defines several primitive data types that can be used by LMCP objects, as shown in Table 1.  These types are
+            the basis for forming meaningful data structures that are described by the MDM.
+        </p>
+        <table align="center" border="1" cellpadding="5" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Size (bytes)</th>
+                    <th>Definition and Limits</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td> bool	   </td><td> 1	    </td><td>  True (1) or false (0) </td></tr>
+                <tr><td> byte	   </td><td> 1	    </td><td>  0 to 255 </td></tr>
+                <tr><td> char	   </td><td> 1	    </td><td>  byte limits, values according to ASCII table </td></tr>
+                <tr><td> real64   </td><td> 8	    </td><td>  2.2e-308 to 1.8e308 </td></tr>
+                <tr><td> real32   </td><td> 4	    </td><td>  1.2e-38 to 3.4e38 </td></tr>
+                <tr><td> int64	   </td><td> 8	    </td><td>  -9,223,372,036,854,775,808 to 9,223,372,036,854,775,807 </td></tr>
+                <tr><td> int32	   </td><td> 4	    </td><td>  -2,147,483,648 to 2,147,483,647 </td></tr>
+                <tr><td> int16	   </td><td> 2     </td><td>  -32,768 to 32,767 </td></tr>
+                <tr><td> uint32   </td><td> 4	    </td><td>  0 to 4,294,967,295 </td></tr>
+                <tr><td> uint16   </td><td> 2	    </td><td>  0 to 65,535 </td></tr>
+                <tr><td> string   </td><td> variable </td><td> a variable length array of char types </td></tr>
+            </tbody>
+        </table>
+
+        <h3>Arrays</h3>
+        Data types defined in an MDM may contain array data in the form of fixed or variable length arrays.  An array data 
+        type is a list of data of the same type.  Arrays can contain only one type of data. Arrays may contain null values
+        if the type is not a primitive data type (i.e. a structured data type). LMCP reserves a special array data type,
+        “string”.  A string is a variable length array of char (see <a href="#primitive_types">Primitive Types</a>).
+
+        <h3>Structured Data Types (Structs)</h3>
+        The MDM has a listing of the structured data types.  A structured data type is analogous to an object-oriented class.  
+        Structured types can contain primitives, arrays, or other structured data types.  LMCP supports single inheritance of
+        structs. The antecedent struct does not need to be a member of the same MDM. A special struct, <em>LmcpObject</em>, is reserved 
+        by LMCP.  <em>LmcpObject</em> denotes that any valid LMCP struct can be used in the corresponding field.  This is analogous to 
+        the “Object” base type used in many object-oriented computer languages.
+
+        <h3>Enumerations (Enums)</h3>
+        Enumerations are named representations of data that can be used in struct fields.  The MDM lists a set of enums that
+        can be used in structs.  Enums can contain any valid int32 value.  Enum entries can be explicitly assigned a value.
+        If no value is specified in the MDM, the enum entry is assigned a value according to the position in the enum entry
+        list, starting at zero.
+
+
+        <h2>Object Serialization</h2>
+        An LMCP object (an instance of an LMCP structured data type) is serialized by placing byte representation of all
+        object contents into a buffer.  A serialized LMCP object shall be readable by any other application that
+        implements this standard.  De-serialization of object bytes shall yield an object of identical content of the
+        source object.  Serialization occurs in declaration order; all members of an LMCP object are converted to bytes
+        and placed in a byte array in the order that they are declared by the MDM.
+
+        <p>
+        Data is serialized according to the rules below.
+        </p>
+
+        <ul>
+            <li>If a data member is a primitive type (those listed in Table 1, with the exception of string), its bytes are serialized using 
+                the big-endian (most significant byte first) byte order.</li>
+
+            <li>If a data member is an enum, it is serialized according to the rules for int32.</li>
+
+            <li>A struct data type is preceded by a 1-byte boolean denoting its existence. If the object is null, the byte is set to zero, 
+                otherwise it is set to 1. If the object is non-null, the 8-byte series name, a 4-byte unsigned integer (uint32) denoting 
+                the LMCP object type, and a 2-byte unsigned integer (uint16) denoting the series version number follows. Then the members 
+                of the struct are serialized using the rules of this section.</li>
+
+            <li>A variable-length array is preceded by a value denoting the length of the array. By default, uint16 is used
+                to store the length. If the field entry in the MDM includes the attribute <code>LargeArray="true"</code> then uint32
+                is used to store the array length. Length is the number of elements (not the number of bytes) in the array.
+                The data contained in the array is then serialized according to the preceding rules. Arrays may be of zero
+                length, but may not be null. If an array is zero length, the preceding length value shall be zero. Arrays may
+                contain null elements if it contains objects of a non-primitive type. Strings are considered as variable
+                length arrays of char.</li>
+        </ul>
+
+
+        <h2>Messages</h2>
+        A message is an encapsulated and serialized LMCP object. Any struct can be packaged as a message. A message contains a header,
+        message body, and checksum. In this section, the data object that forms the body of the message is referred to as the root object.
+
+        <h3> Header</h3>
+        The header contains information that is used by applications to identify and process messages.  The header is 8 bytes long and 
+        contains the following data:
+        <ul>
+            <li> Control Sequence (char[4]).  The header starts with a 4-byte char sequence of "LMCP" (0x4c4d4350) that is used to indicate
+                the start of a new LMCP message.</li>
+            <li> Length (uint32).  Indicates the length, in bytes, of the root object.</li>
+        </ul>
+
+        <h3>Root Object</h3>
+        The root object is a single LMCP struct. When serializing the root-level object, the serialization rules given in Section 3 are used.
+
+        <h3>Checksum</h3>
+        The checksum is an unsigned integer (uint32) that is derived by binary addition of all members of the message except
+        the checksum.  The result is truncated to a 32-bit unsigned integer. Applications can choose to not calculate the checksum.
+        In this case, the field shall be set to zero.  LMCP-aware applications should recognize the zero value as a non-calculated
+        checksum.
+
+
+        <h2>Message Data Model</h2>
+
+        The message data model (MDM) is a list of data structures defined for a given application that all LMCP-aware applications shall implement.  
+        It is specified in an XML file as shown in the appendices. The LMCP standard does not specify how the MDM translates into code.  However, 
+        an XML DTD defines the contents of an MDM. 
+
+        <h3>Series Name</h3>
+        The SeriesName is used for populating the SeriesName header item when creating a message packet. The SeriesName may be any set of ASCII values 
+        of less than 8 chars.  Applications implementing LMCP may use the SeriesName value in a message packet as a first-check for MDM compatibility 
+        as well as byte-stream integrity. 
+
+        <h3>Version</h3>
+        The version number is an unsigned 16-bit integer according to the value specified in the MDM.  This is an optional setting in the MDM.  
+        A value of zero indicates that no versioning is specified.
+
+        <h3>Struct Definition</h3>
+        Structured data types are defined within the StructList of the MDM.  A struct name may be of any combination of letters, numbers, and the 
+        underscore ('_') character.  A name may not begin with a number. A struct may extend another struct type through the "extends" attribute.  
+        For serialization, all members of the antecedent type precede the members of the current type.  There is no limit on the number of levels 
+        of inheritance. Recursive inheritance is not allowed.
+        
+        <h3>Field Definition</h3>
+        The members of each struct are described by the MDM.  Each field has a name and type.  Every instance of a struct contains the members 
+        specified by the MDM.  Fields can be of any primitive type, array, or another struct specified by the MDM.  A struct may also have no fields.  
+
+        
+        <h2>Implementation Standards</h2>
+        LMCP defines message content, but leaves the implementation of communication protocols to the user. However, a few suggestions are presented 
+        which may help application developers. 
+
+        <h3>Mixing MDMs</h3>
+        A session should support data from multiple MDMs.  Since the MDM series name and series version are included for every struct that is contained 
+        in a message, applications should be aware of the presence of data from multiple MDM sources.  Not all applications will be able to meaningfully 
+        handle all MDMs, but should factory methods should return gracefully when data from unknown MDMs is encountered in a session.
+
+        <h3>Streaming Communications</h3>
+        When performing streaming operations, such as TCP/IP, it is best to check the SeriesName in the header each time a read is performed to test for 
+        corruption of the data stream.
+
+        <h3>Packet-Based Communications</h3>
+        When using packet-based protocols, such as UDP/IP, the use of confirmation messages helps mitigate the possibility of lost data.  A manual system 
+        for resending “lost” packets must be maintained by the implementing software.  If the protocol has a packet length limitation, consider splitting 
+        a message into multiple parts.  
+
+        <h3>Using the Checksum</h3>
+        Implementations of LMCP may choose to ignore the checksum.  In the case of TCP, using the checksum may be of little use.  Anecdotally, UDP has shown 
+        to be reliable under most network conditions, so the checksum may not be used.  If the checksum is not to be used, the field shall be zero-filled.
+
+        <h3>Using the MDM</h3>
+        The preferred method of utilizing an MDM is to pre-compile libraries or auto-generate code to be compiled with the application.  The field of 
+        each message should have corresponding “get” and “set” functions to allow access to message data members. Application developers may choose to use the
+        MDM definitions in other ways. 
+
+
+
+        <h2>XML Representation</h2>
+
+        <h3>Introduction</h3>
+        <p>LMCP messages can be specified in a data file as binary objects.  However, it may be useful to users to view and/or edit LMCP data.  XML is a
+            natural language for the storage of hierarchical information and is used by LMCP to define MDM data. This section describes
+            one way to store LMCP data in an XML format.  The rules described in this section can be used to store instantiations of LMCP
+            structs.  An example of an LMCP XML object list is shown in Appendix E.</p>
+
+        <h3>Object Representation</h3>
+        <p>Any struct from an MDM may be represented using XML.  An object is declared by creating an element with the name of the
+            corresponding LMCP struct.  All members of that object are assumed to contain default values as specified in the MDM unless
+            they are listed as children in the XML representation. The series name for the object should be included in the struct’s element
+            as an attribute named "series".
+            <code> &lt;struct_type series=""&gt;stuff &lt;/struct_type&gt; &lt;</code>
+            Members of objects are set by listing child elements of the object with a name corresponding to the field in the MDM declaration.
+            Use the following rules for object members:
+            <ul>
+                <li> Each member fields is listed as its own element under the struct’s element using the field name as the element name.</li>
+                <li> If the member is a primitive type, and is not an array, the value is listed as text under an element with the name of the field.
+                    <br/><code> &lt;field_name&gt;stuff &lt;/field_name&gt; </code></li>
+                <li> If the member is an array of primitive types , each list item is expressed as a list of child elements of a type that is
+                    compatible with the array.</li>
+                <br/><code> &lt;field_name&gt;&lt;int&gt;12&lt;/int&gt;&lt;int&gt;32&lt;/int&gt;&lt;int&gt;19&lt;/int&gt;&lt;/ field_name&gt; </code>
+                <li> If the member is a struct type, it is listed under the field name using the rules of this section.
+                    <br/><code> &lt;field_name&gt;&lt;struct_type series=""&gt;stuff&lt;/struct_type&gt;&lt;/field_name&gt; </code></li>
+                <li> If the member is a list of structs types, each object in the list is listed as a child element of the member element, using the
+                    rules of this section to list each object.</li>
+                <li> Enumerations are listed using their named value.</li>
+            </ul>
+        </p>
+
+        <h2> Example MDM </h2>
+
+        The XML definition of an MDM is straight forward and is shown following as an XML snippet.  
+        The following XML entities and attributes are handled in the LMCP specification.<br/>
+
+        <table border="1" cellspacing="0" cellpadding="5">
+            <tbody>
+                <tr>
+                    <td>
+                        <pre>
+    &lt;!DOCTYPE MDM SYSTEM 'MDM.DTD'&gt;
+    &lt;MDM&gt;
+        &lt;SeriesName&gt;TestSeries&lt;/SeriesName&gt;
+        &lt;Namespace&gt;Example&lt;/Namespace&gt;
+        &lt;Version&gt;1&lt;/Version&gt;
+        &lt;Comment&gt; MDM Comment &lt;/Comment&gt;
+        &lt;EnumList&gt;
+            &lt;Enum Name="VehicleCondition"&gt;
+                &lt;Entry Name="GOOD" Value="27"/&gt;
+                &lt;Entry Name="BAD"  Value="12"/&gt;
+        &lt;/EnumList&gt;
+        &lt;StructList&gt;
+            &lt;!-- put a struct comment here --&gt;
+            &lt;Struct Name="Position" Extends="AnotherMDM/Point"&gt;
+                    &lt;!-- put a field comment here --&gt;
+                &lt;Field Name="Latitude" Type="real64" Default="0" Units="Degree"&gt;
+                            &lt;Comment&gt; or put a field comment here &lt;/Comment&gt;
+                &lt;/Field&gt;
+                &lt;Field Name="Longitude" Type="real64" Default="0" Units="Degree"/&gt;
+                &lt;Field Name="Zone" Type="char[10]" Default="a"/&gt;
+            &lt;/Struct&gt;
+            &lt;Struct Name="Status"&gt;
+                &lt;Field Name="VehicleID" Type="int32" Default="0"/&gt;
+                &lt;Field Name="Condition" Type="VehicleCondition" /&gt;
+                &lt;Field Name="Location" Type="AnotherMDM/Point"/&gt;
+                &lt;Field Name="Extra" Type="LmcpObject"/&gt;
+            &lt;/Struct&gt;
+        &lt;/StructList&gt;
+    &lt;/MDM&gt;
+                        </pre>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <strong><tt>&lt;SeriesName&gt;</tt></strong><br/>
+                        <em>required</em><br/>
+                        This is a unique name for the MDM series that can be up to 8 characters long. <br/>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <strong><tt>&lt;Namespace&gt;</tt></strong><br/>
+                        <em>required</em><br/>
+                        This value is used by auto-coding software to establish namespaces or package names under which the message code
+                        will exist.<br/>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <strong><tt>&lt;Version&gt;</tt></strong><br/>
+                        <em>optional</em><br/>
+                        Denotes the version of this MDM. <br/>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <strong><tt>&lt;EnumList&gt;</tt></strong><br/>
+                        <em>optional</em><br/>
+                        Defines all of the enumerations for this MDM<br/>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <strong><tt>&lt;Enum Name=""&gt;</tt></strong><br/>
+                        <em>multiple allowed.</em><br/>
+                        This defines an enumeration.
+                        <ul>
+                            <li>Name (required) Name of the enumeration.</li>
+                        </ul>
+                    </td>
+                </tr>
+
+                <tr><td>
+                        <strong><tt>&lt;Entry Name="" Value=""&gt;</tt></strong><br/>
+                        <em>multiple allowed, at least one required.</em>
+                        <br/>This defines a Enum entry.
+                        <ul>
+                            <li><tt>Name</tt> (required) Name of the value</li>
+                            <li><tt>Value</tt> (optional) The value for this entry.  If there is no value specified, then the value is set to the index of the entry in the enum.</li>
+                        </ul>
+                    </td></tr>
+
+                <tr><td>
+                        <strong><tt>&lt;StructList&gt;</tt></strong><br/>
+                        <em>required</em><br/>
+                        Contains all of the messages specified in this MDM and their members.<br/>
+                    </td></tr>
+
+                <tr><td>
+                        <strong><tt>&lt;Struct Name=""&gt;</tt></strong><br/>
+                        <em>multiple allowed, at least one required.</em>
+                        <br/>This defines a struct.
+                        <ul>
+                            <li><tt>Name</tt> (required) Name of the struct.</li>
+                            <li><tt>Extends</tt> (optional) Name of the struct that this struct is based on.  All members of the antecedent are declared in the struct by using this attribute.  
+                                To denote an extension of a type in another MDM, use the syntax <code>series_name/struct_name</code>.</li>
+                            <li><tt>Series</tt> (deprecated,  used if this struct extends a struct from another MDM) Series name of the MDM in which the parent struct 
+                                (denoted by the “Extends” attribute) is defined.  This attribute is still supported in LMCP, but the recommended practice is to use 
+                                the “/” separator in the “Extends” attribute.  </li>
+                        </ul>
+                    </td></tr>
+
+                <tr><td>
+                        <strong><tt >&lt;Field Name="" Type="" Default=""/&gt;</tt></strong><br/>
+                        <em>optional.  Used only if the struct contains fields.  (Most structs do)</em><br/>
+                        The definition of each field in the message.  The order of fields in the XML tree must match the order of the fields in the message type definition.
+                        <ul>
+                            <li><tt>Name</tt>	(required) is the name of the field.</li>
+
+                            <li><tt>Type</tt>	(required) must be one of the types listed in Table 1, or a type defined by this MDM.  If the type is a fixed-length array, then
+                                declare the type attribute as &lt;type_name&gt;[xxx], where xxx is the length of the array.  If it is a variable length array, declare
+                                it as &lt;type_name&gt;[].&lt;/type_name&gt;&lt;/type_name&gt;.  If the type is a struct from another MDM, use the syntax <em>series_name/struct_name</em>. </li>
+
+                            <li><tt>Series</tt> (deprecated, used if the type is from another MDM) Series name of the MDM in which the struct type is defined.  
+                                This is deprecated, but still supported in LMCP. The recommended practice is to use the “/” separator in the type field instead.</li>
+
+                            <li><tt>Default</tt> (optional) specifies the default value for that field and must be of a valid type for that field, such as an integer, floating point value, or char.
+                                If a struct is to be null by default, use Default="null". Variable length arrays shall always be zero-length by default, so the Default attribute has no effect</li>
+
+                            <li><tt>Units</tt> (optional) specifies the units that are used for this field.  Typically units (e.g. feet, degrees, etc) apply to real values.</li>
+
+                            <li><tt>LargeArray</tt> (optional) Specifies that the variable length array should use an unsigned 32 bit integer to store length.  Allows for very long 
+                                arrays of data.  This is only valid for variable length array fields, and should only have a value of "true" or "false".</li>  
+                        </ul>
+                    </td></tr>
+
+                <tr><td>
+                        <strong><tt >&lt;!-- comments --&gt;</tt></strong><br/><em>Optional.</em><br/>
+                        XML comments are recognized in MDM processing.  If an XML comment is in the document, it is assumed that the comment applies to the element directly following
+                        the comment. Comments are recognized for the MDM node, an Enum node, an Enum Entry, a Struct node, or a Field node.  <br/>
+                        To assist in creating easily navigable documentation, the following special tag is declared.  Automatic code generators use this to resolve hyperlinks to structs
+                        and enums elsewhere in the documentation. To link to a struct or enum in another series, use the syntax [series name]/[struct or enum name] for the “type_name”
+                        listed below.
+                        <ul>
+                            <li>{@link type_name}  Used to create a link to the data type specified by type_name</li>
+                        </ul>
+                    </td></tr>
+
+            </tbody>
+        </table>
+
+        <h2>DTD for MDM files</h2>
+
+        <p>MDMs are constrainted by an XML DTD file.  A DTD specifies what data is allowed in an XML file and also defines required, optional, and default items.
+            When processing an MDM, the DTD is used to ensure conformance with the MDM format.</p>
+
+        <pre>
+&lt;?xml version='1.0' encoding='UTF-8'?&gt;
+
+&lt;!--- The MDM Node should contain only the elements that follow --&gt;
+&lt;!ELEMENT MDM (SeriesName+, Namespace+, Version?, Comment?, EnumList?, StructList?)&gt;
+
+&lt;!--- This is a text value of less than 10 chars (ascii types) --&gt;
+
+&lt;!ELEMENT SeriesName (#PCDATA) &gt;
+
+&lt;!--- For autocoding purposes.  This is used by languages to set namespaces or directory paths --&gt;
+&lt;!ELEMENT Namespace (#PCDATA)&gt;
+
+&lt;!--- Optional element to specify a version number for the MDM --&gt;
+&lt;!ELEMENT Version (#PCDATA)&gt;
+
+&lt;!--- The starting number for messages (must be greater than 10) --&gt;
+&lt;!ELEMENT StartID (#PCDATA)&gt;
+
+&lt;!--Comments for the MDM, Struct, or Field --&gt;
+&lt;!ELEMENT Comment (#PCDATA)&gt;
+
+&lt;!-- List of enerations that can be used in structs --&gt;
+&lt;!ELEMENT EnumList (Enum)*&gt;
+
+&lt;!--- Field definition (used in structs) --&gt;
+&lt;!ELEMENT Field (Comment)?&gt;
+&lt;!ATTLIST Field
+    Default CDATA ''
+    Type CDATA #REQUIRED
+    Name CDATA #REQUIRED
+    Series CDATA ''
+    Units CDATA 'None'
+    LargeArray CDATA ''
+  &gt;
+
+&lt;!--- The list of structs --&gt;
+&lt;!ELEMENT StructList (Struct)*&gt;
+
+&lt;!--- Struct definition --&gt;
+&lt;!ELEMENT Struct (Comment?, Field*)&gt;
+&lt;!ATTLIST Struct
+    Extends CDATA ''
+    Name CDATA #REQUIRED
+    Series CDATA ''
+  &gt;
+
+&lt;!--- Enumeration definition --&gt;
+&lt;!ELEMENT Enum (Comment?, Entry*)&gt;
+
+&lt;!ATTLIST Enum
+    Name CDATA #REQUIRED
+  &gt;
+
+&lt;!--- Struct entry definition --&gt;
+&lt;!ELEMENT Entry (Comment?)&gt;
+&lt;!ATTLIST Entry
+    Name CDATA ''
+    Value CDATA ''
+  &gt;
+
+        </pre>
+
+    </body>
+</html>
+

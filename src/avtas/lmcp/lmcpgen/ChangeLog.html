@@ -1,0 +1,425 @@
+<HTML>
+    <BODY>
+        <H1>LmcpGen Change Log</H1>
+
+        <P>This log reflects all changes to the LmcpGen</P>
+        
+        <h2>21 Mar 2016</h2>
+        <ul>
+            <li>(All) Allowed avtas.lmcp.Object to be a field in messages</li>
+        </ul>
+
+        <h2>11 Feb 2016</h2>
+        <ul>
+            <li>(Java) Added null checking in LMCPUtil getObject() method to avoid throwing exceptions for unknown types.</li>
+        </ul>
+
+        <h2>16 Jul 2015</h2>
+        <ul>
+            <li>(C++) Generates VS2013 project files</li>
+            <li>(C++) Consistent types used (int16_t, int32_t, int64_t)</li>
+            <li>(C++) Fixed int64 XML parsing</li>
+        </ul>
+		
+        <h2>4 June 2015</h2>
+        <ul>
+            <li>(C++) Added ifndef statements around type defs in ByteBuffer.h to avoid confusion with systems that define same types</li>
+        </ul>
+
+        <h2>6 Nov 2014</h2>
+        <ul>
+            <li>(C++) Added -fPIC compiler option</li>
+        </ul>
+        
+        <h2>10 Oct 2014</h2>
+        <ul>
+            <li>(Java) Changed SeriesEnum method to get new instance of messages to use switch statement in place of reflection (performance improvement)</li>
+        </ul>
+        
+        <h2>25 Aug 2014</h2>
+        <ul>
+            <li>(C++, Java) Fixed some bugs related to handling fixed-length arrays.</li>
+            <li>(Doc) Updated the generated DTD file for MDM output</li>
+        </ul>
+        
+        <h2>10 Mar 2014</h2>
+        <ul>
+            <li>(C++) Added makefile and linux/windows switches to test server/client code.  (Credit: Kyle Finley)</li>
+        </ul>
+        
+        <h2>24 Feb 2014</h2>
+        <ul>
+            <li>Updated LMCP help file and fixed menu action.</li>
+        </ul>
+        
+        <h2>20 Feb 2014</h2>
+        <ul>
+            <li>(C++) Changed additional int and long values to size_t to prevent errors between 
+            32 bit and 64 bit compilers.</li>
+        </ul>
+        
+        <h2>22 Nov 2013</h2>
+        <ul>
+            <li>(C++) Changed several <code>unsigned int</code> types to <code>size_t</code> in base LMCP classes
+                to be compatible across 32 and 64 bit compilers</li>
+        </ul>
+        
+        <h2>25 Sep 2013</h2>
+        <ul>
+            <li>(C#) Fixed accidental change to XmlNodeList in SeriesXmlReader that broke .Net compiling.</li>
+        </ul>
+        
+        <h2>26 Aug 2013</h2>
+        <ul>
+            <li>(Java) Changed constructor to allow for unlimited number of initial input scalars</li>
+        </ul>
+        
+        <h2>15 Aug 2013</h2>
+        <ul>
+            <li>Fixed MDMReader validation to properly check limits for byte types.</li>
+        </ul>
+        
+        <h2>29 July 2013</h2>
+        <ul>
+            <li>(XSD) Added a space when copying comments to avoid "-<" errors for comments that end in "-".</li>
+            <li>(C++) Fixed bug in calculateSize() for lists of strings.</li>
+            <li>(C++) Fixed bug in "f" float suffix to handle values with and without decimal point.</li>
+        </ul>
+        
+        <h2>16 July 2013</h2>
+        <ul>
+            <li>(Python) Improved import structure.  Added __init__ files to empty folders.</li>
+            <li>(Python) Fixed Test Server socket import. </li>
+            <li>(Java) Removed imports of all series to avoid class name confusion.</li>
+            <li>(Java) Added Javadoc comments to set() methods and top-level classes.</li>
+        </ul>
+        
+        <h2>17 Jun 2013</h2>
+        <ul>
+            <li>(C++) Added "f" suffix to real32 types to avoid precision warnings during compilation.</li>
+            <li>Added default value checking when reading in MDMs.</li>
+        </ul>
+        
+        <h2>30 April 2013</h2>
+        <ul>
+            <li>(C++) Added cstdlib to include list for Node.h</li>
+        </ul>
+        
+        <h2>26 Feb 2013</h2>
+        <ul>
+            <li>(C#) Fixed bug in list accessors (uint used instead of int, change from 29 Jan)</li>
+            <li>(C#) Reversed list size container type (ushort and uint)</li>
+        </ul>
+        
+        <h2>29 Jan 2013</h2>
+        <ul>
+            <li>Added support for "LargeArrays" (see LMCP documentation)</li>
+        </ul>
+        <h2>31 Oct 2012</h2>
+        <ul>
+            <li>(Python) Fixed bug in xml output of enums</li>
+        </ul>
+        
+        <h2>17 Oct 2012</h2>
+        <ul>
+            <li>(C#) Changed modifiers to several functions in LmcpFactory to allow public access.</li>
+            <li>(C#) Updated TestServer program to use GetObject() from LmcpFactory.</li>
+        </ul>
+        
+        <h2>17 Sep 2012</h2>
+        <ul>
+            <li>(Doc) Minor change in documentation to print out <em>LmcpObject</em> correctly</li>
+        </ul>
+        
+        <h2>11 July 2012</h2>
+        <ul>
+            <li><font color="red">(New)</font> MDM style change allows users to use "/" syntax for referring to types in other MDMs</li>
+            <li><font color="red">(New)</font> LMCP now supports generic "LmcpObject" type</li>
+            <li>(C#) Fixed error in setting default values for "char" type </li>
+            <li>(C++, C#, Java) Fixed error in setting default values for "char" type </li>
+            <li>(C++) Fixed error in setting large default int64 values </li>
+            <li>(C++) Added missing get_char method in XML reader </li>
+        </ul>
+        
+        <h2>14 Jun 2012</h2>
+        <ul>
+            <li>(C++)  Changed output precision to 15 digits to handle large 64bit real values.</li>
+        </ul>
+        
+        <h2>26 Sep 2011</h2>
+        <ul>
+            <li>(C++) Fixed XML output for list of enums</li>
+        </ul>
+        
+        <h2>11 Jul 2011</h2>
+        <ul>
+            <li>(Python) Fixed variable access error in toString() method.</li>
+        </ul>
+        
+        <h2>20 Jun 2011</h2>
+        <ul>
+            <li>(C++) Fixed XML printouts of bools from numerical (0 or 1) to "true" and "false"</li>
+        </ul>
+        
+        <h2>3 Jun 2011</h2>
+        <ul>
+            <li>(C++) Changed enum references to be fully qualified namespaces in toXML() function.</li>
+        </ul>
+
+        <h2>5 May 2011</h2>
+        <ul>
+            <li>(Python) Fixed instance variable name mismatch in pack method (Credit: Adam Parry)</li>
+        </ul>
+
+        <h2>18 March 2011</h2>
+        <ul>
+            <li>Added support for Visual Studio 10 (vcxproj and filters)</li>
+        </ul>
+
+        <h2>8 March 2011</h2>
+        <ul>
+            <li>(C++) Updated "Object.h" calculateSize function to return size_t (matches function definition return type) </li>
+            <li>Updated documentation for running LmcpGen on the command line.</li>
+            <li>Updated folder choosing in GUI to start in current directory</li>
+        </ul>
+
+        <h2>31 Jan 2011</h2>
+        <ul>
+            <li>Fixed C++ XML output to write enums as strings (previously did integers)</li>
+        </ul>
+
+        <h2>25 Jan 2011</h2>
+        <ul>
+            <li>Added XML Schema output.  Thanks to Andrew Martignoni III for creating this.</li>
+        </ul>
+
+        <h2>19 Jan 2011</h2>
+        <ul>
+            <li>(Java) Fixed XML output in LMCP object toXML() method to be properly indented.</li>
+            <li>(Java) Changed enumeration LmcpType annotation to be simple class name</li>
+            <li>(C++) Added XML node null checking in LmcpXMLReader read() function.  This fixes the issue that
+                was aimed to be fixed by the Jan 18 mod.</li>
+            <li>(C++) Modified the XML output to skip null-items (makes XML more compact)</li>
+        </ul>
+
+        <h2>18 Jan 2011</h2>
+        <ul>
+            <li>(C++) Added XML node null checking in SeriesXMLReader read() function</li>
+        </ul>
+
+        <h2>10 Jan 2011</h2>
+        <ul>
+            <li>(C#) Fixed issue causing compile error if multiple MDMs used</li>
+            <li>(C#) Changed the namespace of basic LMCP classes to Afrl.Lmcp</li>
+            <li>(C#) Improved project file output to include a VS2008 solution and 3 project files</li>
+        </ul>
+
+        <h2>7 Jan 2011</h2>
+        <ul>
+            <li>Added Source extraction menu to "help" menu.
+        </ul>
+
+        <h2>5 Jan 2011</h2>
+        <ul>
+            <li>(C++) Fixed memory leak in unpack() function by calling delete on objects before unpacking</li>
+        </ul>
+
+        <h2>4 Oct 2010</h2>
+        <ul>
+            <li>(Java) Changed classloader method to be compatible with MATLAB
+            <li>(Java) added XMLUtil class into java package
+            <li>added help menu to lmcpgen
+        </ul>
+
+        <h2>24 Sep 2010</h2>
+        <ul>
+            <li>(Java) Added == check into equals() method
+            <li>Fixed bug in Gui code so that only selected (checked) packages are built
+        </ul>
+
+        <h2>21 Sep 2010</h2>
+        <ul>
+            <li>Updated LmcpGen gui to auto-configure packages using "gui_config.xml" file
+            <li>Fixed hyperlink errors in html output
+            <li>Incorporated Qt-based gui tools as an option in LmcpGen
+            <li>(Python) class member reference errors fixed
+        </ul>
+
+        <h2>1 Sep 2010</h2>
+        <ul>
+            <li>(Java) added constructor with arguments (up to 4 scalar args)
+            <li>Changed MDM DTD to "require" type value in fields.  Was set to default to "byte"
+        </ul>
+
+        <h2>28 Jul 2010</h2>
+        <ul>
+            <li>Minor updates to Doc methods
+            <li>Now distributing LmcpGen as a single jar file with source embedded
+        </ul>
+
+        <h2>16 Jun 2010</h2>
+        <ul>
+            <li>(Java) Fixed SeriesEnum index bug
+            <li>(Python) Python is back.  The Python message set has been upgraded to the new LMCP standard.
+        </ul>
+
+        <h2>4 Jun 2010</h2>
+        <ul>
+            <li>(C++) fixed bug in enum lists
+        </ul>
+
+        <h2>24 May 2010</h2>
+        <ul>
+            <li>(C++) Changes to XML handing and minor updates for VS compatibility.
+            <li>MDMs now print in the main output directory and each code package directory.
+        </ul>
+
+        <h2>20 May 2010</h2>
+        <ul>
+            <li>(Java) re-vamped XML reader now uses reflection to create objects from XML
+            <li>(Java) minor fix to series enums to return proper object types.
+        </ul>
+
+        <h2>6 May 2010</h2>
+        <ul>
+            <li>(Java) Minor changes to java methods for better access to objects
+            <li>(Java) Fixed XML reading problem
+        </ul>
+
+        <h2>26 Mar 2010</h2>
+        <ul>
+            <li>Added vcproj (C++) and csproj (C#) build files
+            <li>(Java) Fixed calculate size bug
+            <li>All languages now have a TCP server and client example app under "test" namespace
+            <li>(Java) changed equality testing to require exact class compatibility
+            <li>Tested and passed multi-MDM inclusion
+            <li>(C++) Significant code changes in templates and methods file.
+        </ul>
+
+        <h2>24 Mar 2010</h2>
+        <ul>
+            <li>Fixed numerous bugs in C++ code that created non-standard headers
+            <li>Implemented new XML standard across C#, C++, Java
+            <lI>Many style and consistency changes in all languages
+        </ul>
+
+        <h2>5 Mar 2010</h2>
+        <i>Warning: Beta Version</i>
+        <ul>
+            <li><B>Major Changes.</B> New LmcpGen supports multiple MDM input.  LMCP factory methods
+	were changed to allow handling of multiple MDMs in one session.
+            <li>New LMCP Header and object structure implemented.
+            <li>(C++) Some errors were fixed in object creation/handling in lists.
+            <li>(Java, C#, C++) Major changes in the factory method.  No more "SeriesFactory" types.  use the
+	LMCP Factory instead.
+            <li>(Python) Python support for multiple MDMs is NOT implemented yet.
+        </ul>
+
+        <h2>13 Feb 2010</h2>
+        <ul>
+            <li>Added a check in the MDMReader that sets numerical fields to zero if no default is specified.
+	      This was causing errors in the Python generated code.</li>
+        </ul>
+
+        <h2>11 Feb 2010</h2>
+        <ul>
+            <li>Enums are here!  LmcpGen has been updated to include the new LMCP enum type
+            <li>Renamed DataType to struct.  MDM DTD, and documentation has been updated.
+            <li>There is no longer a StartID field for structs.  All MDMs will have struct IDs that start at 1.
+        </ul>
+
+        <h2>22 Jan 2010</h2>
+        <ul>
+            <li>Minor changes to C# code.
+        </ul>
+
+        <h2>14 Jan 2010</h2>
+        <ul>
+            <li>Changes to the C# package to be in line with C# conventions
+            <lI>Fixed default value problem in MDM DTD that set non-numeric fields to "0" in absence of default values
+        </ul>
+
+        <h2>17 Jun 2009</h2>
+        <ul>
+            <li>C# packages are here!
+        </ul>
+
+        <h2>24 Mar 2009</h2>
+        <ul>
+            <li>(Java) Added getTypeName() to LMCPObject
+        </ul>
+
+        <H2>19 Mar 2009</H2>
+        <ul>
+            <li><B>Python is Here!</B> The LmcpGen now includes python output.
+                Python package has been tested with Python 2.6.  Expect some bugs since this
+                is a brand-new code package.
+        </ul>
+
+        <H2>5 Mar 2009</H2>
+        <ul>
+            <li>(C++) Added null checking to object clone and operator= functions.
+        </ul>
+
+        <H2>26 Feb 2009</H2>
+        <ul>
+            <li>(C++) Fixed minor packing bug for object types
+        </ul>
+
+        <H2>16 Jan 2009</H2>
+        <ul>
+            <li>(C++) Added clone method to object class, allowing deep copies in arrays.
+            <li>(C++) Changed the handling of variable-length lists to use STL vectors
+            <li>(C++) Changed fixed-length arrays to use C++ arrays
+            <li>(C++) Simplified C++ code base
+            <li>(Java) Added a static SeriesFactory object to SeriesFactory to eliminate the need
+                to create several SeriesFactories
+            <li>(Java) Minor tweaks made to simplify the code
+        </ul>
+
+        <H2>02 Oct 2008</H2>
+        <ul>
+            <li>(C++) Changed ObjectArray.h code to to shallow copies in order to avoid loss of type
+        </ul>
+
+        <H2>27 Aug 2008</H2>
+        <ul>
+            <li>(C++) Fixed a packing bug in pack() function.  Old method stored the wrong object type
+            <li>(C++) Fixed PrimitiveArray.h byte-order bug
+            <li>(C++) SeriesXMLReader no longer deletes objects that are created during XML parsing.
+        </ul>
+
+        <H2>24 Jun 2008</H2>
+        <ul>
+            <li>(C++) added precision line to toString and toXML methods.  Decimals now have 9 digits precision.
+        </ul>
+
+        <H2>29 Feb 2008</H2>
+        <ul>
+            <li>Changed XML Reading code in java package.  Now checks for nulls before attempting
+                to read a value.
+            <li>Fixed XML output so extra endline is not printed between objects
+        </ul>
+
+
+    </BODY>
+</HTML>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

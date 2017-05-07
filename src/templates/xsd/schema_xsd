@@ -1,0 +1,51 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified">
+	-<generate_structs>-
+	-<generate_enums>-
+	<!-- LMCP built-in types -->
+	<xs:simpleType name="bool">
+		<xs:restriction base="xs:boolean" />
+	</xs:simpleType>
+	<xs:simpleType name="byte">
+		<xs:restriction base="xs:unsignedByte" />
+	</xs:simpleType>
+	<xs:simpleType name="char">
+		<xs:restriction base="byte" />
+	</xs:simpleType>
+	<xs:simpleType name="real64">
+		<xs:restriction base="xs:double" />
+	</xs:simpleType>
+	<xs:simpleType name="real32">
+		<xs:restriction base="xs:float" />
+	</xs:simpleType>
+	<xs:simpleType name="int64">
+		<xs:restriction base="xs:long" />
+	</xs:simpleType>
+	<xs:simpleType name="int32">
+		<xs:restriction base="xs:int" />
+	</xs:simpleType>
+	<xs:simpleType name="int16">
+		<xs:restriction base="xs:short" />
+	</xs:simpleType>
+	<xs:simpleType name="uint32">
+		<xs:restriction base="xs:unsignedInt" />
+	</xs:simpleType>
+	<xs:simpleType name="uint16">
+		<xs:restriction base="xs:unsignedShort" />
+	</xs:simpleType>
+	<xs:simpleType name="string">
+		<xs:restriction base="xs:string" />
+	</xs:simpleType>
+	<xs:element name="null">
+		<xs:annotation>
+			<xs:documentation>represents missing elements</xs:documentation>
+		</xs:annotation>
+		<xs:complexType/>
+	</xs:element>
+	<xs:attribute name="Series">
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:maxLength value="8" />
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:attribute>
+</xs:schema>

@@ -1,0 +1,10 @@
+<LmcpGen>
+    <PackageList>
+        <Package DisplayName="Java" TemplateListing="/templates/java.tl" MethodsClass="avtas.lmcp.lmcpgen.JavaMethods" SubFolder="java"/>
+        <Package DisplayName="C++" TemplateListing="/templates/cpp.tl" MethodsClass="avtas.lmcp.lmcpgen.CppMethods" SubFolder="cpp"/>
+        <Package DisplayName="C#" TemplateListing="/templates/cs.tl" MethodsClass="avtas.lmcp.lmcpgen.CsMethods" SubFolder="cs"/>
+        <Package DisplayName="Python" TemplateListing="/templates/python.tl" MethodsClass="avtas.lmcp.lmcpgen.PythonMethods" SubFolder="py"/>
+        <Package DisplayName="Docs" TemplateListing="/templates/doc.tl" MethodsClass="avtas.lmcp.lmcpgen.DocMethods" SubFolder="doc"/>
+        <Package DisplayName="XML Schema" TemplateListing="/templates/xsd.tl" MethodsClass="avtas.lmcp.lmcpgen.XsdMethods" SubFolder="xsd"/>
+    </PackageList>
+</LmcpGen>

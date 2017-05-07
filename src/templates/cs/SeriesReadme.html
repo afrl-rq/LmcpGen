@@ -1,0 +1,86 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+    <TITLE>LMCP C# Readme</TITLE>
+</HEAD>
+<BODY LANG="en-US" DIR="LTR">
+<H1 ALIGN=CENTER>Using the LMCP C# Code Package</H1>
+<h3 align=center>Created on -<creation_date>-</h3>
+
+<DL>
+<DD STYLE="text-align: center">20 May 2009</DD><DD STYLE="text-align: center">
+<BR>
+</DD><DD STYLE="text-align: center">
+AVTAS Laboratory</DD><DD STYLE="text-align: center">
+Air Force Research Laboratory</DD><DD STYLE="text-align: center">
+<BR>
+</DD
+</DL>
+
+<P ALIGN=LEFT>
+This document describes how to use C# classes generated for the
+Lightweight Message Construction Protocol (LMCP) system. The C#
+source code is produced using the LmcpGen utility, part of the
+LMCP package available from the AVTAS laboratory at AFRL.</P>
+<P ALIGN=LEFT>The LMCP C# source package includes classes to handle
+the creation, recognition, serialization, and de-serialization of
+LMCP objects.  The source package contains two top-level directories.
+ The avtas/lmcp directory contains base classes from which all LMCP
+classes are derived.  These files enable interface-style access to
+LMCP objects regardless of the MDM namespace.  When implementing
+tools to handle LMCP classes, it is recommended that one uses these
+base-classes in methods.  The -<namespace>- directory contains
+classes that are specific to the MDM used when the code was
+generated.</P>
+
+<H2 ALIGN=LEFT>Creating LMCP Objects</H2>
+
+<P ALIGN=LEFT>Every LMCP struct listed in the MDM file has a
+corresponding class found in the -<namespace>- directory.  
+These classes are based on <I>LMCPObject</I> found in the avtas/lmcp
+namespace. LMCP objects can be used in C# code in the same manner as
+any other C# class.  They are data containers, including access
+methods that allow programmers to use get and set fields. 
+</P>
+
+<H2 ALIGN=LEFT>Serializing</H2>
+
+<P ALIGN=LEFT>LMCP-C# allows serialization of objects.
+Objects are serialized using the pack(MemoryStream) method. 
+In order for an object to pack, the memory stream must be created
+externally, with a size at least that given by an object's
+<I>calculateSize()</I> method.</P>
+
+<H2 ALIGN=LEFT>Creating LMCP Messages</H2>
+
+<P ALIGN=LEFT>An LMCP message is an LMCP object that is encapsulated
+with a header and a checksum.  In the C# package, use the static method
+<I>packMessage</I> in the <I>avtas.lmcp.LMCPFactory</I> class to create a message.  This class takes a
+single <I>LMCPObject</I> as an input, as well as header items.  The object is set as the root object
+for the message.</P>
+
+<H2 ALIGN=LEFT>Unpacking Messages</H2>
+
+<P ALIGN=LEFT>Unpacking messages requires knowledge of the message
+root object type in order to instantiate the proper C# object type.
+The SeriesFactory class, located in -<series_namespace>- enables a
+user to convert bytes into LMCP messages and objects.  Using the
+getMessage() methods, the user can get the root object that is contained in a set of message bytes.
+The returned object is an <I>avtas.lmcp.LMCPObject</I> type that can be used in
+the application.  Note that the stream-based getMessage() method is blocking;  it will read until the 
+number of bytes read from the header value is reached.</P>
+
+<H2 ALIGN=LEFT>Identifying Message Types</H2>
+
+<P ALIGN=LEFT>The C# language keyword, is, can be used for
+the root object of a Message to determine its type.  This is useful
+when creating handlers for messages that arrive through a data
+source.  Alternatively, <I>LMCPObject</I>s from the -<series_namespace>-
+namespace can be created using the getNewObject(int type) method in the
+<I>SeriesFactory.</I>  This allows users to instantiate objects based on a
+type number.  Use the SeriesEnum's object enumerations to relate series names and type
+numbers.</P>
+
+
+</BODY>
+</HTML>

@@ -1,0 +1,176 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+    <TITLE>LMCP C++ Readme</TITLE>
+</HEAD>
+<BODY LANG="en-US" DIR="LTR">
+<H1 ALIGN=CENTER>Using the -<series_name>- C++ Code Package</H1>
+
+<DL>
+<DD STYLE="text-align: center">22 Jan 2009</DD><DD STYLE="text-align: center">
+<BR>
+</DD><DD STYLE="text-align: center">
+AVTAS Laboratory</DD><DD STYLE="text-align: center">
+Air Force Research Laboratory</DD><DD STYLE="text-align: center">
+<BR>
+</DD
+</DL>
+
+<P ALIGN=LEFT>
+This document describes how to use C++ classes generated for the
+Lightweight Message Construction Protocol (LMCP) system. The C++
+source code is produced using the LmcpGen utility, part of the
+LMCP package available from the AVTAS Laboratory at AFRL.</P>
+<P ALIGN=LEFT>The LMCP C++ source package includes classes to handle
+the creation, recognition, serialization, and de-serialization of
+LMCP objects.  The source package contains multiple top-level
+directories organized according to the namespaces of each of the
+generated message sets.
+The avtas/lmcp directory contains base classes from which all LMCP
+classes are derived.  These files enable interface-style access to
+LMCP objects regardless of the MDM namespace.  When implementing
+tools to handle LMCP classes, it is recommended that one uses these
+base-classes in methods.  The -<series_dir>- directory contains
+classes that are specific to the MDM used when the code was
+generated.
+
+<H2 ALIGN=LEFT>Creating LMCP Objects</H2>
+
+<P ALIGN=LEFT>Every LMCP struct listed in the MDM file has a
+corresponding class found in the -<series_dir>- directory.  
+These classes are based on <code>avtas::lmcp::Object</code> found in the
+avtas/lmcp directory. LMCP objects can be used in C++ code in the same
+manner as any other C++ class.  They are data containers, including
+access methods that allow programmers to use get and set fields. 
+</P>
+
+<H2 ALIGN=LEFT>Serializing LMCP Messages</H2>
+
+<P ALIGN=LEFT>LMCP-C++ allows serialization of messages and objects.
+Objects are serialized using the <code>Object::pack(avtas::lmcp::ByteBuffer)</code>
+method. In order pack an object, the <code>avtas::lmcp::ByteBuffer</code> must be
+created externally and then passed as a parameter to the <code>pack()</code> method
+where enough memory will be allocated and filled with the serialized object.
+
+<P ALIGN=LEFT>An LMCP message is an LMCP object that is encapsulated
+with a header and a checksum.  In the C++ package, use the static function
+<code>packMessage()</code> in the <code>avtas::lmcp::Factory</code> class to create a 
+message.  This class takes a single <code>avtas::lmcp::Object</code> as an input.  
+The object is set as the root object for the message and the message header 
+contents are set based the other inputs to the function.  The <code>avtas::lmcp::ByteBuffer</code> 
+that is passed to the factory function is reconfigured to hold the message bytes.
+</P>
+
+<H2 ALIGN=LEFT>Unpacking Messages</H2>
+
+<P ALIGN=LEFT>Unpacking messages requires knowledge of the message
+root object type in order to instantiate the proper C++ object type.
+The <code>-<namespace>-::SeriesFactory</code> class, located in -<series_dir>-
+enables a user to convert bytes into LMCP messages and objects.  The
+<code>getMessage()</code> method checks a set of bytes for proper
+series name, determines the LMCP type number, instantiates a root object
+of the corresponding type, and unpacks the bytes into that object. 
+The returned object is of <code>avtas::lmcp::Object</code> type and can be used
+in the application.  A default factory is included in the SeriesFactory class, allowing
+end-users to access a single instance of the factory, rather than create a new instance for
+unpacking operations.  It can be accessed by calling the <code>getDefaultFactory()</code> function 
+in <code>SeriesFactory</code>.</P>
+
+<P ALIGN=LEFT>The Message SeriesName, InstanceId, Type, and Size can be examined
+through static functions in the Factory class, allowing the user to examine the
+contents of a byte buffer.
+</P>
+
+<H2 ALIGN=LEFT>Identifying Message Types</H2>
+
+<P ALIGN=LEFT>The C++ <code>dynamic_cast</code> operation, can be used on
+the root object of a <code>avtas::lmcp::Object</code> to determine its type.  This
+is useful when creating handlers for messages that arrive through a data source.
+Alternatively, <code>avtas::lmcp::Object</code>s can be created using the
+<code>getNewObject(int type)</code> method in the <code>-<series_dir>-SeriesFactory.</code>
+This allows users to instantiate objects based on a type number.</P>
+
+<H2 ALIGN=LEFT>Fixed and Variable-Length Array Fields</H2>
+
+<P ALIGN=LEFT>LMCP Objects can contain arrays (fixed-length) or lists (variable-length) of primitive or 
+object data.  (See the LMCP users guide for more information).  Fixed-length arrays are accessed in C++
+using the <code>[]</code> operator.  Arrays of LMCP objects are stored as a pointer of pointers (**).  Arrays of
+primitive data are stored as arrays of objects. </P>
+
+<P ALIGN=LEFT>Variable length arrays are stored as STL vectors.  The <code>get</code> method for the list 
+returns a reference to an STL vector.  Like arrays, vectors of object data are kept as vectors of pointers, while
+primitive data is stored as copies in the vector.</P>
+
+<H2 ALIGN=LEFT>Memory Management</H2>
+
+<P ALIGN=LEFT>LMCP objects that are stored inside of another LMCP object are subject to destruction by the parent 
+object.  In other words, if a user adds an object to a vector or array or sets an object using the <code>set()</code>
+method, and the destructor for the parent object is called at a later time, then the object is destroyed regardless of
+where the object was originally created.  The user has the option of calling <code>clone</code> on any object that is 
+passed into an LMCP object in order to prevent that object from being destroyed.  When calling the <code>set()</code> function,
+pass <code>object.clone()</code> to create a new copy of the object in memory.  That new copy is passed instead of the 
+original, preventing an unexpected destruction of the original object.
+
+<H2 ALIGN=LEFT>Examples</H2>
+
+<P ALIGN=LEFT>This section contains a number of examples for performing operations in LMCP.  For the purposes of this section, assume that
+an LMCP object named Person has been defined.  Person contains the following:</P>
+
+<table border="1">
+<thead><tr><th>Member Name</th><th>Type</th></tr></thead>
+<tbody>
+<tr><td>Name</td><td>String</td></tr>
+<tr><td>Age</td><td>int</td></tr>
+<tr><td>Friends</td><td>Person (variable length list)</td></tr>
+</tbody>
+</table>
+
+<P ALIGN=LEFT>In this example, an object is created, some members are manipulated, and the object is serialized. Assume that a network
+socket named socket has been created and has <code> send(byte*) </code> and <code> byte* receive() </code> functions</P>
+<P ALIGN="LEFT">
+
+<code>
+example::Person* hank = new example::Person();<br>
+example::Person* betty = new example::Person();<br>
+hank->setName("Hank");<br>
+hank->setAge("30");<br>
+hank->getFriends().push_back(betty->clone());<br><br>
+</code>
+
+This tells the factory to pack hank into a byte buffer with and instance id of 1 and <br>
+to calculate a checksum.<br><br>
+
+<code>avtas::lmcp::ByteBuffer* buf = avtas::lmcp::Factory::packMessage(hank, 1, true);</code><br><br>
+
+Get a reference to the byte array in the byte buffer in order to send the bytes over <br>
+a socket connection, write to a file, or store in some other way.<br><br>
+<code>uint8_t* bytes = buf->array();</code><br><br>
+
+Now we are done with hank and the byte buffer, so lets destroy both.<br>
+Note that the copy of 'betty' (in hank's friend list) will also be destroyed during the destruction of 'hank'.<br><br>
+
+<code>delete hank;<br>
+delete betty;<br><br>
+</code>
+
+Next, we get bytes from a source (could be a socket or a file).  We use the <code>Factory</code> class to get a new object
+and then use it in our application.  The <code>ByteBuffer</code> needs to be initialized and filled with bytes from some
+source.<br><br>
+
+<code>
+avtas::lmcp::ByteBuffer buf;<br>
+avtas::lmcp::Object* obj = avtas::lmcp::Factory::getObject(buf);<br>
+</code>
+<br>
+Now use <code>obj</code> by doing tests on its type using a dynamic cast, a switch statement, or a conditional on the type.<br><br>
+<code>
+if (example::isPerson(obj)) {<br>
+	&nbsp example::Person* p = reinterpret_cast<example::Person*>(obj);<br>
+}
+</code>
+
+</P>
+
+</BODY>
+</HTML>
+

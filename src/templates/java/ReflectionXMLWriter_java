@@ -1,0 +1,138 @@
+// ===============================================================================
+// Authors: AFRL/RQQA
+// Organization: Air Force Research Laboratory, Aerospace Systems Directorate, Power and Control Division
+// 
+// Copyright (c) 2017 Government of the United State of America, as represented by
+// the Secretary of the Air Force.  No copyright is claimed in the United States under
+// Title 17, U.S. Code.  All Other Rights Reserved.
+// ===============================================================================
+
+// This file was auto-created by LmcpGen. Modifications will be overwritten.
+
+package avtas.lmcp;
+
+import avtas.lmcp.LMCPObject.LmcpType;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ *
+ * @author Matt Duquette
+ * This is an experimental class.  Tests show that it runs 10x slower than the toXML() method in each
+ * LMCP class.  This should not be used in production code.
+ */
+public class ReflectionXMLWriter {
+
+
+    static final String default_whitespace = "    ";
+    static final String line_return = "\n";
+
+    public static String toXMLString(LMCPObject o)  {
+        try {
+            StringBuilder sb = new StringBuilder();
+            toXMLString(o, "", sb);
+            return sb.toString();
+        } catch (Exception ex) {
+            Logger.getLogger(ReflectionXMLWriter.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
+        }
+    }
+
+    protected static void toXMLString(LMCPObject o, String ws, StringBuilder sb) throws Exception {
+
+        if (o == null) {
+            sb.append(ws).append("<null/>").append(line_return);
+            return;
+        }
+
+        sb.append(ws).append("<").append(o.getLMCPTypeName()).append(" Series=\"")
+                .append(o.getLMCPSeriesName()).append("\">").append(line_return);
+
+        ArrayList<Field> fields = new ArrayList<Field>();
+        Class cc = o.getClass();
+        do {
+            fields.addAll(0, Arrays.asList(cc.getDeclaredFields()));
+            cc = cc.getSuperclass();
+        } while (cc != LMCPObject.class);
+
+
+        String field_ws = ws + default_whitespace;
+
+        for (Field f : fields) {
+
+            f.setAccessible(true);
+            if (List.class.isAssignableFrom(f.getType())) {
+                List list = (List) f.get(o);
+                sb.append(field_ws);
+                setOpenTag(f.getName(), sb);
+                sb.append(line_return);
+                for (Object listEntry : list) {
+                    buildList(listEntry, f, field_ws + default_whitespace, sb);
+                }
+                sb.append(field_ws);
+                setCloseTag(f.getName(), sb).append(line_return);
+            }
+            else if (f.getType().isArray()) {
+                Object[] array = (Object[]) f.get(o);
+                sb.append(field_ws);
+                setOpenTag(f.getName(), sb);
+                sb.append(line_return);
+                for (Object arrayobj : array) {
+                    buildList(arrayobj, f, field_ws + default_whitespace, sb);
+                }
+                sb.append(field_ws);
+                setCloseTag(f.getName(), sb).append(line_return);
+            }
+            else if (LMCPObject.class.isAssignableFrom(f.getType())) {
+                sb.append(field_ws);
+                setOpenTag(f.getName(), sb);
+                sb.append(line_return);
+                toXMLString((LMCPObject) f.get(o), field_ws + default_whitespace, sb);
+                sb.append(field_ws);
+                setCloseTag(f.getName(), sb);
+                sb.append(line_return);
+            }
+            else if (f.isAnnotationPresent(LMCPObject.LmcpType.class)){
+                sb.append(field_ws);
+                setOpenTag(f.getName(), sb);
+                sb.append(f.get(o));
+                setCloseTag(f.getName(), sb);
+                sb.append(line_return);
+            }
+
+        }
+
+        sb.append(ws);
+        setCloseTag(o.getLMCPTypeName(), sb).append(line_return);
+    }
+
+    private static void buildList(Object value, Field f, String ws, StringBuilder sb) throws Exception{
+
+        if (value instanceof LMCPObject) {
+            toXMLString( (LMCPObject) value, ws, sb);
+            return;
+        }
+
+        LmcpType lmcp_type = f.getAnnotation(LMCPObject.LmcpType.class);
+        if (lmcp_type != null) {
+            String typeTag = lmcp_type.value();
+            sb.append(ws);
+            setOpenTag(typeTag, sb);
+            sb.append(value);
+            setCloseTag(typeTag, sb);
+            sb.append(line_return);
+        }
+    }
+
+    private static StringBuilder setOpenTag(String tagName, StringBuilder sb) {
+        return sb.append("<").append(tagName).append(">");
+    }
+
+    private static StringBuilder setCloseTag(String tagName, StringBuilder sb) {
+        return sb.append("</").append(tagName).append(">");
+    }
+}

@@ -1,0 +1,21 @@
+<!-- This file was auto-created by LmcpGen. Modifications will be overwritten. -->
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{-<vcproj_make_guid>-}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{-<vcproj_make_guid>-}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    -<xproject_setup_filters>-
+  </ItemGroup>
+  <ItemGroup>
+    -<xproject_header_filters>-
+  </ItemGroup>
+  <ItemGroup>
+    -<xproject_source_filters>-
+  </ItemGroup>
+</Project>

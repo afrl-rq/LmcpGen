@@ -1,0 +1,1 @@
+ONCE	xsd/schema_xsd	-<series>-.xsd

@@ -1,0 +1,59 @@
+// ===============================================================================
+// Authors: AFRL/RQQA
+// Organization: Air Force Research Laboratory, Aerospace Systems Directorate, Power and Control Division
+// 
+// Copyright (c) 2017 Government of the United State of America, as represented by
+// the Secretary of the Air Force.  No copyright is claimed in the United States under
+// Title 17, U.S. Code.  All Other Rights Reserved.
+// ===============================================================================
+
+// This file was auto-created by LmcpGen. Modifications will be overwritten.
+
+-<package_name>-
+
+import avtas.lmcp.LMCPObject;
+import java.util.Arrays;
+
+public class SeriesEnum implements avtas.lmcp.LMCPEnum {
+ 
+    -<series_name_setup>-
+
+    private static String[] name_list = new String[]{
+        -<list_all_types>-
+    };
+
+    public long getSeriesNameAsLong() { return SERIES_NAME_ID; }
+
+    public String getSeriesName() { return SERIES_NAME; }
+
+    public int getSeriesVersion() { return SERIES_VERSION; }
+
+    public String getName(long type) {
+        switch ((int) type) {
+            -<series_enum_get_name>-
+        }
+        
+        return "";
+    }
+
+    public long getType(String name) {
+       -<series_enum_get_type>-
+       
+       return -1;
+    }
+
+    public LMCPObject getInstance(long type) {
+        switch ((int) type) {
+            -<series_enum_new_instance>-
+        }
+
+        return null;
+    }
+
+    public java.util.Collection<String> getAllTypes() {
+        return Arrays.asList(name_list);
+    }
+
+
+
+}

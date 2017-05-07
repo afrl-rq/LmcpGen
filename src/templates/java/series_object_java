@@ -1,0 +1,104 @@
+// ===============================================================================
+// Authors: AFRL/RQQA
+// Organization: Air Force Research Laboratory, Aerospace Systems Directorate, Power and Control Division
+// 
+// Copyright (c) 2017 Government of the United State of America, as represented by
+// the Secretary of the Air Force.  No copyright is claimed in the United States under
+// Title 17, U.S. Code.  All Other Rights Reserved.
+// ===============================================================================
+
+// This file was auto-created by LmcpGen. Modifications will be overwritten.
+
+-<package_name>-
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import avtas.lmcp.*;
+
+-<class_comment>-
+public class -<object_type_name>- -<extends_object_type>- {
+    
+    public static final int LMCP_TYPE = -<object_type_number>-;
+
+    -<series_name_setup>-
+
+    private static final String TYPE_NAME = "-<object_type_name>-";
+
+    private static final String FULL_LMCP_TYPE_NAME = "-<full_object_type_name>-";
+
+    -<member_declaration>-
+    
+    public -<object_type_name>-() {
+    }
+
+    -<make_field_constructor>-
+
+    public -<object_type_name>- clone() {
+        try {
+            java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream( calcSize() );
+            pack(bos);
+            java.io.ByteArrayInputStream bis = new java.io.ByteArrayInputStream(bos.toByteArray());
+            -<object_type_name>- newObj = new -<object_type_name>-();
+            newObj.unpack(bis);
+            return newObj;
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+     
+    -<member_gets_and_sets>-
+
+    public int calcSize() {
+        int size = super.calcSize();  
+        -<calc_size>-
+    }
+
+    public void unpack(InputStream in) throws IOException {
+        -<member_unpack>-
+    }
+
+    public void pack(OutputStream out) throws IOException {
+        -<member_pack>-
+    }
+
+    public int getLMCPType() { return LMCP_TYPE; }
+
+    public String getLMCPSeriesName() { return SERIES_NAME; }
+
+    public long getLMCPSeriesNameAsLong() { return SERIES_NAME_ID; }
+
+    public int getLMCPSeriesVersion() { return SERIES_VERSION; };
+
+    public String getLMCPTypeName() { return TYPE_NAME; }
+
+    public String getFullLMCPTypeName() { return FULL_LMCP_TYPE_NAME; }
+
+    public String toString() {
+        return toXML("");
+    }
+
+    public String toXML(String ws) {
+        StringBuffer buf = new StringBuffer();
+        -<to_xml>-
+        return buf.toString();
+    }
+
+    public boolean equals(Object anotherObj) {
+        if ( anotherObj == this ) return true;
+        if ( anotherObj == null ) return false;
+        if ( !(anotherObj instanceof -<object_type_name>-) ) return false;
+        if ( !super.equals(anotherObj) ) return false;
+        -<object_type_name>- o = (-<object_type_name>-) anotherObj;
+        -<member_equals>-
+        return true;
+    }
+
+    public int hashCode() {
+        int hash = 0;
+        -<member_hashcode>-
+        return hash + super.hashCode();
+    }
+    
+}
