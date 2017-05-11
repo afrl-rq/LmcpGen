@@ -6,6 +6,8 @@ srcs_lmcp = [
   'avtas/lmcp/XMLParser.cpp',
   -<meson_source_list>-]
 
+incs_lmcp = include_directories('.')
+
 lib_lmcp = static_library(
   'lmcp',
   srcs_lmcp,
@@ -13,5 +15,5 @@ lib_lmcp = static_library(
     '-std=c++11',
     '-Wall',
   ],
-  include_directories: include_directories('.'),
+  include_directories: incs_lmcp,
 )
