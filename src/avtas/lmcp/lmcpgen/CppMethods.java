@@ -950,9 +950,9 @@ public class CppMethods {
             }
             for (StructInfo si : i.structs) {
                 String cleanNamespace = i.namespace.replaceAll("/","");
-                buf.append("\t\t'" + i.namespace + "/" + cleanNamespace + si.name + ".cpp',\n");
+                buf.append(ws + "'" + i.namespace + "/" + cleanNamespace + si.name + ".cpp',\n");
             }
-            buf.append("\t\t'" + i.namespace + "/" + i.seriesName + "XMLReader.cpp',\n");
+            buf.append(ws + "'" + i.namespace + "/" + i.seriesName + "XMLReader.cpp',\n");
         }
         return buf.toString();
     }
