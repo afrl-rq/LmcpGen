@@ -1,3 +1,10 @@
+# License
+
+*LmcpGen* is developed by the Air Force Research Laboratory, Aerospace System Directorate, Power and Control Division. 
+The LMCP specification and all source code for *LmcpGen* is publicaly released under the Air Force Open Source Agreement
+Version 1.0. See LICENSE.md for complete details. The Air Force Open Source Agreement closely follows the NASA Open Source
+Agreement Verion 1.3. **NOTE the terms of the license include registering use of the software by emailing <a href="mailto:afrl.rq.opensource@us.af.mil?subject=LmcpGen Registration&body=Please register me for use of LmcpGen. Name: ____________">afrl.rq.opensource@us.af.mil</a>.**
+
 # Introduction
 
 The Lightweight Message Construction Protocol (LMCP) is a standard that serves two purposes. First, it
@@ -73,11 +80,3 @@ command line options are as follows:
 For example, with a set of proper LMCP MDMs in the directory `mdms`, the command to create documentation would be:
 
 ``` java -jar LmcpGen.jar -mdmdir "mdms" -doc -dir "doc/LMCP" ```
-
-# License
-
-*LmcpGen* is developed by the Air Force Research Laboratory, Aerospace System Directorate, Power and Control Division.
-The LMCP specification and all source code for *LmcpGen* is publicaly released under the Air Force Open Source Agreement
-Version 1.0. See LICENSE.md for complete details. The Air Force Open Source Agreement closely follows the NASA Open Source
-Agreement Verion 1.3.
-
