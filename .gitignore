@@ -1,2 +1,14 @@
+# Netbeans private project
+
 /nbproject/private/
+
+# Auto-generated files
+
 /build/
+/dist/LmcpGen.jar
+/dist/README.TXT
+
+# Temporary files (emacs)
+
+\#*
+.#*
