@@ -20,6 +20,9 @@ package avtas.lmcp.lmcpgen;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -156,12 +159,31 @@ public class LmcpGen {
 
         return buf.toString();
     }
+    
+    public static String FileIntoString(File file) throws Exception {
+        return new String(Files.readAllBytes(file.toPath()));
+    }
 
-    /** simply writes the contents of a string to a file */
+
+
+    /** simply writes the contents of a string to a file if the existing file isn't already identical */
     public static boolean writeFile(File file, String contents) throws Exception {
-        FileWriter writer = new FileWriter(file);
-        writer.write(contents);
-        writer.close();
+        if(file.exists())
+        {
+            String oldcontents = FileIntoString(file);
+            if(!oldcontents.equals(contents))
+            {
+                FileWriter writer = new FileWriter(file);
+                writer.write(contents);
+                writer.close();
+            }
+        }
+        else
+        {
+            FileWriter writer = new FileWriter(file);
+            writer.write(contents);
+            writer.close();
+        }
         return true;
     }
 
