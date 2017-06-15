@@ -5,8 +5,10 @@
 # Auto-generated files
 
 /build/
-/dist/LmcpGen.jar
-/dist/README.TXT
+/dist/
+
+# Java class files
+*.class
 
 # Temporary files (emacs)
 
