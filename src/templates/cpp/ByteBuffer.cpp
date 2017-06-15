@@ -86,72 +86,72 @@ namespace lmcp {
 
    int16_t ByteBuffer::getShort(void) {
       if (_buf && remaining()>=2) {
-         uint8_t b[2];
-         copyFromBuffer(b, 2);
-         return *(reinterpret_cast<int16_t *>(b));
+         int16_t b;
+         copyFromBuffer(reinterpret_cast<uint8_t*>(&b), 2);
+         return b;
       }
       return 0;
    }
 
    uint16_t ByteBuffer::getUShort(void) {
       if (_buf && remaining()>=2) {
-         uint8_t b[2];
-         copyFromBuffer(b, 2);
-         return *(reinterpret_cast<uint16_t *>(b));
+         uint16_t b;
+         copyFromBuffer(reinterpret_cast<uint8_t*>(&b), 2);
+         return b;
       }
       return 0;
    }
 
    int32_t ByteBuffer::getInt(void) {
       if (_buf && remaining()>=4) {
-         uint8_t b[4];
-         copyFromBuffer(b, 4);
-         return *(reinterpret_cast<int32_t *>(b));
+         int32_t b;
+         copyFromBuffer(reinterpret_cast<uint8_t*>(&b), 4);
+         return b;
       }
       return 0;
    }
 
    uint32_t ByteBuffer::getUInt(void) {
       if (_buf && remaining()>=4) {
-         uint8_t b[4];
-         copyFromBuffer(b, 4);
-         return *(reinterpret_cast<uint32_t *>(b));
+         uint32_t b;
+         copyFromBuffer(reinterpret_cast<uint8_t*>(&b), 4);
+         return b;
       }
       return 0;
    }
 
    int64_t ByteBuffer::getLong(void) {
       if (_buf && remaining()>=8) {
-         uint8_t b[8];
-         copyFromBuffer(b, 8);
-         return *(reinterpret_cast<int64_t *>(b));
+         int64_t b;
+         copyFromBuffer(reinterpret_cast<uint8_t*>(&b), 8);
+         return b;
       }
       return 0;
    }
 
    uint64_t ByteBuffer::getULong(void) {
       if (_buf && remaining()>=8) {
-         uint8_t b[8];
-         copyFromBuffer(b, 8);
-         return *(reinterpret_cast<uint64_t *>(b));
+         uint64_t b;
+         copyFromBuffer(reinterpret_cast<uint8_t*>(&b), 8);
+         return b;
       }
       return 0;
    }
 
    float ByteBuffer::getFloat(void) {
       if (_buf && remaining()>=4) {
-         uint8_t b[4];
-         copyFromBuffer(b, 4);
-         return *(reinterpret_cast<float *>(b));
+         float f;
+         copyFromBuffer(reinterpret_cast<uint8_t*>(&f), 4);
+         return f;
       }
       return 0.f;
    }
 
    double ByteBuffer::getDouble(void) {
       if (_buf && remaining()>=8) {
-         uint8_t b[8];
-         copyFromBuffer(b, 8);
-         return *(reinterpret_cast<double *>(b));
+         double d;
+         copyFromBuffer(reinterpret_cast<uint8_t*>(&d), 8);
+         return d;
       }
       return 0.;
    }
