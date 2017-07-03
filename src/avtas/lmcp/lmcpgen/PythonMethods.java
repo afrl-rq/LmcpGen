@@ -476,17 +476,6 @@ class PythonMethods {
         return buf.toString();
     }
 
-    public static String factory_name_for_type(MDMInfo[] infos, MDMInfo info, final File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
-        StringBuffer buf = new StringBuffer();
-        for(MDMInfo in : infos){
-            String[] splits = in.namespace.split("/");
-            String seriesListClass = splits[splits.length - 1] + ".SeriesFactory";
-            buf.append(ws + "if(name == " + seriesListClass + ".SeriesName):\n");
-            buf.append(ws + "    return " + seriesListClass + ".createObjectByName(name)");
-        }
-        return buf.toString();
-    }
-
     public static String get_object_from_buffer(MDMInfo[] infos, MDMInfo info, final File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         StringBuffer buf = new StringBuffer();
         buf.append(ws + "obj = createObject( getLMCPType(buffer))\n");
@@ -574,12 +563,45 @@ class PythonMethods {
 
         return str;
     }
+    
+    public static String to_dict_members(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        String str = "";
+        str += ws + extends_name(infos, info, outfile, st, en, "") + ".toDictMembers(self, d)\n";
+
+        for (FieldInfo f : st.fields) {
+            String name = "self." + f.name;
+            if (f.isArray) {
+                str += ws + "d['" + f.name + "'] = []\n";
+
+                str += ws + "for x in " + name + ":\n";
+                if (f.isStruct) {
+                    str += ws + "    if x == None:\n";
+                    str += ws + "        d['" + f.name + "'].append(None)\n";
+                    str += ws + "    else:\n";
+                    str += ws + "        d['" + f.name + "'].append(x.toDict())\n";
+                } else {
+                    str += ws + "    d['" + f.name + "'].append(x)\n";
+                }
+            } else if (f.isStruct) {
+                str += ws + "if " + name + " == None:\n";
+                str += ws + "    d['" + f.name + "'] = None\n";
+                str += ws + "else:\n";
+                str += ws + "    d['" + f.name + "'] = " + name + ".toDict()\n";
+            } else {
+                str += ws + "d['" + f.name + "'] = " + name + "\n";
+            }
+        }
+
+        return str;
+    }
 
     public static String members_from_xml(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         StringBuffer buf = new StringBuffer();
         buf.append(ws + extends_name(infos, info, outfile, st, en, "") + ".unpackFromXMLNode(self, el, seriesFactory)\n" );
-        buf.append(ws + "for e in el.childNodes:\n");
-        buf.append(ws + "    if e.nodeType == xml.dom.Node.ELEMENT_NODE:\n");
+        if (st.fields.length > 0) {
+            buf.append(ws + "for e in el.childNodes:\n");
+            buf.append(ws + "    if e.nodeType == xml.dom.Node.ELEMENT_NODE:\n");
+        }
         boolean first = true;
         for (FieldInfo f : st.fields) {
             String name = "self." + f.name;
@@ -592,33 +614,71 @@ class PythonMethods {
             }
             if (!f.isArray) {
                 if (f.isStruct) {
-                    buf.append(ws + "           for n in e.childNodes:\n" );
-                    buf.append(ws + "               if n.nodeType == xml.dom.Node.ELEMENT_NODE:\n");
-                    buf.append(ws + "                   " + name + " = seriesFactory.createObjectByName(n.localName)\n");
-                    buf.append(ws + "                   if " + name + " != None:\n");
-                    buf.append(ws + "                           " + name + ".unpackFromXMLNode(n, seriesFactory)\n");
+                    buf.append(ws + "            for n in e.childNodes:\n" );
+                    buf.append(ws + "                if n.nodeType == xml.dom.Node.ELEMENT_NODE:\n");
+                    buf.append(ws + "                    " + name + " = seriesFactory.createObjectByName(n.getAttribute('Series'), n.localName)\n");
+                    buf.append(ws + "                    if " + name + " != None:\n");
+                    buf.append(ws + "                        " + name + ".unpackFromXMLNode(n, seriesFactory)\n");
                 } else if (f.isEnum) {
-                    buf.append(ws + "           " + name + " = get_" + f.type + "_str(e.childNodes[0].nodeValue)\n");
+                    buf.append(ws + "            " + name + " = get_" + f.type + "_str(e.childNodes[0].nodeValue)\n");
                 } else if (f.type.equalsIgnoreCase("Bool")) {
-                    buf.append(ws + "           " + name + " = e.childNodes[0].nodeValue.lower() == 'true' \n");
+                    buf.append(ws + "            " + name + " = e.childNodes[0].nodeValue.lower() == 'true' \n");
                 } else {
-                    buf.append(ws + "           " + name + " = " + getPythonType(f.type) + "(e.childNodes[0].nodeValue)\n");
+                    buf.append(ws + "            " + name + " = " + getPythonType(f.type) + "(e.childNodes[0].nodeValue)\n");
                 }
             // struct arrays
             } else {
-                buf.append(ws + "           " + name + " = []\n");
-                buf.append(ws + "           for c in e.childNodes:\n");
-                buf.append(ws + "               if c.nodeType == xml.dom.Node.ELEMENT_NODE:\n");
+                buf.append(ws + "            " + name + " = []\n");
+                buf.append(ws + "            for c in e.childNodes:\n");
+                buf.append(ws + "                if c.nodeType == xml.dom.Node.ELEMENT_NODE:\n");
                 if (f.isStruct) {
-                    buf.append(ws + "                    obj = seriesFactory.createObjectByName(c.localName)\n");
+                    buf.append(ws + "                    obj = seriesFactory.createObjectByName(c.getAttribute('Series'), c.localName)\n");
                     buf.append(ws + "                    if obj != None:\n");
-                    buf.append(ws + "                       obj.unpackFromXMLNode(c, seriesFactory)\n");
-                    buf.append(ws + "                       " + name + ".append(obj)\n");
+                    buf.append(ws + "                        obj.unpackFromXMLNode(c, seriesFactory)\n");
+                    buf.append(ws + "                        " + name + ".append(obj)\n");
                 }
                 else if (f.isEnum) {
-                    buf.append(ws + "                   " + name + ".append( get_" + f.type + "_str(e.childNodes[0].nodeValue))\n");
+                    buf.append(ws + "                    " + name + ".append( get_" + f.type + "_str(c.childNodes[0].nodeValue))\n");
                 } else {
-                    buf.append(ws + "                   " + name + ".append( " + getPythonType(f.type) + "(c.childNodes[0].nodeValue) )\n");
+                    buf.append(ws + "                    " + name + ".append( " + getPythonType(f.type) + "(c.childNodes[0].nodeValue) )\n");
+                }
+            }
+        }
+        return buf.toString();
+    }
+    
+    public static String members_from_dict(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        StringBuffer buf = new StringBuffer();
+        buf.append(ws + extends_name(infos, info, outfile, st, en, "") + ".unpackFromDict(self, d, seriesFactory)\n" );
+        if (st.fields.length > 0) {
+            buf.append(ws + "for key in d:\n");
+        }
+        boolean first = true;
+        for (FieldInfo f : st.fields) {
+            String name = "self." + f.name;
+            if (first) {
+                buf.append(ws + "    if key == \"" + f.name + "\":\n");
+                first = false;
+            }
+            else {
+                buf.append(ws + "    elif key == \"" + f.name + "\":\n");
+            }
+            if (!f.isArray) {
+                if (f.isStruct) {
+                    buf.append(ws + "        " + name + " = seriesFactory.unpackFromDict(d[key])\n");
+                } else {
+                    buf.append(ws + "        " + name + " = d[key]\n");
+                }
+            // struct arrays
+            } else {
+                buf.append(ws + "            " + name + " = []\n");
+                buf.append(ws + "            for c in d[key]:\n");
+                if (f.isStruct) {
+                    buf.append(ws + "                obj = seriesFactory.unpackFromDict(c)\n");
+                    buf.append(ws + "                if obj != None:\n");
+                    buf.append(ws + "                    " + name + ".append(obj)\n");
+                } else {
+                    buf.append(ws + "                " + name + ".append( c )\n");
                 }
             }
         }

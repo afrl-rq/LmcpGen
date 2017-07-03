@@ -41,6 +41,14 @@ class -<classname>-(-<extends_name>-):
         """
         -<unpack_vars>-
 
+    def unpackFromXMLNode(self, el, seriesFactory):
+        -<members_from_xml>-
+        return
+
+    def unpackFromDict(self, d, seriesFactory):
+        -<members_from_dict>-
+        return
+
     -<gets_and_sets>-
 
     def toString(self):
@@ -49,6 +57,17 @@ class -<classname>-(-<extends_name>-):
         """
         -<print_vars>-
         return buf;
+
+    def toDict(self):
+        m = {}
+        self.toDictMembers(m)
+        d = {}
+        d[-<series_name>- + "/-<datatype_name>-"] = m
+        return d
+
+    def toDictMembers(self, d):
+        -<to_dict_members>-
+        return
 
     def getLMCPType(self):
         return self.LMCP_TYPE
@@ -63,7 +82,7 @@ class -<classname>-(-<extends_name>-):
         return self.SERIES_VERSION
 
     def toXMLStr(self, ws):
-        str = ws + "<-<datatype_name>->\n";
+        str = ws + '<-<datatype_name>- Series=-<series_name>- >\n';
         #str += -<extends_name>-.toXMLMembersStr(self, ws + "  ")
         str += self.toXMLMembersStr(ws + "  ")
         str += ws + "</-<datatype_name>->\n";
