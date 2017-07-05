@@ -542,6 +542,8 @@ class PythonMethods {
                     str += ws + "        buf += x.toXMLStr(ws + \"    \") \n";
                 } else if (f.isEnum) {
                     str += ws + "    buf += ws + \"<" + f.type + ">\" + " + f.type + ".get_" + f.type + "_int(x) + \"</" + f.type + ">\\n\"\n";
+                } else if (f.type.equalsIgnoreCase("Bool")) {
+                    str += ws + "    buf += ws + \"<" + f.type + ">\" + ('True' if x else 'False') + \"</" + f.type + ">\\n\"\n";
                 } else {
                     str += ws + "    buf += ws + \"<" + f.type + ">\" + str(x) + \"</" + f.type + ">\\n\"\n";
                 }
@@ -556,6 +558,8 @@ class PythonMethods {
                 str += ws + "buf += ws + \"</" + f.name + ">\\n\"\n";
             } else if (f.isEnum) {
                 str += ws + "buf += ws + \"<" + f.name + ">\" + " + f.type + ".get_" + f.type + "_int(" + name + ") + \"</" + f.name + ">\\n\"\n";
+            } else if (f.type.equalsIgnoreCase("Bool")) {
+                str += ws + "buf += ws + \"<" + f.name + ">\" + ('True' if " + name + " else 'False') + \"</" + f.name + ">\\n\"\n";
             } else {
                 str += ws + "buf += ws + \"<" + f.name + ">\" + str(" + name + ") + \"</" + f.name + ">\\n\"\n";
             }
@@ -622,7 +626,7 @@ class PythonMethods {
                 } else if (f.isEnum) {
                     buf.append(ws + "            " + name + " = " + f.type  + ".get_" + f.type + "_str(e.childNodes[0].nodeValue)\n");
                 } else if (f.type.equalsIgnoreCase("Bool")) {
-                    buf.append(ws + "            " + name + " = e.childNodes[0].nodeValue.lower() == 'true' \n");
+                    buf.append(ws + "            " + name + " = e.childNodes[0].nodeValue.lower() == 'true'\n");
                 } else {
                     buf.append(ws + "            " + name + " = " + getPythonType(f.type) + "(e.childNodes[0].nodeValue)\n");
                 }
@@ -639,6 +643,8 @@ class PythonMethods {
                 }
                 else if (f.isEnum) {
                     buf.append(ws + "                    " + name + ".append( " + f.type + ".get_" + f.type + "_str(c.childNodes[0].nodeValue) )\n");
+                } else if (f.type.equalsIgnoreCase("Bool")) {
+                    buf.append(ws + "                    " + name + ".append( c.childNodes[0].nodeValue.lower() == 'true' )\n");
                 } else {
                     buf.append(ws + "                    " + name + ".append( " + getPythonType(f.type) + "(c.childNodes[0].nodeValue) )\n");
                 }
