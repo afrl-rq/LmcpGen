@@ -1,6 +1,7 @@
 #! /usr/bin/python
 
 import struct
+import xml.dom.minidom
 from lmcp import LMCPObject
 
 ## ===============================================================================

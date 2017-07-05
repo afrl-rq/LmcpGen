@@ -620,7 +620,7 @@ class PythonMethods {
                     buf.append(ws + "                    if " + name + " != None:\n");
                     buf.append(ws + "                        " + name + ".unpackFromXMLNode(n, seriesFactory)\n");
                 } else if (f.isEnum) {
-                    buf.append(ws + "            " + name + " = get_" + f.type + "_str(e.childNodes[0].nodeValue)\n");
+                    buf.append(ws + "            " + name + " = " + f.type  + ".get_" + f.type + "_str(e.childNodes[0].nodeValue)\n");
                 } else if (f.type.equalsIgnoreCase("Bool")) {
                     buf.append(ws + "            " + name + " = e.childNodes[0].nodeValue.lower() == 'true' \n");
                 } else {
@@ -638,7 +638,7 @@ class PythonMethods {
                     buf.append(ws + "                        " + name + ".append(obj)\n");
                 }
                 else if (f.isEnum) {
-                    buf.append(ws + "                    " + name + ".append( get_" + f.type + "_str(c.childNodes[0].nodeValue))\n");
+                    buf.append(ws + "                    " + name + ".append( " + f.type + ".get_" + f.type + "_str(c.childNodes[0].nodeValue) )\n");
                 } else {
                     buf.append(ws + "                    " + name + ".append( " + getPythonType(f.type) + "(c.childNodes[0].nodeValue) )\n");
                 }
@@ -671,14 +671,14 @@ class PythonMethods {
                 }
             // struct arrays
             } else {
-                buf.append(ws + "            " + name + " = []\n");
-                buf.append(ws + "            for c in d[key]:\n");
+                buf.append(ws + "        " + name + " = []\n");
+                buf.append(ws + "        for c in d[key]:\n");
                 if (f.isStruct) {
-                    buf.append(ws + "                obj = seriesFactory.unpackFromDict(c)\n");
-                    buf.append(ws + "                if obj != None:\n");
-                    buf.append(ws + "                    " + name + ".append(obj)\n");
+                    buf.append(ws + "            obj = seriesFactory.unpackFromDict(c)\n");
+                    buf.append(ws + "            if obj != None:\n");
+                    buf.append(ws + "                " + name + ".append(obj)\n");
                 } else {
-                    buf.append(ws + "                " + name + ".append( c )\n");
+                    buf.append(ws + "            " + name + ".append( c )\n");
                 }
             }
         }

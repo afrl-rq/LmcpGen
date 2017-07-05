@@ -107,15 +107,10 @@ class LMCPFactory:
         Reads in an XML string, unpacks objects, adds them to a list and
         returns the list
         """
-        doc = xml.dom.minidom.parseString(xmlStr)
-        hasElementNodes = False
-        for e in doc.documentElement.childNodes:
-            if e.nodeType == xml.dom.Node.ELEMENT_NODE:
-                hasElementNodes = True
 
-        if not hasElementNodes:
-            modXmlStr = '<?xml version="1.0" encoding="UTF-8" ?><root>' + xmlStr + '</root>'
-            doc = xml.dom.minidom.parseString(modXmlStr)
+        if xmlStr.find('<?xml version=') != 0:
+            xmlStr = '<?xml version="1.0" encoding="UTF-8" ?><root>' + xmlStr + '</root>'
+        doc = xml.dom.minidom.parseString(xmlStr)
 
         return self.unpackFromXMLNode(doc.documentElement)
 
