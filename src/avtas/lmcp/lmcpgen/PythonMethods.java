@@ -28,7 +28,7 @@ class PythonMethods {
          */
         int len = info.namespace.split("/").length;
         File parent = outfile.getParentFile();
-        System.out.println("******* Parent: " + parent.getAbsolutePath() + " *********");
+        //System.out.println("******* Parent: " + parent.getAbsolutePath() + " *********");
         for(int i = 1; i < len; i++){
             parent = parent.getParentFile();
             File blank_init = new File(parent, "__init__.py");
@@ -749,7 +749,7 @@ class PythonMethods {
             if(f.isEnum){
                 for(EnumInfo ei : info.enums){
                     if(f.type.equals(ei.name)){
-                        System.out.println("Enum namespace: " + ei.namespace + "Enum type: " + ei.name);
+                        //System.out.println("Enum namespace: " + ei.namespace + "Enum type: " + ei.name);
                         return ei.namespace;
                     }
                 }
