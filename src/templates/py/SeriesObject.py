@@ -23,6 +23,7 @@ class -<classname>-(-<extends_name>-):
         -<call_superclass_init>-
         self.LMCP_TYPE = -<lmcp_type>-
         self.SERIES_NAME = -<series_name>-
+        self.FULL_LMCP_TYPE_NAME = "-<full_datatype_name>-"
         -<struct_series_name_setup>-
         #Define message fields
         -<define_vars>-

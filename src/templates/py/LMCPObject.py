@@ -14,6 +14,7 @@ class LMCPObject:
 
     SERIES_NAME = ""
     LMCP_TYPE = 0
+    FULL_LMCP_TYPE_NAME = "avtas.lmcp.Object"
 
     def pack(self):
         return []
