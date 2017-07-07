@@ -21,12 +21,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.Path;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.Set;
 import java.util.Vector;
 
 /**
@@ -129,6 +128,21 @@ public class LmcpGen {
                         }
                     }
                 }
+		else if (splits[0].equals("PER_NS_SUBDIR")) {
+		    URL f = new URL(templateFile, splits[1]);
+		    String fileString = readFile(f);
+		    Set<String> subdirs = MDMInfo.getNamespaceSubdirs(infos);
+		    for (String subdir : subdirs) {
+			// make a fake MDMInfo for this part of the namespace
+			MDMInfo dummyInfo = new MDMInfo();
+			dummyInfo.namespace = subdir;
+			String fname = replaceTags(splits[2], null, methodClass, infos, dummyInfo, null, null);
+			File outfile = new File(outputDir, fname);
+			String outString = replaceTags(fileString, outfile, methodClass, infos, dummyInfo, null, null);
+			outfile.getParentFile().mkdirs();
+			writeFile(outfile, outString);
+		    }
+		}
             }
         }
     }
@@ -198,13 +212,14 @@ public class LmcpGen {
 
             Method method = methodClass.getMethod(strs[1], MDMInfo[].class, MDMInfo.class, File.class,
                     StructInfo.class, EnumInfo.class, String.class);
-            //System.err.println("accessing method: " + method.getName());
+//            System.err.println("accessing method: " + method.getName());
             try {
                 outputStr = strs[0] + (String) method.invoke(null, infos, info, outfile, st, en, strs[3]) + strs[2];
                 outputStr = replaceTags(outputStr, outfile, methodClass, infos, info, st, en);
             } catch (InvocationTargetException ex) {
                 throw new Exception("Method calling exception.  "
-                        + "Trying to access method name: " + method.getName() + " for file: " + outfile.getName());
+                        + "Trying to access method name: " + method.getName() + " for file: " + outfile.getName(),
+                        ex);
             } catch (Exception ex2) {
                 System.out.println(ex2.getMessage());
                 throw new Exception("Error writing file: " + outfile.getName() + " using method " + method.getName());
@@ -303,6 +318,11 @@ public class LmcpGen {
             else if (args[i].equalsIgnoreCase("-py")) {
                 template = LmcpGen.class.getResource("/templates/python.tl");
                 methodClassName = "avtas.lmcp.lmcpgen.PythonMethods";
+                i -= 1;
+            }
+            else if (args[i].equalsIgnoreCase("-rs")) {
+                template = LmcpGen.class.getResource("/templates/rust.tl");
+                methodClassName = "avtas.lmcp.lmcpgen.RustMethods";
                 i -= 1;
             }
             else if (args[i].equalsIgnoreCase("-xsd")) {
