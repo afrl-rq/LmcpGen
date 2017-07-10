@@ -28,7 +28,7 @@ class PythonMethods {
          */
         int len = info.namespace.split("/").length;
         File parent = outfile.getParentFile();
-        System.out.println("******* Parent: " + parent.getAbsolutePath() + " *********");
+        //System.out.println("******* Parent: " + parent.getAbsolutePath() + " *********");
         for(int i = 1; i < len; i++){
             parent = parent.getParentFile();
             File blank_init = new File(parent, "__init__.py");
@@ -60,6 +60,15 @@ class PythonMethods {
         return ws + st.name;
     }
 
+    public static String full_datatype_name(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        String str = "";
+        String[] tmp = info.namespace.split("/");
+        for (int i = 0; i < tmp.length; i++) {
+            str += tmp[i] + ".";
+        }
+        return ws + str + st.name;
+    }
+    
     public static String classname(MDMInfo[] infos, MDMInfo info, final File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         return ws + st.name;
     }
@@ -229,7 +238,10 @@ class PythonMethods {
                 if (f.type.equalsIgnoreCase("string")) {
                     buf.append(ws + "buffer.append(struct.pack(\">H\", len(" + name + ") ))\n");
                     buf.append(ws + "if len(" + name + ") > 0:\n");
-                    buf.append(ws + "    buffer.append(struct.pack( `len(" + name + ")` + \"s\", " + name + "))\n");
+                    buf.append(ws + "    buffer.append(struct.pack( `len(" + name + ")` + \"s\", str(" + name + ")))\n");
+                } else if (f.type.equalsIgnoreCase("Bool")) {
+                    buf.append(ws + "boolChar = 1 if " + name + " == True else 0\n");
+                    buf.append(ws + "buffer.append(struct.pack(\">B\",boolChar))\n");
                 } else if (f.isStruct) {
                     buf.append(ws + "buffer.append(struct.pack(\"B\", " + name + " != None ))\n");
                     buf.append(ws + "if " + name + " != None:\n");
@@ -262,7 +274,11 @@ class PythonMethods {
                     buf.append(ws + "for x in " + name + ":\n");
                     buf.append(ws + "    buffer.append(struct.pack(\">H\", len(x) ))\n");
                     buf.append(ws + "    if len(x) > 0:\n");
-                    buf.append(ws + "        buffer.append(struct.pack( `len(x)` + \"s\", " + name + "[x]))\n");
+                    buf.append(ws + "        buffer.append(struct.pack( `len(x)` + \"s\", str(" + name + "[x])))\n");
+                } else if (f.type.equalsIgnoreCase("Bool")) {
+                    buf.append(ws + "for x in " + name + ":\n");
+                    buf.append(ws + "    boolChar = 1 if x == True else 0\n");
+                    buf.append(ws + "    buffer.append(struct.pack(\">B\",boolChar))\n");
                 } else {
                     buf.append(ws + "for x in " + name + ":\n");
                     buf.append(ws + "    buffer.append(struct.pack(\">" + getStructTypeString(f) + "\", x ))\n");
@@ -287,6 +303,10 @@ class PythonMethods {
                     buf.append(ws + "    _pos += _strlen\n");
                     buf.append(ws + "else:\n ");
                     buf.append(ws + "    " + name + " = \"\"\n");
+                } else if (f.type.equalsIgnoreCase("Bool")) {
+                    buf.append(ws + "boolChar = struct.unpack_from(\">B\", buffer, _pos)[0]\n");
+                    buf.append(ws + name + " = True if boolChar == 1 else False\n");
+                    buf.append(ws + "_pos += 1\n");
                 } else if (f.isStruct) {
                     buf.append(ws + "_valid = struct.unpack_from(\"B\", buffer, _pos )[0]\n");
                     buf.append(ws + "_pos += 1\n");
@@ -347,6 +367,11 @@ class PythonMethods {
                     buf.append(ws + "        _pos += _strlen\n");
                     buf.append(ws + "    else:\n ");
                     buf.append(ws + "        " + name + "[x] = \"\"\n");
+                } else if (f.type.equalsIgnoreCase("Bool")) {
+                    buf.append(ws + "for x in range(_arraylen):\n");
+                    buf.append(ws + "    boolChar = struct.unpack_from(\">B\", buffer, _pos)[0]\n");
+                    buf.append(ws + "    " + name + "[x] = True if boolChar == 1 else False\n");
+                    buf.append(ws + "    _pos += 1\n");
                 } else {
                     String typeStr = "\">\" + `_arraylen` + \"" + getStructTypeString(f) + "\"";
                     buf.append(ws + "if _arraylen > 0:\n");
@@ -476,17 +501,6 @@ class PythonMethods {
         return buf.toString();
     }
 
-    public static String factory_name_for_type(MDMInfo[] infos, MDMInfo info, final File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
-        StringBuffer buf = new StringBuffer();
-        for(MDMInfo in : infos){
-            String[] splits = in.namespace.split("/");
-            String seriesListClass = splits[splits.length - 1] + ".SeriesFactory";
-            buf.append(ws + "if(name == " + seriesListClass + ".SeriesName):\n");
-            buf.append(ws + "    return " + seriesListClass + ".createObjectByName(name)");
-        }
-        return buf.toString();
-    }
-
     public static String get_object_from_buffer(MDMInfo[] infos, MDMInfo info, final File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         StringBuffer buf = new StringBuffer();
         buf.append(ws + "obj = createObject( getLMCPType(buffer))\n");
@@ -553,6 +567,8 @@ class PythonMethods {
                     str += ws + "        buf += x.toXMLStr(ws + \"    \") \n";
                 } else if (f.isEnum) {
                     str += ws + "    buf += ws + \"<" + f.type + ">\" + " + f.type + ".get_" + f.type + "_int(x) + \"</" + f.type + ">\\n\"\n";
+                } else if (f.type.equalsIgnoreCase("Bool")) {
+                    str += ws + "    buf += ws + \"<" + f.type + ">\" + ('True' if x else 'False') + \"</" + f.type + ">\\n\"\n";
                 } else {
                     str += ws + "    buf += ws + \"<" + f.type + ">\" + str(x) + \"</" + f.type + ">\\n\"\n";
                 }
@@ -567,8 +583,41 @@ class PythonMethods {
                 str += ws + "buf += ws + \"</" + f.name + ">\\n\"\n";
             } else if (f.isEnum) {
                 str += ws + "buf += ws + \"<" + f.name + ">\" + " + f.type + ".get_" + f.type + "_int(" + name + ") + \"</" + f.name + ">\\n\"\n";
+            } else if (f.type.equalsIgnoreCase("Bool")) {
+                str += ws + "buf += ws + \"<" + f.name + ">\" + ('True' if " + name + " else 'False') + \"</" + f.name + ">\\n\"\n";
             } else {
                 str += ws + "buf += ws + \"<" + f.name + ">\" + str(" + name + ") + \"</" + f.name + ">\\n\"\n";
+            }
+        }
+
+        return str;
+    }
+    
+    public static String to_dict_members(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        String str = "";
+        str += ws + extends_name(infos, info, outfile, st, en, "") + ".toDictMembers(self, d)\n";
+
+        for (FieldInfo f : st.fields) {
+            String name = "self." + f.name;
+            if (f.isArray) {
+                str += ws + "d['" + f.name + "'] = []\n";
+
+                str += ws + "for x in " + name + ":\n";
+                if (f.isStruct) {
+                    str += ws + "    if x == None:\n";
+                    str += ws + "        d['" + f.name + "'].append(None)\n";
+                    str += ws + "    else:\n";
+                    str += ws + "        d['" + f.name + "'].append(x.toDict())\n";
+                } else {
+                    str += ws + "    d['" + f.name + "'].append(x)\n";
+                }
+            } else if (f.isStruct) {
+                str += ws + "if " + name + " == None:\n";
+                str += ws + "    d['" + f.name + "'] = None\n";
+                str += ws + "else:\n";
+                str += ws + "    d['" + f.name + "'] = " + name + ".toDict()\n";
+            } else {
+                str += ws + "d['" + f.name + "'] = " + name + "\n";
             }
         }
 
@@ -578,8 +627,10 @@ class PythonMethods {
     public static String members_from_xml(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         StringBuffer buf = new StringBuffer();
         buf.append(ws + extends_name(infos, info, outfile, st, en, "") + ".unpackFromXMLNode(self, el, seriesFactory)\n" );
-        buf.append(ws + "for e in el.childNodes:\n");
-        buf.append(ws + "    if e.nodeType == xml.dom.Node.ELEMENT_NODE:\n");
+        if (st.fields.length > 0) {
+            buf.append(ws + "for e in el.childNodes:\n");
+            buf.append(ws + "    if e.nodeType == xml.dom.Node.ELEMENT_NODE:\n");
+        }
         boolean first = true;
         for (FieldInfo f : st.fields) {
             String name = "self." + f.name;
@@ -592,33 +643,73 @@ class PythonMethods {
             }
             if (!f.isArray) {
                 if (f.isStruct) {
-                    buf.append(ws + "           for n in e.childNodes:\n" );
-                    buf.append(ws + "               if n.nodeType == xml.dom.Node.ELEMENT_NODE:\n");
-                    buf.append(ws + "                   " + name + " = seriesFactory.createObjectByName(n.localName)\n");
-                    buf.append(ws + "                   if " + name + " != None:\n");
-                    buf.append(ws + "                           " + name + ".unpackFromXMLNode(n, seriesFactory)\n");
+                    buf.append(ws + "            for n in e.childNodes:\n" );
+                    buf.append(ws + "                if n.nodeType == xml.dom.Node.ELEMENT_NODE:\n");
+                    buf.append(ws + "                    " + name + " = seriesFactory.createObjectByName(n.getAttribute('Series'), n.localName)\n");
+                    buf.append(ws + "                    if " + name + " != None:\n");
+                    buf.append(ws + "                        " + name + ".unpackFromXMLNode(n, seriesFactory)\n");
                 } else if (f.isEnum) {
-                    buf.append(ws + "           " + name + " = get_" + f.type + "_str(e.childNodes[0].nodeValue)\n");
+                    buf.append(ws + "            " + name + " = " + f.type  + ".get_" + f.type + "_str(e.childNodes[0].nodeValue)\n");
                 } else if (f.type.equalsIgnoreCase("Bool")) {
-                    buf.append(ws + "           " + name + " = e.childNodes[0].nodeValue.lower() == 'true' \n");
+                    buf.append(ws + "            " + name + " = e.childNodes[0].nodeValue.lower() == 'true'\n");
                 } else {
-                    buf.append(ws + "           " + name + " = " + getPythonType(f.type) + "(e.childNodes[0].nodeValue)\n");
+                    buf.append(ws + "            " + name + " = " + getPythonType(f.type) + "(e.childNodes[0].nodeValue)\n");
                 }
             // struct arrays
             } else {
-                buf.append(ws + "           " + name + " = []\n");
-                buf.append(ws + "           for c in e.childNodes:\n");
-                buf.append(ws + "               if c.nodeType == xml.dom.Node.ELEMENT_NODE:\n");
+                buf.append(ws + "            " + name + " = []\n");
+                buf.append(ws + "            for c in e.childNodes:\n");
+                buf.append(ws + "                if c.nodeType == xml.dom.Node.ELEMENT_NODE:\n");
                 if (f.isStruct) {
-                    buf.append(ws + "                    obj = seriesFactory.createObjectByName(c.localName)\n");
+                    buf.append(ws + "                    obj = seriesFactory.createObjectByName(c.getAttribute('Series'), c.localName)\n");
                     buf.append(ws + "                    if obj != None:\n");
-                    buf.append(ws + "                       obj.unpackFromXMLNode(c, seriesFactory)\n");
-                    buf.append(ws + "                       " + name + ".append(obj)\n");
+                    buf.append(ws + "                        obj.unpackFromXMLNode(c, seriesFactory)\n");
+                    buf.append(ws + "                        " + name + ".append(obj)\n");
                 }
                 else if (f.isEnum) {
-                    buf.append(ws + "                   " + name + ".append( get_" + f.type + "_str(e.childNodes[0].nodeValue))\n");
+                    buf.append(ws + "                    " + name + ".append( " + f.type + ".get_" + f.type + "_str(c.childNodes[0].nodeValue) )\n");
+                } else if (f.type.equalsIgnoreCase("Bool")) {
+                    buf.append(ws + "                    " + name + ".append( c.childNodes[0].nodeValue.lower() == 'true' )\n");
                 } else {
-                    buf.append(ws + "                   " + name + ".append( " + getPythonType(f.type) + "(c.childNodes[0].nodeValue) )\n");
+                    buf.append(ws + "                    " + name + ".append( " + getPythonType(f.type) + "(c.childNodes[0].nodeValue) )\n");
+                }
+            }
+        }
+        return buf.toString();
+    }
+    
+    public static String members_from_dict(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        StringBuffer buf = new StringBuffer();
+        buf.append(ws + extends_name(infos, info, outfile, st, en, "") + ".unpackFromDict(self, d, seriesFactory)\n" );
+        if (st.fields.length > 0) {
+            buf.append(ws + "for key in d:\n");
+        }
+        boolean first = true;
+        for (FieldInfo f : st.fields) {
+            String name = "self." + f.name;
+            if (first) {
+                buf.append(ws + "    if key == \"" + f.name + "\":\n");
+                first = false;
+            }
+            else {
+                buf.append(ws + "    elif key == \"" + f.name + "\":\n");
+            }
+            if (!f.isArray) {
+                if (f.isStruct) {
+                    buf.append(ws + "        " + name + " = seriesFactory.unpackFromDict(d[key])\n");
+                } else {
+                    buf.append(ws + "        " + name + " = d[key]\n");
+                }
+            // struct arrays
+            } else {
+                buf.append(ws + "        " + name + " = []\n");
+                buf.append(ws + "        for c in d[key]:\n");
+                if (f.isStruct) {
+                    buf.append(ws + "            obj = seriesFactory.unpackFromDict(c)\n");
+                    buf.append(ws + "            if obj != None:\n");
+                    buf.append(ws + "                " + name + ".append(obj)\n");
+                } else {
+                    buf.append(ws + "            " + name + ".append( c )\n");
                 }
             }
         }
@@ -658,7 +749,7 @@ class PythonMethods {
             if(f.isEnum){
                 for(EnumInfo ei : info.enums){
                     if(f.type.equals(ei.name)){
-                        System.out.println("Enum namespace: " + ei.namespace + "Enum type: " + ei.name);
+                        //System.out.println("Enum namespace: " + ei.namespace + "Enum type: " + ei.name);
                         return ei.namespace;
                     }
                 }

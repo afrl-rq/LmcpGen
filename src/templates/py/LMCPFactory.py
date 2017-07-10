@@ -28,6 +28,8 @@ class LMCPFactory:
     def addSeries(self, series):
         if not series.SERIES_NAME_ID in self.series_enums.keys():
             self.series_enums[series.SERIES_NAME_ID] = series
+        if not series.SERIES_NAME in self.series_enums.keys():
+            self.series_enums[series.SERIES_NAME] = series
 
     def getObject(self, buffer):
         if len(buffer) < HEADER_SIZE:
@@ -57,10 +59,13 @@ class LMCPFactory:
         -<create_object>-
         return None
 
-    def createObjectByName(self, name):
+    def createObjectByName(self, series_name, name):
         """
         Returns a new LMCP object based on its name
         """
+        if series_name in self.series_enums.keys():
+            series_enum = self.series_enums[series_name]
+            return series_enum.SeriesEnum().getInstance(series_enum.SeriesEnum().getType(name))
         return None
 
     def unpackFromXMLNode(self, domNode):
@@ -71,11 +76,28 @@ class LMCPFactory:
         objs = []
         for e in domNode.childNodes:
             if e.nodeType == xml.dom.Node.ELEMENT_NODE:
-                obj = self.createObjectByName(e.localName)
+                obj = self.createObjectByName(e.getAttribute('Series'), e.localName)
                 if obj != None:
                     obj.unpackFromXMLNode(e, self)
                     objs.append(obj)
         return objs
+
+    def unpackFromDict(self, d):
+        if type(d) is not dict:
+            return None
+
+        obj = None
+        for key in d:
+            if type(d[key]) is dict:
+                name_parts = key.split("/")
+                if len(name_parts) == 2:
+                   series_name = name_parts[0]
+                   type_name = name_parts[1]
+                   obj = self.createObjectByName(series_name, type_name)
+                   if obj != None:
+                       obj.unpackFromDict(d[key], self);
+                       return obj
+        return obj
 
     def createObjectFromNode(self, xmlNode):
         return None
@@ -85,7 +107,11 @@ class LMCPFactory:
         Reads in an XML string, unpacks objects, adds them to a list and
         returns the list
         """
+
+        if xmlStr.find('<?xml version=') != 0:
+            xmlStr = '<?xml version="1.0" encoding="UTF-8" ?><root>' + xmlStr + '</root>'
         doc = xml.dom.minidom.parseString(xmlStr)
+
         return self.unpackFromXMLNode(doc.documentElement)
 
     def unpackFromXMLFile(self, file):

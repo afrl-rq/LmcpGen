@@ -14,6 +14,7 @@ class LMCPObject:
 
     SERIES_NAME = ""
     LMCP_TYPE = 0
+    FULL_LMCP_TYPE_NAME = "avtas.lmcp.Object"
 
     def pack(self):
         return []
@@ -21,8 +22,22 @@ class LMCPObject:
     def unpack(self, buffer, _pos):
         return _pos
 
+    def unpackFromXMLNode(self, el, seriesFactory):
+        return
+
+    def unpackFromDict(self, d, seriesFactory):
+        return
+
     def toString(self):
         return ""
+
+    def toDict(self):
+        d = {}
+        self.toDictMembers(d)
+        return d
+
+    def toDictMembers(self, d):
+        return
 
     def toXML(self):
         return self.toXMLStr("");
