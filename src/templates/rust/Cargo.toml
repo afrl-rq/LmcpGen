@@ -17,6 +17,9 @@ authors = ["LmcpGen"]
 [dependencies]
 lmcp_derive = { path = "lmcp-derive" }
 
+[dev-dependencies]
+quickcheck = "0.4.1"
+
 [lib]
 crate-type = ["lib", "staticlib"]
 

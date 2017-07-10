@@ -11,8 +11,6 @@ package avtas.lmcp.lmcpgen;
 
 import java.io.File;
 import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -20,8 +18,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.UUID;
-import java.util.Vector;
 import java.util.stream.Stream;
 
 public class RustMethods {
@@ -93,6 +89,16 @@ public class RustMethods {
     public static String enum_default_variant(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         return en.entries.get(0).name;
     }
+
+    public static String enum_variant_choices(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        StringBuilder sb = new StringBuilder();
+        for (EnumInfo.EnumEntry entry : en.entries) {
+            sb.append(ws);
+            sb.append(String.format("%s::%s,", en.name, entry.name));
+        }
+        return sb.toString();
+    }
+
     public static String datatype_id(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         return ws + st.id;
     }
@@ -103,7 +109,7 @@ public class RustMethods {
         StructInfo parent = st0;
         while (parent.hasParent()) {
             String prefix = getSeriesModule(infos, parent.extends_series);
-            uses.add(String.format("\nuse %s::%s;", prefix, parent.extends_name));
+            uses.add(String.format("%suse %s::%s;\n", ws, prefix, parent.extends_name));
             parent = MDMInfo.getParentType(infos, parent);
         }
 
@@ -113,7 +119,27 @@ public class RustMethods {
                     continue;
                 }
                 String type = getResolvedTypeName(infos, field);
-                uses.add(String.format("\nuse %s;", type));
+                uses.add(String.format("%suse %s;\n", ws, type));
+            }
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (String use : uses) {
+            sb.append(use);
+        }
+        return sb.toString();
+    }
+
+    public static String use_dependents_tests(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en, String ws) throws Exception {
+        SortedSet<String> uses = new TreeSet<>();
+
+        for (StructInfo st : MDMInfo.getAllParents(infos, st0)) {
+            for (FieldInfo field : st.fields) {
+                if (!(field.isEnum || field.isStruct)) {
+                    continue;
+                }
+                String type = getResolvedTypeName(infos, field);
+                uses.add(String.format("%suse %s::tests as %sTests;\n", ws, type, field.type));
             }
         }
 
@@ -288,6 +314,31 @@ public class RustMethods {
                 sb.append(String.format("    Some((LmcpType::%s(s), i))\n", st.name));
                 sb.append(ws);
                 sb.append("}\n");
+            }
+        }
+        return sb.toString();
+    }
+
+    public static String declare_arbitrary_fields(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en, String ws) throws Exception {
+        StringBuilder sb = new StringBuilder();
+        for (StructInfo st : MDMInfo.getAllParents(infos, st0)) {
+            for (FieldInfo field : st.fields) {
+                sb.append(ws);
+                sb.append(String.format("%s: Arbitrary::arbitrary(g),\n", field.name));
+            }
+        }
+        return sb.toString();
+    }
+
+    public static String discard_long_fields(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en, String ws) throws Exception {
+        StringBuilder sb = new StringBuilder();
+        for (StructInfo st : MDMInfo.getAllParents(infos, st0)) {
+            for (FieldInfo field : st.fields) {
+                if (!field.isArray) {
+                    continue;
+                }
+                sb.append(ws);
+                sb.append(String.format("if x.%s.len() > (u16::MAX as usize) { return TestResult::discard(); }\n", field.name));
             }
         }
         return sb.toString();
@@ -533,32 +584,6 @@ public class RustMethods {
     private static String getSeriesModule(MDMInfo[] infos, String series_name) {
         MDMInfo i = MDMReader.getMDM(series_name, infos);
         return i.namespace.replaceAll("/", "::");
-    }
-
-    public static Vector<StructInfo> getAllCppSubclasses(MDMInfo[] infos, FieldInfo f) throws Exception {
-        if (f.type.equals(MDMInfo.LMCP_OBJECT_NAME)) {
-            return new Vector<StructInfo>();
-        }
-        StructInfo i = MDMInfo.getStructByName(infos, f);
-        return getAllCppSubclasses(infos, i);
-    }
-
-    private static Vector<StructInfo> getAllCppSubclasses(MDMInfo[] infos, StructInfo st) throws Exception {
-        Vector<StructInfo> ret = new Vector<StructInfo>();
-        if (st.name.equals(MDMInfo.LMCP_OBJECT_NAME)) {
-            return ret;
-        }
-        for (MDMInfo in : infos) {
-            if (st.extends_series.equals(in.seriesName)) {
-                for (int i = 0; i < in.structs.length; i++) {
-                    if (in.structs[i].extends_name.equals(st.name)) {
-                        ret.add(in.structs[i]);
-                        ret.addAll(getAllCppSubclasses(infos, in.structs[i]));
-                    }
-                }
-            }
-        }
-        return ret;
     }
 
     private static String getTypeName(MDMInfo[] infos, FieldInfo field, boolean fullyQualified) {
