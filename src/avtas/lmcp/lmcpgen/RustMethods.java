@@ -22,6 +22,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.Vector;
+import java.util.stream.Stream;
 
 public class RustMethods {
 
@@ -63,6 +64,28 @@ public class RustMethods {
         StringBuilder sb = new StringBuilder();
         for (EnumInfo.EnumEntry entry : en.entries) {
             sb.append(String.format("\n    %s = %s,", entry.name, entry.value));
+        }
+        return sb.toString();
+    }
+
+    public static String match_enum_from_i32(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        StringBuilder sb = new StringBuilder();
+
+        // first, figure out whether we'll have to number them
+        // ourselves, and error out unless they're all one or the
+        // other
+        boolean hasCustomValues = en.entries.stream().allMatch(entry -> entry.value != null);
+        boolean generateValues = en.entries.stream().allMatch(entry -> entry.value == null);
+        if (!(hasCustomValues || generateValues)) {
+            throw new IllegalArgumentException("Enums must have values for all entries, or for no entries");
+        }
+
+        int gen = 0;
+        for (EnumInfo.EnumEntry entry : en.entries) {
+            int v = hasCustomValues ? Integer.parseInt(entry.value) : gen;
+            sb.append(ws);
+            sb.append(String.format("%d => Some(%s::%s),\n", v, en.name, entry.name));
+            gen++;
         }
         return sb.toString();
     }

@@ -10,12 +10,18 @@
 // This file was auto-created by LmcpGen. Modifications will be overwritten.
 
 use avtas::lmcp::{LmcpSer};
-use enum_primitive::{FromPrimitive};
 
-enum_from_primitive! {
 #[derive(Debug, Copy, Clone, LmcpDerives)]
 pub enum -<enum_name>- {-<declare_enum_fields>-
 }
+
+impl -<enum_name>- {
+    fn from_i32(x: i32) -> Option<-<enum_name>-> {
+        match x {
+            -<match_enum_from_i32>-
+            _ => None,
+        }
+    }
 }
 
 impl Default for -<enum_name>- {

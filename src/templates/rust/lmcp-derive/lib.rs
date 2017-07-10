@@ -60,7 +60,7 @@ fn impl_descend(ast: &syn::MacroInput) -> quote::Tokens {
         syn::Body::Enum(_) => {
             quote! {
                 let r = get!(buf.get_mut(pos ..));
-                let b : usize = get!((*self as u32).lmcp_ser(r));
+                let b : usize = get!((*self as i32).lmcp_ser(r));
                 pos += b;
             }
         }
@@ -98,8 +98,8 @@ fn impl_descend(ast: &syn::MacroInput) -> quote::Tokens {
         syn::Body::Enum(_) => {
             quote! {
                 let r = get!(buf.get(pos ..));
-                let (i, readb) : (u32, usize) = get!(u32::lmcp_deser(r));
-                out = get!(#name::from_u32(i));
+                let (i, readb) : (i32, usize) = get!(i32::lmcp_deser(r));
+                out = get!(#name::from_i32(i));
                 pos += readb;
             }
         }

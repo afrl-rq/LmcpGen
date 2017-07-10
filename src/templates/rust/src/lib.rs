@@ -10,10 +10,13 @@
 // This file was auto-created by LmcpGen. Modifications will be overwritten.
 
 #![allow(non_snake_case)]
+
 #[macro_use]
 extern crate lmcp_derive;
+
 #[macro_use]
-extern crate enum_primitive;
+#[cfg(test)]
+extern crate quickcheck;
 
 #[macro_use]
 pub mod avtas;

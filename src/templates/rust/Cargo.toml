@@ -16,7 +16,6 @@ authors = ["LmcpGen"]
 
 [dependencies]
 lmcp_derive = { path = "lmcp-derive" }
-enum_primitive = "*"
 
 [lib]
 crate-type = ["lib", "staticlib"]

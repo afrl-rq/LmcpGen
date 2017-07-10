@@ -10,7 +10,6 @@
 // This file was auto-created by LmcpGen. Modifications will be overwritten.
 
 #![allow(non_snake_case)]
-pub use enum_primitive::FromPrimitive;
 use std::mem;
 
 macro_rules! get(
