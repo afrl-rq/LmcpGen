@@ -112,7 +112,7 @@ fn impl_descend(ast: &syn::MacroInput) -> quote::Tokens {
                 let ident = field.ident.as_ref();
                 quote!{ size += self.#ident.lmcp_size(); }
             }).collect::<Vec<_>>();
-            quote! { #(#fields)* }
+            quote! { size += 15; #(#fields)* }
         },
         syn::Body::Struct(_) => {panic!("only variant structs supported"); }
         syn::Body::Enum(_) => {
@@ -130,7 +130,7 @@ fn impl_descend(ast: &syn::MacroInput) -> quote::Tokens {
             #deser_body
             Some((out,pos))
         }
-        fn lmcp_size(&self) -> usize { let mut size = 15; #size_body size }
+        fn lmcp_size(&self) -> usize { let mut size = 0; #size_body size }
 
         }
     }
