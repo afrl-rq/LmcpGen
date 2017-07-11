@@ -13,7 +13,7 @@
 use avtas::lmcp::{LmcpSer, LmcpStruct, StructInfo};
 -<use_dependents>-
 
-#[derive(PartialEq, Clone, Debug, Default, LmcpDerives)]
+#[derive(PartialEq, Clone, Debug, Default)]
 #[repr(C)]
 pub struct -<datatype_name>- {-<declare_fields>-
 }
@@ -29,6 +29,34 @@ impl LmcpStruct for -<datatype_name>- {
     }
 }
 
+impl LmcpSer for -<datatype_name>- {
+    fn lmcp_ser(&self, buf: &mut[u8]) -> Option<usize> {
+        let mut pos = 0;
+        {
+            let x = get!(Self::GetStructInfo().lmcp_ser(buf));
+            pos += x;
+        }
+        -<struct_lmcp_ser_body>-
+        Some(pos)
+    }
+
+    fn lmcp_deser(buf: &[u8]) -> Option<(-<datatype_name>-, usize)> {
+        let mut pos = 0;
+        {
+            let (_si, u) = get!(StructInfo::lmcp_deser(buf));
+            // TODO: assert correctness properties of StructInfo
+            pos += u;
+        }
+        -<struct_lmcp_deser_body>-
+        Some((out, pos))
+    }
+
+    fn lmcp_size(&self) -> usize {
+        -<struct_lmcp_size_body>-
+        size
+    }
+}
+
 pub trait -<datatype_name>-T-<declare_parent_trait>- {-<declare_trait_methods>-
 }
 -<declare_trait_impls>-
@@ -37,11 +65,9 @@ pub trait -<datatype_name>-T-<declare_parent_trait>- {-<declare_trait_methods>-
 pub mod tests {
     use super::*;
     use quickcheck::*;
-    -<use_dependents_tests>-
-    use std::u16;
 
     impl Arbitrary for -<datatype_name>- {
-        fn arbitrary<G: Gen>(g: &mut G) -> -<datatype_name>- {
+        fn arbitrary<G: Gen>(_g: &mut G) -> -<datatype_name>- {
             -<datatype_name>- {
                 -<declare_arbitrary_fields>-
             }

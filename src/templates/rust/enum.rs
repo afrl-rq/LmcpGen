@@ -11,7 +11,7 @@
 
 use avtas::lmcp::{LmcpSer};
 
-#[derive(PartialEq, Debug, Copy, Clone, LmcpDerives)]
+#[derive(PartialEq, Debug, Copy, Clone)]
 pub enum -<enum_name>- {-<declare_enum_fields>-
 }
 
@@ -22,6 +22,21 @@ impl -<enum_name>- {
             _ => None,
         }
     }
+}
+
+impl LmcpSer for -<enum_name>- {
+    fn lmcp_ser(&self, buf: &mut[u8]) -> Option<usize> {
+        let readb = get!((*self as i32).lmcp_ser(buf));
+        Some(readb)
+    }
+
+    fn lmcp_deser(buf: &[u8]) -> Option<(-<enum_name>-, usize)> {
+        let (i, readb): (i32, usize) = get!(i32::lmcp_deser(buf));
+        let out = get!(-<enum_name>-::from_i32(i));
+        Some((out, readb))
+    }
+
+    fn lmcp_size(&self) -> usize { 0i32.lmcp_size() }
 }
 
 impl Default for -<enum_name>- {

@@ -196,6 +196,59 @@ public class RustMethods {
         return buf.toString();
     }
 
+    public static String struct_lmcp_ser_body(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en0, String ws) throws Exception {
+        StringBuilder sb = new StringBuilder();
+        for (StructInfo st : MDMInfo.getAllParents(infos, st0)) {
+            for (FieldInfo field : st.fields) {
+                sb.append(ws + "{\n");
+                sb.append(ws + "    let r = get!(buf.get_mut(pos ..));\n");
+                sb.append(ws + String.format("    let writeb: usize = get!(self.%s.lmcp_ser(r));\n", field.name));
+                sb.append(ws + "    pos += writeb;\n");
+                sb.append(ws + "}\n");
+            }
+        }
+        return sb.toString();
+    }
+
+    public static String struct_lmcp_deser_body(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en0, String ws) throws Exception {
+        StringBuilder sb = new StringBuilder();
+
+        boolean needMutable = false;
+        for (StructInfo st : MDMInfo.getAllParents(infos, st0)) {
+            for (FieldInfo field : st.fields) {
+                needMutable = true;
+                sb.append(ws + "{\n");
+                sb.append(ws + "    let r = get!(buf.get(pos ..));\n");
+                sb.append(ws + String.format("    let (x, readb): (%s, usize) = get!(LmcpSer::lmcp_deser(r));\n", getShortTypeName(infos, field)));
+                sb.append(ws + String.format("    out.%s = x;\n", field.name));
+                sb.append(ws + "    pos += readb;\n");
+                sb.append(ws + "}\n");
+            }
+        }
+
+        String mut = needMutable ? " mut" : "";
+        sb.insert(0, ws + String.format("let%s out: %s = Default::default();\n", mut, st0.name));
+
+        return sb.toString();
+    }
+
+    public static String struct_lmcp_size_body(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en0, String ws) throws Exception {
+        StringBuilder sb = new StringBuilder();
+
+        boolean needMutable = false;
+        for (StructInfo st : MDMInfo.getAllParents(infos, st0)) {
+            for (FieldInfo field : st.fields) {
+                needMutable = true;
+                sb.append(ws + String.format("size += self.%s.lmcp_size();\n", field.name));
+            }
+        }
+
+        String mut = needMutable ? " mut" : "";
+        sb.insert(0, ws + String.format("let%s size = 15;\n", mut));
+
+        return sb.toString();
+    }
+
     public static String declare_entire_series(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en0, String ws) throws Exception {
         // we're going to be passed the dummy subdir MDM, so we need
         // to look up the real ones if they exist, in addition to any
@@ -324,7 +377,7 @@ public class RustMethods {
         for (StructInfo st : MDMInfo.getAllParents(infos, st0)) {
             for (FieldInfo field : st.fields) {
                 sb.append(ws);
-                sb.append(String.format("%s: Arbitrary::arbitrary(g),\n", field.name));
+                sb.append(String.format("%s: Arbitrary::arbitrary(_g),\n", field.name));
             }
         }
         return sb.toString();
@@ -332,14 +385,20 @@ public class RustMethods {
 
     public static String discard_long_fields(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en, String ws) throws Exception {
         StringBuilder sb = new StringBuilder();
+
+        boolean needImport = false;
         for (StructInfo st : MDMInfo.getAllParents(infos, st0)) {
             for (FieldInfo field : st.fields) {
                 if (!field.isArray) {
                     continue;
                 }
+                needImport = true;
                 sb.append(ws);
                 sb.append(String.format("if x.%s.len() > (u16::MAX as usize) { return TestResult::discard(); }\n", field.name));
             }
+        }
+        if (needImport) {
+            sb.insert(0, ws + "use std::u16;\n");
         }
         return sb.toString();
     }

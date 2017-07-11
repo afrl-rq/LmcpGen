@@ -14,9 +14,6 @@ name = "lmcp"
 version = "0.1.0"
 authors = ["LmcpGen"]
 
-[dependencies]
-lmcp_derive = { path = "lmcp-derive" }
-
 [dev-dependencies]
 quickcheck = "0.4.1"
 

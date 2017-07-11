@@ -12,9 +12,6 @@
 #![allow(non_snake_case)]
 
 #[macro_use]
-extern crate lmcp_derive;
-
-#[macro_use]
 #[cfg(test)]
 extern crate quickcheck;
 
