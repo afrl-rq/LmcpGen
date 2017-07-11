@@ -30,6 +30,7 @@
     Series CDATA ''
     Units CDATA 'None'
     LargeArray CDATA ''
+    MaxArrayLength CDATA ''
   >
 
 <!--- The list of structs -->
