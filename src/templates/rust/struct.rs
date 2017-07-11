@@ -9,7 +9,6 @@
 
 // This file was auto-created by LmcpGen. Modifications will be overwritten.
 
-#![allow(non_snake_case)]
 use avtas::lmcp::{LmcpSer, LmcpStruct, StructInfo};
 -<use_dependents>-
 
@@ -19,7 +18,7 @@ pub struct -<datatype_name>- {-<declare_fields>-
 }
 
 impl LmcpStruct for -<datatype_name>- {
-    fn GetStructInfo() -> StructInfo {
+    fn get_struct_info() -> StructInfo {
         StructInfo {
             exist: 1,
             series: -<series_id>-u64,
@@ -33,7 +32,7 @@ impl LmcpSer for -<datatype_name>- {
     fn lmcp_ser(&self, buf: &mut[u8]) -> Option<usize> {
         let mut pos = 0;
         {
-            let x = get!(Self::GetStructInfo().lmcp_ser(buf));
+            let x = get!(Self::get_struct_info().lmcp_ser(buf));
             pos += x;
         }
         -<struct_lmcp_ser_body>-

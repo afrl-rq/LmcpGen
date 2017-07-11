@@ -52,8 +52,16 @@ public class RustMethods {
         return ws + st.name;
     }
 
+    public static String datatype_snake_name(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        return ws + snake_case(st.name);
+    }
+
     public static String enum_name(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         return ws + en.name;
+    }
+
+    public static String enum_snake_name(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        return ws + snake_case(en.name);
     }
 
     public static String declare_enum_fields(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
@@ -109,7 +117,7 @@ public class RustMethods {
         StructInfo parent = st0;
         while (parent.hasParent()) {
             String prefix = getSeriesModule(infos, parent.extends_series);
-            uses.add(String.format("%suse %s::%s;\n", ws, prefix, parent.extends_name));
+            uses.add(String.format("%suse %s::%s;\n", ws, prefix, snake_case(parent.extends_name)));
             parent = MDMInfo.getParentType(infos, parent);
         }
 
@@ -118,8 +126,8 @@ public class RustMethods {
                 if (!(field.isEnum || field.isStruct)) {
                     continue;
                 }
-                String type = getResolvedTypeName(infos, field);
-                uses.add(String.format("%suse %s;\n", ws, type));
+                String type = snake_case(getResolvedTypeName(infos, field));
+                uses.add(String.format(ws + "use %s;\n", type));
             }
         }
 
@@ -138,8 +146,8 @@ public class RustMethods {
                 if (!(field.isEnum || field.isStruct)) {
                     continue;
                 }
-                String type = getResolvedTypeName(infos, field);
-                uses.add(String.format("%suse %s::tests as %sTests;\n", ws, type, field.type));
+                String type = snake_case(getResolvedTypeName(infos, field));
+                uses.add(String.format(ws + "use %s::tests as %sTests;\n", type, field.type));
             }
         }
 
@@ -154,7 +162,7 @@ public class RustMethods {
         if (!st.hasParent()) {
             return "";
         } else {
-            return String.format(": %s::%sT", st.extends_name, st.extends_name);
+            return String.format(": %s::%sT", snake_case(st.extends_name), st.extends_name);
         }
     }
 
@@ -162,12 +170,13 @@ public class RustMethods {
         StringBuilder sb = new StringBuilder();
 
         for (StructInfo st : MDMInfo.getAllParents(infos, st0)) {
-            String prefix = st == st0 ? "" : st.name + "::";
+            String prefix = st == st0 ? "" : snake_case(st.name) + "::";
             sb.append(String.format("\nimpl %s%sT for %s {", prefix, st.name, st0.name));
             for (FieldInfo field : st.fields) {
+                String name = snake_case(field.name);
                 String type = getShortTypeName(infos, field);
-                sb.append(String.format("\n    fn Get%s(&self) -> &%s { &self.%s }", field.name, type, field.name));
-                sb.append(String.format("\n    fn Set%s(&mut self, v: %s) { self.%s = v; }", field.name, type, field.name));
+                sb.append(String.format("\n    fn get_%s(&self) -> &%s { &self.%s }", name, type, name));
+                sb.append(String.format("\n    fn set_%s(&mut self, v: %s) { self.%s = v; }", name, type, name));
             }
             sb.append("\n}\n");
         }
@@ -180,7 +189,7 @@ public class RustMethods {
         for (StructInfo st : MDMInfo.getAllParents(infos, st0)) {
             for (FieldInfo field : st.fields) {
                 String type = getShortTypeName(infos, field);
-                buf.append(String.format("\n    pub %s: %s,", field.name, type));
+                buf.append(String.format("\n    pub %s: %s,", snake_case(field.name), type));
             }
         }
         return buf.toString();
@@ -190,8 +199,8 @@ public class RustMethods {
         StringBuffer buf = new StringBuffer();
         for (FieldInfo field : st.fields) {
             String type = getShortTypeName(infos, field);
-            buf.append(String.format("\n    fn Get%s(&self) -> &%s;", field.name, type));
-            buf.append(String.format("\n    fn Set%s(&mut self, v: %s);", field.name, type));
+            buf.append(String.format("\n    fn get_%s(&self) -> &%s;", snake_case(field.name), type));
+            buf.append(String.format("\n    fn set_%s(&mut self, v: %s);", snake_case(field.name), type));
         }
         return buf.toString();
     }
@@ -202,7 +211,7 @@ public class RustMethods {
             for (FieldInfo field : st.fields) {
                 sb.append(ws + "{\n");
                 sb.append(ws + "    let r = get!(buf.get_mut(pos ..));\n");
-                sb.append(ws + String.format("    let writeb: usize = get!(self.%s.lmcp_ser(r));\n", field.name));
+                sb.append(ws + String.format("    let writeb: usize = get!(self.%s.lmcp_ser(r));\n", snake_case(field.name)));
                 sb.append(ws + "    pos += writeb;\n");
                 sb.append(ws + "}\n");
             }
@@ -220,7 +229,7 @@ public class RustMethods {
                 sb.append(ws + "{\n");
                 sb.append(ws + "    let r = get!(buf.get(pos ..));\n");
                 sb.append(ws + String.format("    let (x, readb): (%s, usize) = get!(LmcpSer::lmcp_deser(r));\n", getShortTypeName(infos, field)));
-                sb.append(ws + String.format("    out.%s = x;\n", field.name));
+                sb.append(ws + String.format("    out.%s = x;\n", snake_case(field.name)));
                 sb.append(ws + "    pos += readb;\n");
                 sb.append(ws + "}\n");
             }
@@ -239,7 +248,7 @@ public class RustMethods {
         for (StructInfo st : MDMInfo.getAllParents(infos, st0)) {
             for (FieldInfo field : st.fields) {
                 needMutable = true;
-                sb.append(ws + String.format("size += self.%s.lmcp_size();\n", field.name));
+                sb.append(ws + String.format("size += self.%s.lmcp_size();\n", snake_case(field.name)));
             }
         }
 
@@ -277,11 +286,11 @@ public class RustMethods {
         for (MDMInfo mdm : realMDMs) {
             for (StructInfo st : mdm.structs) {
                 sb.append(ws);
-                sb.append(String.format("pub mod %s;\n", st.name));
+                sb.append(String.format("pub mod %s;\n", snake_case(st.name)));
             }
             for (EnumInfo en : mdm.enums) {
                 sb.append(ws);
-                sb.append(String.format("pub mod %s;\n", en.name));
+                sb.append(String.format("pub mod %s;\n", snake_case(en.name)));
             }
         }
 
@@ -315,7 +324,7 @@ public class RustMethods {
         for (MDMInfo mdm : infos) {
             for (StructInfo st : mdm.structs) {
                 sb.append(ws);
-                sb.append(String.format("%s(%s::%s),\n", st.name, st.name, st.name));
+                sb.append(String.format("%s(%s::%s),\n", st.name, snake_case(st.name), st.name));
             }
         }
         return sb.toString();
@@ -327,7 +336,7 @@ public class RustMethods {
             for (StructInfo st : mdm.structs) {
                 sb.append(ws);
                 String prefix = getSeriesModule(infos, st.seriesName);
-                sb.append(String.format("use %s::%s;\n", prefix, st.name));
+                sb.append(String.format("use %s::%s;\n", prefix, snake_case(st.name)));
             }
         }
         return sb.toString();
@@ -362,7 +371,7 @@ public class RustMethods {
                 sb.append(ws);
                 sb.append(String.format("(%d, %d) => {\n", mdm.seriesNameAsLong, st.id));
                 sb.append(ws);
-                sb.append(String.format("    let (s, i) = get!(%s::%s::lmcp_deser(buf));\n", st.name, st.name));
+                sb.append(String.format("    let (s, i) = get!(%s::%s::lmcp_deser(buf));\n", snake_case(st.name), st.name));
                 sb.append(ws);
                 sb.append(String.format("    Some((LmcpType::%s(s), i))\n", st.name));
                 sb.append(ws);
@@ -377,7 +386,7 @@ public class RustMethods {
         for (StructInfo st : MDMInfo.getAllParents(infos, st0)) {
             for (FieldInfo field : st.fields) {
                 sb.append(ws);
-                sb.append(String.format("%s: Arbitrary::arbitrary(_g),\n", field.name));
+                sb.append(String.format("%s: Arbitrary::arbitrary(_g),\n", snake_case(field.name)));
             }
         }
         return sb.toString();
@@ -394,7 +403,7 @@ public class RustMethods {
                 }
                 needImport = true;
                 sb.append(ws);
-                sb.append(String.format("if x.%s.len() > (u16::MAX as usize) { return TestResult::discard(); }\n", field.name));
+                sb.append(String.format("if x.%s.len() > (u16::MAX as usize) { return TestResult::discard(); }\n", snake_case(field.name)));
             }
         }
         if (needImport) {
@@ -678,7 +687,7 @@ public class RustMethods {
             if (type.equals(MDMInfo.LMCP_OBJECT_NAME)) {
                 throw new RuntimeException("avtas::lmcp::Object type not supported for Rust");
             }
-            base = String.format("%s::%s", type, type);
+            base = String.format("%s::%s", snake_case(type), type);
         }
         else {
             base = getRustTypeName(infos, field, false);
@@ -688,5 +697,20 @@ public class RustMethods {
         } else {
             return base;
         }
+    }
+
+    private static String snake_case(String str0) {
+        StringBuilder sb = new StringBuilder();
+        // add a dummy lowercase character to the end to make room for the sliding window
+        char[] str = (str0 + "x").toCharArray();
+        // loop with sliding window of 2 chars, so stop before the last index
+        for (int i = 0; i < str.length - 1; i++) {
+            sb.append(Character.toLowerCase(str[i]));
+            int j = i + 1;
+            if (Character.isLowerCase(str[i]) && Character.isUpperCase(str[j])) {
+                sb.append('_');
+            }
+        }
+        return sb.toString();
     }
 };

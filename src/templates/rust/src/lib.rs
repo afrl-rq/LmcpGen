@@ -9,8 +9,6 @@
 
 // This file was auto-created by LmcpGen. Modifications will be overwritten.
 
-#![allow(non_snake_case)]
-
 #[macro_use]
 #[cfg(test)]
 extern crate quickcheck;
@@ -58,7 +56,7 @@ impl LmcpSer for LmcpType {
     }
 }
 
-pub fn LmcpParseMsg(buf: &[u8]) -> Result<Option<LmcpType>, ()> {
+pub fn lmcp_msg_deser(buf: &[u8]) -> Result<Option<LmcpType>, ()> {
     let size: u32;
     {
         let h = get2!(buf.get(0..4));
@@ -94,7 +92,7 @@ pub fn LmcpParseMsg(buf: &[u8]) -> Result<Option<LmcpType>, ()> {
 }
 
 
-pub fn LmcpMakeMsg(obj: &LmcpType, buf: &mut [u8]) -> Result<usize, ()> {
+pub fn lmcp_msg_ser(obj: &LmcpType, buf: &mut [u8]) -> Result<usize, ()> {
     let size = obj.lmcp_size();
     if size > (u32::max_value() as usize) {
         return Err(());
@@ -129,6 +127,6 @@ pub fn LmcpMakeMsg(obj: &LmcpType, buf: &mut [u8]) -> Result<usize, ()> {
     Ok(size + 12)
 }
 
-pub fn LmcpMsgSize(obj: &LmcpType) -> usize {
+pub fn lmcp_msg_size(obj: &LmcpType) -> usize {
     obj.lmcp_size() + 12
 }

@@ -9,7 +9,6 @@
 
 // This file was auto-created by LmcpGen. Modifications will be overwritten.
 
-#![allow(non_snake_case)]
 use std::mem;
 
 macro_rules! get(
@@ -79,9 +78,9 @@ impl LmcpSer for StructInfo {
 
 
 pub trait LmcpStruct {
-    fn GetStructInfo() -> StructInfo;
+    fn get_struct_info() -> StructInfo;
     fn lmcp_write_struct_header(buf: &mut[u8]) -> Option<usize> {
-        Self::GetStructInfo().lmcp_ser(buf)
+        Self::get_struct_info().lmcp_ser(buf)
     }
 }
 
