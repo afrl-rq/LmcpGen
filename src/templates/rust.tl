@@ -1,14 +1,11 @@
 # Rust template listing
 
-# Include the lmcp-derive proc-macro crate
-ONCE            rust/lmcp-derive/Cargo.toml lmcp-derive/Cargo.toml
-ONCE            rust/lmcp-derive/lib.rs     lmcp-derive/lib.rs
-
 # Include the top-level library
 ONCE            rust/Cargo.toml             Cargo.toml
 ONCE            rust/src/lib.rs             src/lib.rs
 ONCE            rust/src/avtas/mod.rs       src/avtas/mod.rs
 ONCE            rust/src/avtas/lmcp.rs      src/avtas/lmcp.rs
+ONCE            rust/meson.build            meson.build
 
 # Test binary
 ONCE            rust/src/main.rs            src/main.rs
