@@ -592,7 +592,6 @@ class PythonMethods {
 
         return str;
     }
-    
     public static String to_dict_members(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         String str = "";
         str += ws + extends_name(infos, info, outfile, st, en, "") + ".toDictMembers(self, d)\n";
@@ -679,11 +678,17 @@ class PythonMethods {
     }
     
     public static String members_from_dict(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        // old:
         StringBuffer buf = new StringBuffer();
+        
+        // new:
+        //buf.append(ws + "print('DEBUG: test -- we got here!!! (SeriesObject unpackFromDict())')\n");
+        // old:
         buf.append(ws + extends_name(infos, info, outfile, st, en, "") + ".unpackFromDict(self, d, seriesFactory)\n" );
         if (st.fields.length > 0) {
             buf.append(ws + "for key in d:\n");
         }
+        
         boolean first = true;
         for (FieldInfo f : st.fields) {
             String name = "self." + f.name;

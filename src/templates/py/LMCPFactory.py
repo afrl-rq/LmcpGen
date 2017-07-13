@@ -86,6 +86,18 @@ class LMCPFactory:
         if type(d) is not dict:
             return None
 
+        # new:
+        #print("DEBUG: went inside 'unpackFromDict' function in LmcpFactory -- loc -1")
+        #print("DEBUG: d = '%r'%")
+        if ("datatype" in d.keys() and "datastring" in d.keys()): # if we needed to do the 'datatype' 'datastring' thing in toDict...
+            #print("DEBUG: went inside 'if' statement -- loc -2")
+            hold = d
+            hold2 = {}
+            import ast
+            hold2[str(d['datatype'])] = ast.literal_eval(str(d['datastring'])) # then unpack it and "overwrite" d so all the other stuff works out just fine again :)
+            d = hold2
+        # original continues:
+        
         obj = None
         for key in d:
             if type(d[key]) is dict:
