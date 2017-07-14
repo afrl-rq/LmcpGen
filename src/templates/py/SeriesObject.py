@@ -64,17 +64,13 @@ class -<classname>-(-<extends_name>-):
         m = {}
         self.toDictMembers(m)
         d = {}
-        # original:
-        #d[-<series_name>- + "/-<datatype_name>-"] = m
-        # new:
-        if (-<series_name>- is None) or (-<series_name>- is ""): # it should never do this!
-            # need to fill this with something...
+        if (-<series_name>- is None) or (-<series_name>- is ""): # this should never happen
+            # need to fill this with error message
             d["datatype"] = str("DEBUG_PROBLEM_HERE" + "/-<datatype_name>-")
             d["datastring"] = str(m)
         else:
             d['datatype'] = str(-<series_name>- + "/-<datatype_name>-")
             d['datastring'] = str(m)
-        # original:
         return d
 
     def toDictMembers(self, d):
