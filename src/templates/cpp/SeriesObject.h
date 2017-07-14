@@ -31,6 +31,10 @@
    public:
       static const std::string Subscription;
       static const std::string TypeName;
+      static const std::string SeriesName;
+      static const int64_t SeriesId;
+      static const uint16_t SeriesVersion;
+      static const uint32_t TypeId;
       
       // Constructor
       -<datatype_name>-(void);
@@ -67,7 +71,7 @@
       virtual std::string toXML(int32_t depth=0);
 
       // Returns object type id
-      virtual uint32_t getLmcpType(void) const { return -<datatype_id>-; }
+      virtual uint32_t getLmcpType(void) const { return TypeId; }
 	  
       // Returns object type name string
       virtual std::string getLmcpTypeName(void) const { return TypeName; }
@@ -76,13 +80,13 @@
       virtual std::string getFullLmcpTypeName(void) const { return Subscription; }
 
       // Returns series name string
-      virtual std::string getSeriesName(void) const { static std::string s_string("-<series_name>-"); return s_string; }
+      virtual std::string getSeriesName(void) const { return SeriesName; }
 
       // gets the series name as a long value
-      virtual int64_t getSeriesNameAsLong(void) const { return -<series_id>-LL; }
+      virtual int64_t getSeriesNameAsLong(void) const { return SeriesId; }
 
       //gets the version number of the series
-      virtual uint16_t getSeriesVersion(void) const { return -<series_version>-; }
+      virtual uint16_t getSeriesVersion(void) const { return SeriesVersion; }
 
       // Accessors and Modifiers
       -<gets_and_sets_header>-

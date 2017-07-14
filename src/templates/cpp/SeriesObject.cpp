@@ -19,6 +19,10 @@
    // Subscription string is namespace separated by '.' followed by type name
    const std::string -<datatype_name>-::Subscription = "-<longdatatype_name_dots>-";
    const std::string -<datatype_name>-::TypeName = "-<datatype_name>-";
+   const std::string -<datatype_name>-::SeriesName = "-<series_name>-";
+   const int64_t -<datatype_name>-::SeriesId = -<series_id>-LL;
+   const uint16_t -<datatype_name>-::SeriesVersion = -<series_version>-;
+   const uint32_t -<datatype_name>-::TypeId = -<datatype_id>-;
    
    bool is-<datatype_name>-(avtas::lmcp::Object* obj)
    {
