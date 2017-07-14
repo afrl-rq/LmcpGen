@@ -86,6 +86,12 @@ class LMCPFactory:
         if type(d) is not dict:
             return None
 
+        if ("datatype" in d.keys() and "datastring" in d.keys()):
+            hold = {}
+            import ast
+            hold[str(d['datatype'])] = ast.literal_eval(str(d['datastring'])) # then unpack it and "overwrite" d
+            d = hold
+        
         obj = None
         for key in d:
             if type(d[key]) is dict:

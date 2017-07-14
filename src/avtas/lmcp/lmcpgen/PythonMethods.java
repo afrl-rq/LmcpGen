@@ -592,7 +592,6 @@ class PythonMethods {
 
         return str;
     }
-    
     public static String to_dict_members(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         String str = "";
         str += ws + extends_name(infos, info, outfile, st, en, "") + ".toDictMembers(self, d)\n";
@@ -684,6 +683,7 @@ class PythonMethods {
         if (st.fields.length > 0) {
             buf.append(ws + "for key in d:\n");
         }
+        
         boolean first = true;
         for (FieldInfo f : st.fields) {
             String name = "self." + f.name;
