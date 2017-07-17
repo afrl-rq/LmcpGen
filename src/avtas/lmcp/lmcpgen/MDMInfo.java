@@ -17,6 +17,11 @@
  */
 package avtas.lmcp.lmcpgen;
 
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
 /**
  *
  * @author default
@@ -101,6 +106,21 @@ public class MDMInfo {
         throw new Exception("Parent type \"" + st.extends_name + "\" from \"" + st.name + "\" does not exist");
     }
 
+    /**
+     * Return the full inheritance chain for a given struct in order
+     * from the base struct at the beginning to the given struct at
+     * the end of the list.
+     */
+    public static List<StructInfo> getAllParents(MDMInfo[] infos, StructInfo st0) throws Exception {
+        LinkedList<StructInfo> ls = new LinkedList<>();
+        StructInfo st = st0;
+        do {
+            ls.addFirst(st);
+            st = getParentType(infos, st);
+        } while (st != null);
+        return ls;
+    }
+
     public static StructInfo getStructByName(MDMInfo[] infos, FieldInfo f) {
         for (MDMInfo info : infos) {
             if (info.seriesName.equals(f.seriesName)) {
@@ -123,6 +143,28 @@ public class MDMInfo {
             }
         }
         return null;
+    }
+
+    /**
+     * Return a set of all the subdirectories in the MDM namespace
+     * hierarchy. So, if we have two MDMs with namespaces
+     * <code>afrl/cmasi</code> and <code>afrl/cmasi/perceive</code>,
+     * we will get a set <code>{"afrl", "afrl/cmasi",
+     * "afrl/cmasi/perceive"}</code>.
+     */
+    public static Set<String> getNamespaceSubdirs(MDMInfo[] infos) {
+	Set<String> s = new HashSet<>();
+	for (MDMInfo info : infos) {
+	    String[] components = info.namespace.split("/");
+	    StringBuilder path = new StringBuilder(components[0]);
+	    s.add(path.toString());
+	    for (int i = 1; i < components.length; i++) {
+		path.append("/");
+		path.append(components[i]);
+		s.add(path.toString());
+	    }
+	}
+        return s;
     }
 }
 

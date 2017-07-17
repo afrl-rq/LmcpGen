@@ -38,5 +38,8 @@ public class StructInfo {
      */
     public StructInfo() {
     }
-    
+
+    public boolean hasParent() {
+        return !this.extends_name.isEmpty();
+    }
 }

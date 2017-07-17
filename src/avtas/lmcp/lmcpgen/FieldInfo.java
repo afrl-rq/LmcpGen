@@ -50,5 +50,10 @@ public class FieldInfo {
     /** Creates a new instance of FieldInfo */
     public FieldInfo() {
     }
+
+    @Override
+    public String toString() {
+        return "FieldInfo{" + "name=" + name + ", comment=" + comment + ", length=" + length + ", type=" + type + ", defaultVal=" + defaultVal + ", units=" + units + ", seriesName=" + seriesName + ", isScalar=" + isScalar + ", isArray=" + isArray + ", isLargeArray=" + isLargeArray + ", isEnum=" + isEnum + ", isStruct=" + isStruct + ", isMap=" + isMap + '}';
+    }
     
 }
