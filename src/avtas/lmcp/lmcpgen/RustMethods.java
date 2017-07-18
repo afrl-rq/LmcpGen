@@ -158,6 +158,14 @@ public class RustMethods {
         return sb.toString();
     }
 
+    public static String struct_copy(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+	if (can_copy_struct(infos, st)) {
+	    return ws + "Copy, ";
+	} else {
+	    return ws;
+	}
+    }
+
     public static String declare_parent_trait(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         if (!st.hasParent()) {
             return "";
@@ -697,6 +705,31 @@ public class RustMethods {
         } else {
             return base;
         }
+    }
+
+    private static boolean can_copy_struct(MDMInfo[] infos, StructInfo st0) throws Exception {
+        for (StructInfo st : MDMInfo.getAllParents(infos, st0)) {
+            for (FieldInfo field : st.fields) {
+		if (field.isArray || field.isLargeArray || field.isMap) {
+		    return false;
+		}
+		if (field.type.equals("string")) {
+		    return false;
+		}
+		if (field.isStruct) {
+		    StructInfo child = MDMInfo.getStructByName(infos, field);
+		    if (child == null) {
+			continue;
+		    }
+		    if (can_copy_struct(infos, child)) {
+			continue;
+		    } else {
+			return false;
+		    }
+		}
+	    }
+        }
+	return true;
     }
 
     private static String snake_case(String str0) {

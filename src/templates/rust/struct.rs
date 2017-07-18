@@ -12,7 +12,7 @@
 use avtas::lmcp::{LmcpSer, LmcpStruct, StructInfo};
 -<use_dependents>-
 
-#[derive(PartialEq, Clone, Debug, Default)]
+#[derive(PartialEq, Clone, -<struct_copy>-Debug, Default)]
 #[repr(C)]
 pub struct -<datatype_name>- {-<declare_fields>-
 }
