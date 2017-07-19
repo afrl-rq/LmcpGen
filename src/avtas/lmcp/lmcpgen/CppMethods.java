@@ -609,6 +609,9 @@ public class CppMethods {
             if (!st.fields[i].isArray) {
                 // objects
                 if (st.fields[i].isStruct) {
+                    if (!st.fields[i].isOptional) {
+                        str += ws + String.format("assert(%s != nullptr);\n", name);
+                    }
                     str += ws + "avtas::lmcp::Factory::putObject( (avtas::lmcp::Object*) " + name + ", buf);\n";
                 }
                 else if (st.fields[i].isEnum) {
@@ -632,6 +635,7 @@ public class CppMethods {
                     str += ws + "for (uint32_t i=0; i<" + st.fields[i].length + "; i++)\n" + ws + "{\n";
                 }
                 if (st.fields[i].isStruct) {
+                    str += ws + "   assert(" + name + "[i] != nullptr);\n";
                     str += ws + "   avtas::lmcp::Factory::putObject( (avtas::lmcp::Object*) " + name + "[i], buf);\n";
                 }
                 else if (st.fields[i].isEnum) {

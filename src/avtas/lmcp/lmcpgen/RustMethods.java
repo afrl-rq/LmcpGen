@@ -702,6 +702,8 @@ public class RustMethods {
         }
         if (field.isArray) {
             return String.format("Vec<%s>", base);
+        } else if (field.isOptional) {
+            return String.format("Option<%s>", base);
         } else {
             return base;
         }

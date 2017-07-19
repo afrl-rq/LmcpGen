@@ -31,6 +31,7 @@
     Units CDATA 'None'
     LargeArray CDATA ''
     MaxArrayLength CDATA ''
+    Optional (false|true) 'false'
   >
 
 <!--- The list of structs -->
