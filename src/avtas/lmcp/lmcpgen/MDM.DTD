@@ -29,8 +29,9 @@
     Name CDATA #REQUIRED
     Series CDATA ''
     Units CDATA 'None'
-    LargeArray CDATA ''
+    LargeArray (false|true) 'false'
     MaxArrayLength CDATA ''
+    Optional (false|true) 'false'
   >
 
 <!--- The list of structs -->
