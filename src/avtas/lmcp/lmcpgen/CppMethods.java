@@ -669,6 +669,9 @@ public class CppMethods {
                     str += ws + "      uint16_t version = buf.getUShort();\n";
                     str += ws + "      " + name + " = (" + type + "*) avtas::lmcp::Factory::createObject( series_id, msgtype, version );\n";
                     str += ws + "      if (" + name + " != nullptr) " + name + "->unpack(buf);\n";
+                    if (!st.fields[i].isOptional) {
+                        str += ws + "      else assert(" + name + " != nullptr);\n";
+                    }
                     str += ws + "   }\n";
                     str += ws + "}\n";
                 }
@@ -713,6 +716,7 @@ public class CppMethods {
                     str += ws + "      uint16_t version = buf.getUShort();\n";
                     str += ws + "      " + type + "* e = (" + type + "*) avtas::lmcp::Factory::createObject( series_id, msgtype, version );\n";
                     str += ws + "      if ( e != nullptr) e->unpack(buf); \n";
+                    str += ws + "      else assert( e != nullptr); \n";
                     if (st.fields[i].length == -1) {
                         str += ws + "      " + name + ".push_back(e);\n";
                     }

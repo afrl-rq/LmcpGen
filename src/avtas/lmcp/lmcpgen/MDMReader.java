@@ -218,9 +218,15 @@ public class MDMReader {
 
                 // large array tag
                 f.isLargeArray = Boolean.valueOf(XMLUtil.getAttribute(fieldNodes[j], "LargeArray", "false"));
-
-                // Optional tag
+                
+                // optional
                 f.isOptional = Boolean.valueOf(XMLUtil.getAttribute(fieldNodes[j], "Optional", "false"));
+                
+                // max length of array
+                String arrLen = XMLUtil.getAttribute(fieldNodes[j], "MaxArrayLength", "0");
+                if(arrLen != "") {
+                    f.maxArrayLength = Integer.valueOf(arrLen);
+                }
             }
         }
 
@@ -321,7 +327,7 @@ public class MDMReader {
     }
 
     public static void checkDefault(StructInfo s, FieldInfo f) throws Exception {
-        if (MDMInfo.isNumber(f.type)) {
+        if (MDMInfo.isNumber(f.type) && !f.isArray) {
             if (f.defaultVal.isEmpty()) {
                 f.defaultVal = "0";
             }
