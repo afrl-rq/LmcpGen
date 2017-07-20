@@ -21,7 +21,7 @@ pub trait LmcpSer where Self : Sized {
     fn lmcp_size(&self) -> usize;
 }
 
-#[derive(Default)]
+#[derive(Debug, Default, PartialEq)]
 pub struct StructInfo {
     pub exist : u8,
     pub series : u64,
@@ -78,9 +78,9 @@ impl LmcpSer for StructInfo {
 
 
 pub trait LmcpStruct {
-    fn get_struct_info() -> StructInfo;
+    fn struct_info() -> StructInfo;
     fn lmcp_write_struct_header(buf: &mut[u8]) -> Option<usize> {
-        Self::get_struct_info().lmcp_ser(buf)
+        Self::struct_info().lmcp_ser(buf)
     }
 }
 

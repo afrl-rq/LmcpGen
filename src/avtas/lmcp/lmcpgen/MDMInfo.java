@@ -121,6 +121,38 @@ public class MDMInfo {
         return ls;
     }
 
+    public static boolean hasChildren(MDMInfo[] infos, FieldInfo field) {
+        StructInfo st = getStructByName(infos, field);
+        return !getChildren(infos, st).isEmpty();
+    }
+
+    /**
+     * Get the immediate children of the given struct.
+     */
+    public static Set<StructInfo> getChildren(MDMInfo[] infos, StructInfo st0) {
+        HashSet<StructInfo> children = new HashSet<>();
+        for (MDMInfo mdm : infos) {
+            for (StructInfo st : mdm.structs) {
+                if (st.extends_name.equals(st0.name) && st.extends_series.equals(st0.seriesName)) {
+                    children.add(st);
+                }
+            }
+        }
+        return children;
+    }
+
+    /**
+     * Get all children of the given struct.
+     */
+    public static Set<StructInfo> getAllChildren(MDMInfo[] infos, StructInfo st0) {
+        HashSet<StructInfo> children = new HashSet<>();
+        for (StructInfo st : getChildren(infos, st0)) {
+            children.add(st);
+            children.addAll(getChildren(infos, st));
+        }
+        return children;
+    }
+
     public static StructInfo getStructByName(MDMInfo[] infos, FieldInfo f) {
         for (MDMInfo info : infos) {
             if (info.seriesName.equals(f.seriesName)) {
@@ -153,17 +185,17 @@ public class MDMInfo {
      * "afrl/cmasi/perceive"}</code>.
      */
     public static Set<String> getNamespaceSubdirs(MDMInfo[] infos) {
-	Set<String> s = new HashSet<>();
-	for (MDMInfo info : infos) {
-	    String[] components = info.namespace.split("/");
-	    StringBuilder path = new StringBuilder(components[0]);
-	    s.add(path.toString());
-	    for (int i = 1; i < components.length; i++) {
-		path.append("/");
-		path.append(components[i]);
-		s.add(path.toString());
-	    }
-	}
+        Set<String> s = new HashSet<>();
+        for (MDMInfo info : infos) {
+            String[] components = info.namespace.split("/");
+            StringBuilder path = new StringBuilder(components[0]);
+            s.add(path.toString());
+            for (int i = 1; i < components.length; i++) {
+                path.append("/");
+                path.append(components[i]);
+                s.add(path.toString());
+            }
+        }
         return s;
     }
 }
