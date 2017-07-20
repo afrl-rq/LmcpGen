@@ -213,12 +213,14 @@ public class MDMReader {
                 f.units = XMLUtil.getAttribute(fieldNodes[j], "Units", "");
 
                 f.defaultVal = XMLUtil.getAttribute(fieldNodes[j], "Default", "");
-                
+
                 checkDefault(struct, f);
 
                 // large array tag
                 f.isLargeArray = Boolean.valueOf(XMLUtil.getAttribute(fieldNodes[j], "LargeArray", "false"));
 
+                // Optional tag
+                f.isOptional = Boolean.valueOf(XMLUtil.getAttribute(fieldNodes[j], "Optional", "false"));
             }
         }
 

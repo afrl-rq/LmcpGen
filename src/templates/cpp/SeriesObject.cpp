@@ -9,6 +9,7 @@
 
 // This file was auto-created by LmcpGen. Modifications will be overwritten.
 
+#include <cassert>
 #include <sstream>
 #include <iomanip>
 #include "-<series_dir>-/-<datatype_name>-.h"

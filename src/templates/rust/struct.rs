@@ -11,14 +11,22 @@
 
 use avtas::lmcp::{LmcpSer, LmcpStruct, StructInfo};
 -<use_dependents>-
+use std::fmt::Debug;
 
-#[derive(PartialEq, Clone, Debug, Default)]
+#[derive(Clone, -<struct_copy>-Debug, Default)]
 #[repr(C)]
 pub struct -<datatype_name>- {-<declare_fields>-
 }
 
+impl PartialEq for -<datatype_name>- {
+    fn eq(&self, _other: &-<datatype_name>-) -> bool {
+        true
+        -<struct_partialeq_cases>-
+    }
+}
+
 impl LmcpStruct for -<datatype_name>- {
-    fn get_struct_info() -> StructInfo {
+    fn struct_info() -> StructInfo {
         StructInfo {
             exist: 1,
             series: -<series_id>-u64,
@@ -32,7 +40,7 @@ impl LmcpSer for -<datatype_name>- {
     fn lmcp_ser(&self, buf: &mut[u8]) -> Option<usize> {
         let mut pos = 0;
         {
-            let x = get!(Self::get_struct_info().lmcp_ser(buf));
+            let x = get!(Self::struct_info().lmcp_ser(buf));
             pos += x;
         }
         -<struct_lmcp_ser_body>-
@@ -56,14 +64,77 @@ impl LmcpSer for -<datatype_name>- {
     }
 }
 
-pub trait -<datatype_name>-T-<declare_parent_trait>- {-<declare_trait_methods>-
+pub trait -<datatype_name>-T: Debug -<declare_parent_trait>- {
+    -<declare_trait_methods>-
 }
+
+impl Clone for Box<-<datatype_name>-T> {
+    fn clone(&self) -> Box<-<datatype_name>-T> {
+        if let Some(x) = -<datatype_name>-T::as_-<datatype_snake_name>-(self.as_ref()) {
+            Box::new(x.clone())
+        -<trait_clone_cases>-
+        } else {
+            panic!("clone error for: {:?}", self)
+        }
+    }
+}
+
+impl Default for Box<-<datatype_name>-T> {
+    fn default() -> Box<-<datatype_name>-T> { Box::new(-<datatype_name>-::default()) }
+}
+
+impl PartialEq for Box<-<datatype_name>-T> {
+    fn eq(&self, other: &Box<-<datatype_name>-T>) -> bool {
+        if let (Some(x), Some(y)) =
+            (-<datatype_name>-T::as_-<datatype_snake_name>-(self.as_ref()),
+             -<datatype_name>-T::as_-<datatype_snake_name>-(other.as_ref())) {
+                x == y
+        -<trait_partialeq_cases>-
+        } else {
+            false
+        }
+    }
+}
+
+impl LmcpSer for Box<-<datatype_name>-T> {
+    fn lmcp_ser(&self, buf: &mut[u8]) -> Option<usize> {
+        if let Some(x) = -<datatype_name>-T::as_-<datatype_snake_name>-(self.as_ref()) {
+            x.lmcp_ser(buf)
+        -<trait_lmcp_ser_cases>-
+        } else {
+            unreachable!()
+        }
+    }
+
+    fn lmcp_deser(buf: &[u8]) -> Option<(Box<-<datatype_name>-T>, usize)> {
+        let (si, _) = get!(StructInfo::lmcp_deser(buf));
+        if si == -<datatype_name>-::struct_info() {
+            let (x, readb) = get!(-<datatype_name>-::lmcp_deser(buf));
+            Some((Box::new(x), readb))
+        -<trait_lmcp_deser_cases>-
+        } else {
+            None
+        }
+    }
+
+    fn lmcp_size(&self) -> usize {
+        if let Some(x) = -<datatype_name>-T::as_-<datatype_snake_name>-(self.as_ref()) {
+            x.lmcp_size()
+        -<trait_lmcp_size_cases>-
+        } else {
+            unreachable!()
+        }
+    }
+}
+
 -<declare_trait_impls>-
 
 #[cfg(test)]
 pub mod tests {
     use super::*;
     use quickcheck::*;
+
+    unsafe impl Send for -<datatype_name>- {}
 
     impl Arbitrary for -<datatype_name>- {
         fn arbitrary<G: Gen>(_g: &mut G) -> -<datatype_name>- {

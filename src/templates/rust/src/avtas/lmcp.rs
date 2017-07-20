@@ -21,7 +21,7 @@ pub trait LmcpSer where Self : Sized {
     fn lmcp_size(&self) -> usize;
 }
 
-#[derive(Default)]
+#[derive(Debug, Default, PartialEq)]
 pub struct StructInfo {
     pub exist : u8,
     pub series : u64,
@@ -78,9 +78,9 @@ impl LmcpSer for StructInfo {
 
 
 pub trait LmcpStruct {
-    fn get_struct_info() -> StructInfo;
+    fn struct_info() -> StructInfo;
     fn lmcp_write_struct_header(buf: &mut[u8]) -> Option<usize> {
-        Self::get_struct_info().lmcp_ser(buf)
+        Self::struct_info().lmcp_ser(buf)
     }
 }
 
@@ -215,7 +215,35 @@ impl LmcpSer for f64 {
         u64::lmcp_deser(data).map(|(y,z)| (unsafe {mem::transmute(y)}, z)) }
 }
 
+impl<T> LmcpSer for Option<T> where T : LmcpSer {
+    // format: 0x00 for None, full struct serialization for Some
 
+    fn lmcp_size(&self) -> usize {
+        if let &Some(ref x) = self {
+            x.lmcp_size()
+        } else {
+            1
+        }
+    }
+
+    fn lmcp_ser(&self, buf: &mut[u8]) -> Option<usize> {
+        if let &Some(ref x) = self {
+            x.lmcp_ser(buf)
+        } else {
+            0u8.lmcp_ser(buf)
+        }
+    }
+
+    fn lmcp_deser(buf: &[u8]) -> Option<(Option<T>, usize)> {
+        let b = get!(buf.get(0..1));
+        if b[0] == 1u8 {
+            let (x, readb) = get!(T::lmcp_deser(buf));
+            Some((Some(x), readb))
+        } else {
+            Some((None, 1))
+        }
+    }
+}
 
 impl<T> LmcpSer for Vec<T> where T : LmcpSer {
     // format: (vector length as u32), e_1, e_2, ..., e_k

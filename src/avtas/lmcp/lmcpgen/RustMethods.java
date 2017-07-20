@@ -114,12 +114,16 @@ public class RustMethods {
     public static String use_dependents(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en, String ws) throws Exception {
         SortedSet<String> uses = new TreeSet<>();
 
-        StructInfo parent = st0;
-        while (parent.hasParent()) {
-            String prefix = getSeriesModule(infos, parent.extends_series);
-            uses.add(String.format("%suse %s::%s;\n", ws, prefix, snake_case(parent.extends_name)));
-            parent = MDMInfo.getParentType(infos, parent);
-        }
+        List<StructInfo> parents = MDMInfo.getAllParents(infos, st0);
+        Set<StructInfo> children = MDMInfo.getAllChildren(infos, st0);
+
+        // use all parents and children
+        Stream.concat(parents.stream(), children.stream())
+            .filter(relative -> !relative.equals(st0)) // exclude current module
+            .forEach(relative -> {
+                    String prefix = getSeriesModule(infos, relative.seriesName);
+                    uses.add(ws + String.format("use %s::%s;\n", prefix, snake_case(relative.name)));
+                });
 
         for (StructInfo st : MDMInfo.getAllParents(infos, st0)) {
             for (FieldInfo field : st.fields) {
@@ -158,12 +162,54 @@ public class RustMethods {
         return sb.toString();
     }
 
+    public static String struct_copy(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        if (can_copy_struct(infos, st)) {
+            return ws + "Copy, ";
+        } else {
+            return ws;
+        }
+    }
+
     public static String declare_parent_trait(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         if (!st.hasParent()) {
-            return "";
+            return ws;
         } else {
-            return String.format(": %s::%sT", snake_case(st.extends_name), st.extends_name);
+            return String.format(ws + "+ %s::%sT", snake_case(st.extends_name), st.extends_name);
         }
+    }
+
+    public static String declare_fields(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en, String ws) throws Exception {
+        StringBuilder sb = new StringBuilder();
+        for (StructInfo st : MDMInfo.getAllParents(infos, st0)) {
+            for (FieldInfo field : st.fields) {
+                String type = getBoxedTypeName(infos, field);
+                sb.append(String.format("\n    pub %s: %s,", snake_case(field.name), type));
+            }
+        }
+        return sb.toString();
+    }
+
+    public static String declare_trait_methods(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en, String ws) throws Exception {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(ws + String.format("fn as_%s(&self) -> Option<&%s> { None }\n",
+                                     snake_case(st0.name), st0.name));
+        sb.append(ws + String.format("fn as_mut_%s(&mut self) -> Option<&mut %s> { None }\n",
+                                     snake_case(st0.name), st0.name));
+        Set<StructInfo> children = MDMInfo.getAllChildren(infos, st0);
+        for (StructInfo child : children) {
+            sb.append(ws + String.format("fn as_%s(&self) -> Option<&%s::%s> { None }\n",
+                                         snake_case(child.name), snake_case(child.name), child.name));
+            sb.append(ws + String.format("fn as_mut_%s(&mut self) -> Option<&mut %s::%s> { None }\n",
+                                         snake_case(child.name), snake_case(child.name), child.name));
+        }
+        for (FieldInfo field : st0.fields) {
+            String ref = field.isReallyScalar() ? "" : "&";
+            String type = getBoxedTypeName(infos, field);
+            sb.append(ws + String.format("fn %s(&self) -> %s%s;\n", snake_case(field.name), ref, type));
+            sb.append(ws + String.format("fn %s_mut(&mut self) -> &mut %s;\n", snake_case(field.name), type));
+        }
+        return sb.toString();
     }
 
     public static String declare_trait_impls(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en, String ws) throws Exception {
@@ -171,38 +217,96 @@ public class RustMethods {
 
         for (StructInfo st : MDMInfo.getAllParents(infos, st0)) {
             String prefix = st == st0 ? "" : snake_case(st.name) + "::";
-            sb.append(String.format("\nimpl %s%sT for %s {", prefix, st.name, st0.name));
+            sb.append(String.format("impl %s%sT for %s {\n", prefix, st.name, st0.name));
+            sb.append(String.format("    fn as_%s(&self) -> Option<&%s> { Some(self) }\n"
+                                    , snake_case(st0.name), st0.name));
+            sb.append(String.format("    fn as_mut_%s(&mut self) -> Option<&mut %s> { Some(self) }\n"
+                                    , snake_case(st0.name), st0.name));
             for (FieldInfo field : st.fields) {
                 String name = snake_case(field.name);
-                String type = getShortTypeName(infos, field);
-                sb.append(String.format("\n    fn get_%s(&self) -> &%s { &self.%s }", name, type, name));
-                sb.append(String.format("\n    fn set_%s(&mut self, v: %s) { self.%s = v; }", name, type, name));
+                String ref = field.isReallyScalar() ? "" : "&";
+                String type = getBoxedTypeName(infos, field);
+                sb.append(String.format("    fn %s(&self) -> %s%s { %sself.%s }\n", name, ref, type, ref, name));
+                sb.append(String.format("    fn %s_mut(&mut self) -> &mut %s { &mut self.%s }\n", name, type, name));
             }
-            sb.append("\n}\n");
+            sb.append("}\n");
         }
 
         return sb.toString();
     }
 
-    public static String declare_fields(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en, String ws) throws Exception {
-        StringBuffer buf = new StringBuffer();
-        for (StructInfo st : MDMInfo.getAllParents(infos, st0)) {
-            for (FieldInfo field : st.fields) {
-                String type = getShortTypeName(infos, field);
-                buf.append(String.format("\n    pub %s: %s,", snake_case(field.name), type));
-            }
+    public static String trait_clone_cases(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en, String ws) throws Exception {
+        StringBuilder sb = new StringBuilder();
+
+        for (StructInfo child : MDMInfo.getAllChildren(infos, st0)) {
+            sb.append(ws + String.format("} else if let Some(x) = %sT::as_%s(self.as_ref()) {\n",
+                                         st0.name, snake_case(child.name)));
+            sb.append(ws + String.format("    Box::new(x.clone())\n"));
         }
-        return buf.toString();
+
+        return sb.toString();
     }
 
-    public static String declare_trait_methods(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
-        StringBuffer buf = new StringBuffer();
-        for (FieldInfo field : st.fields) {
-            String type = getShortTypeName(infos, field);
-            buf.append(String.format("\n    fn get_%s(&self) -> &%s;", snake_case(field.name), type));
-            buf.append(String.format("\n    fn set_%s(&mut self, v: %s);", snake_case(field.name), type));
+    public static String struct_partialeq_cases(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en, String ws) throws Exception {
+        StringBuilder sb = new StringBuilder();
+
+        for (FieldInfo field : st0.fields) {
+            String name = snake_case(field.name);
+            sb.append(ws + String.format("&& &self.%s == &_other.%s\n", name, name));
         }
-        return buf.toString();
+
+        return sb.toString();
+    }
+
+    public static String trait_partialeq_cases(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en, String ws) throws Exception {
+        StringBuilder sb = new StringBuilder();
+
+        for (StructInfo child : MDMInfo.getAllChildren(infos, st0)) {
+            sb.append(ws + String.format("} else if let (Some(x), Some(y)) =\n"));
+            sb.append(ws + String.format("    (%sT::as_%s(self.as_ref()),\n", st0.name, snake_case(child.name)));
+            sb.append(ws + String.format("     %sT::as_%s(other.as_ref())) {\n", st0.name, snake_case(child.name)));
+            sb.append(ws + String.format("        x == y\n"));
+        }
+
+        return sb.toString();
+    }
+
+    public static String trait_lmcp_ser_cases(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en, String ws) throws Exception {
+        StringBuilder sb = new StringBuilder();
+
+        for (StructInfo child : MDMInfo.getAllChildren(infos, st0)) {
+            sb.append(ws + String.format("} else if let Some(x) = %sT::as_%s(self.as_ref()) {\n",
+                                         st0.name, snake_case(child.name)));
+            sb.append(ws + String.format("    x.lmcp_ser(buf)\n"));
+        }
+
+        return sb.toString();
+    }
+
+    public static String trait_lmcp_deser_cases(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en, String ws) throws Exception {
+        StringBuilder sb = new StringBuilder();
+
+        for (StructInfo child : MDMInfo.getAllChildren(infos, st0)) {
+            sb.append(ws + String.format("} else if si == %s::%s::struct_info() {\n",
+                                         snake_case(child.name), child.name));
+            sb.append(ws + String.format("    let (x, readb) = get!(%s::%s::lmcp_deser(buf));\n",
+                                         snake_case(child.name), child.name));
+            sb.append(ws + String.format("    Some((Box::new(x), readb))\n"));
+        }
+
+        return sb.toString();
+    }
+
+    public static String trait_lmcp_size_cases(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en, String ws) throws Exception {
+        StringBuilder sb = new StringBuilder();
+
+        for (StructInfo child : MDMInfo.getAllChildren(infos, st0)) {
+            sb.append(ws + String.format("} else if let Some(x) = %sT::as_%s(self.as_ref()) {\n",
+                                         st0.name, snake_case(child.name)));
+            sb.append(ws + String.format("    x.lmcp_size()\n"));
+        }
+
+        return sb.toString();
     }
 
     public static String struct_lmcp_ser_body(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en0, String ws) throws Exception {
@@ -228,7 +332,8 @@ public class RustMethods {
                 needMutable = true;
                 sb.append(ws + "{\n");
                 sb.append(ws + "    let r = get!(buf.get(pos ..));\n");
-                sb.append(ws + String.format("    let (x, readb): (%s, usize) = get!(LmcpSer::lmcp_deser(r));\n", getShortTypeName(infos, field)));
+                sb.append(ws + String.format("    let (x, readb): (%s, usize) = get!(LmcpSer::lmcp_deser(r));\n",
+                                             getBoxedTypeName(infos, field)));
                 sb.append(ws + String.format("    out.%s = x;\n", snake_case(field.name)));
                 sb.append(ws + "    pos += readb;\n");
                 sb.append(ws + "}\n");
@@ -385,8 +490,25 @@ public class RustMethods {
         StringBuilder sb = new StringBuilder();
         for (StructInfo st : MDMInfo.getAllParents(infos, st0)) {
             for (FieldInfo field : st.fields) {
-                sb.append(ws);
-                sb.append(String.format("%s: Arbitrary::arbitrary(_g),\n", snake_case(field.name)));
+                if (field.isArray && field.isStruct) {
+                    sb.append(ws + String.format(
+                        "%s: Vec::<%s::%s>::arbitrary(_g).into_iter().map(|x| Box::new(x) as Box<%s::%sT>).collect(),\n",
+                        snake_case(field.name), snake_case(field.type), field.type, snake_case(field.type), field.type));
+                } else if (field.isStruct && field.isOptional) {
+                    sb.append(ws + String.format("%s: {\n", snake_case(field.name)));
+                    sb.append(ws + String.format("    if _g.gen() {\n"));
+                    sb.append(ws + String.format("        Some(Box::new(%s::%s::arbitrary(_g)))\n",
+                                                 snake_case(field.type), field.type));
+                    sb.append(ws + String.format("    } else {\n"));
+                    sb.append(ws + String.format("        None\n"));
+                    sb.append(ws + String.format("    }\n"));
+                    sb.append(ws + String.format("},\n"));
+                } else if (field.isStruct) {
+                    sb.append(ws + String.format("%s: Box::new(%s::%s::arbitrary(_g)),\n",
+                                                 snake_case(field.name), snake_case(field.type), field.type));
+                } else {
+                    sb.append(ws + String.format("%s: Arbitrary::arbitrary(_g),\n", snake_case(field.name)));
+                }
             }
         }
         return sb.toString();
@@ -694,9 +816,51 @@ public class RustMethods {
         }
         if (field.isArray) {
             return String.format("Vec<%s>", base);
+        } else if (field.isOptional) {
+            return String.format("Option<%s>", base);
         } else {
             return base;
         }
+    }
+
+    /**
+     * Like getShortTypeName, but turns structs into boxed trait objects
+     */
+    private static String getBoxedTypeName(MDMInfo[] infos, FieldInfo field) {
+        String type = field.type;
+        String base;
+        if (field.isStruct) {
+            if (type.equals(MDMInfo.LMCP_OBJECT_NAME)) {
+                throw new RuntimeException("avtas::lmcp::Object type not supported for Rust");
+            }
+            base = String.format("Box<%s::%sT>", snake_case(type), type);            
+        } else if (field.isEnum) {
+            base = String.format("%s::%s", snake_case(type), type);
+        } else {
+            base = getRustTypeName(infos, field, false);
+        }
+        if (field.isArray) {
+            return String.format("Vec<%s>", base);
+        } else if (field.isOptional) {
+            return String.format("Option<%s>", base);
+        } else {
+            return base;
+        }
+    }
+
+    private static boolean can_copy_struct(MDMInfo[] infos, StructInfo st0) throws Exception {
+        for (StructInfo st : MDMInfo.getAllParents(infos, st0)) {
+            for (FieldInfo field : st.fields) {
+                if (field.isStruct ||
+                    field.isArray ||
+                    field.isLargeArray ||
+                    field.isMap ||
+                    field.type.equals("string")) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private static String snake_case(String str0) {
