@@ -106,9 +106,21 @@ public class MDMReader {
         }
 
         info.structs = fillStructs(XMLUtil.getList(node, "StructList", "Struct"), info);
+
+        // Determine start ID by looking for the maximum specified ID (0 by default)
         for (int i = 0; i < info.structs.length; i++) {
-            info.structs[i].id = startId + i;
+            startId = Math.max(startId, info.structs[i].id + 1);
         }
+
+        // Assign IDs for structs that do not yet have one
+        int idOffset = 0;
+        for (int i = 0; i < info.structs.length; i++) {
+            if (info.structs[i].id < 1) {
+                info.structs[i].id = startId + idOffset;
+                idOffset++;
+            }
+        }
+
         info.enums = fillEnums(XMLUtil.getList(node, "EnumList", "Enum"), info);
 
         return info;
@@ -150,6 +162,12 @@ public class MDMReader {
             struct.comment = XMLUtil.get(list[i], "Comment", "").replaceAll("[\n\r\f]+", "");
             if (struct.comment.isEmpty()) {
                 struct.comment = getComment(list[i]).replaceAll("[\n\r\f]+", "");
+            }
+
+            // Optional explicit ID
+            String idStr = XMLUtil.getAttribute(list[i], "ID", "");
+            if (!idStr.isEmpty()) {
+                struct.id = Integer.parseInt(idStr);
             }
 
 
