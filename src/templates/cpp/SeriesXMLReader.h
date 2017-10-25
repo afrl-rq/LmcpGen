@@ -9,8 +9,8 @@
 
 // This file was auto-created by LmcpGen. Modifications will be overwritten.
 
-#ifndef -<series_name_caps>-_SERIESXMLREADER_H_
-#define -<series_name_caps>-_SERIESXMLREADER_H_
+#ifndef _-<series_name_caps>-_XMLREADER_H_
+#define _-<series_name_caps>-_XMLREADER_H_
 
 #include "avtas/lmcp/Object.h"
 #include "avtas/lmcp/Node.h"
@@ -23,14 +23,14 @@ using namespace avtas::lmcp;
 
 -<open_namespace>-
 
-class SeriesXMLReader {
+class -<series_name>-XMLReader {
 
     /** reads an LMCP XML Storage file and returns a list of LMCPObjects */
     public:
 
-        SeriesXMLReader(void) {}
+        -<series_name>-XMLReader(void) {}
 
-        virtual ~SeriesXMLReader(){}  
+        virtual ~-<series_name>-XMLReader(){}  
 
         static avtas::lmcp::Object * visitType(avtas::lmcp::Node* el );
 
@@ -38,4 +38,4 @@ class SeriesXMLReader {
 
 -<close_namespace>-
 
-#endif 
+#endif // _-<series_name_caps>-_XMLREADER_H_

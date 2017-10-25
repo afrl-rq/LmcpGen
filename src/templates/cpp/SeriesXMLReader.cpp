@@ -23,7 +23,7 @@ using namespace avtas::lmcp::xml;
 
 -<open_namespace>-
 
-    avtas::lmcp::Object* SeriesXMLReader :: visitType(avtas::lmcp::Node* el){
+    avtas::lmcp::Object* -<series_name>-XMLReader :: visitType(avtas::lmcp::Node* el){
 
         if (el == NULL) return NULL;
         

@@ -9,42 +9,40 @@
 
 // This file was auto-created by LmcpGen. Modifications will be overwritten.
 
-#include "avtas/lmcp/Factory.h"
+#include "-<series_dir>-/-<series_name>-Factory.h"
 #include "avtas/lmcp/Object.h"
 #include <iostream>
 #include <string>
 #include <cstdint>
 
--<include_all_factories>-
+-<include_all_series_headers>-
 
-namespace avtas {
+-<open_namespace>-
 
-    namespace lmcp {
+        const uint32_t -<series_name>-Factory::HEADER_SIZE = 8;
+        const uint32_t -<series_name>-Factory::CHECKSUM_SIZE = 4;
+        const uint32_t -<series_name>-Factory::SERIESNAME_SIZE = 8;
+        const int32_t -<series_name>-Factory::LMCP_CONTROL_STR = 0x4c4d4350;
 
-        const uint32_t Factory::HEADER_SIZE = 8;
-        const uint32_t Factory::CHECKSUM_SIZE = 4;
-        const uint32_t Factory::SERIESNAME_SIZE = 8;
-        const int32_t Factory::LMCP_CONTROL_STR = 0x4c4d4350;
+        -<series_name>-Factory::-<series_name>-Factory(void) { }
 
-        Factory::Factory(void) { }
+        -<series_name>-Factory::-<series_name>-Factory(const -<series_name>-Factory & that) { }
 
-        Factory::Factory(const Factory & that) { }
-
-        Factory & Factory::operator=(const Factory & that)
+        -<series_name>-Factory & -<series_name>-Factory::operator=(const -<series_name>-Factory & that)
         {
             return *this;
         }
 
-        Factory::~Factory(void) { }
+        -<series_name>-Factory::~-<series_name>-Factory(void) { }
 
-        ByteBuffer* Factory::packMessage(const Object * const rootObject, const bool enableChecksum)
+        avtas::lmcp::ByteBuffer* -<series_name>-Factory::packMessage(const avtas::lmcp::Object * const rootObject, const bool enableChecksum)
         {
             if (rootObject != nullptr)
             {
                 // allocate space for message
                 // 15 = boolean (1 byte), series name (8 bytes), type (4 bytes) , version number (2 bytes)
                 uint32_t msgSize = rootObject->calculatePackedSize() + 15;
-                ByteBuffer* buffer = new ByteBuffer();
+                avtas::lmcp::ByteBuffer* buffer = new avtas::lmcp::ByteBuffer();
                 buffer->allocate(HEADER_SIZE + msgSize + CHECKSUM_SIZE);
 
                 // add header values
@@ -52,7 +50,7 @@ namespace avtas {
                 buffer->putUInt( msgSize );
 
                 // add root object
-                Factory::putObject( rootObject, *buffer);
+                -<series_name>-Factory::putObject( rootObject, *buffer);
 
                 // add checksum
                 uint32_t cs = enableChecksum ? calculateChecksum(buffer->array(), buffer->capacity()) : 0;
@@ -62,7 +60,7 @@ namespace avtas {
             return nullptr;
         }
 
-        void Factory::putObject(const Object* o, ByteBuffer & buffer)
+        void -<series_name>-Factory::putObject(const avtas::lmcp::Object* o, avtas::lmcp::ByteBuffer & buffer)
         {
             if (!o)
             {
@@ -78,11 +76,11 @@ namespace avtas {
             }
         }
 
-        Object * Factory::getObject(ByteBuffer & buffer)
+        avtas::lmcp::Object * -<series_name>-Factory::getObject(avtas::lmcp::ByteBuffer & buffer)
         {
             if (buffer.capacity() < HEADER_SIZE + CHECKSUM_SIZE)
             {
-                std::cerr << "Error (Factory::getObject): buffer at least as big as"
+                std::cerr << "Error (-<series_name>-Factory::getObject): buffer at least as big as"
                         << " header + checksum (" << HEADER_SIZE + CHECKSUM_SIZE << ").\n";
                 return nullptr;
             }
@@ -90,7 +88,7 @@ namespace avtas {
             int32_t ctrl_str = buffer.getInt();
             if ( ctrl_str != LMCP_CONTROL_STR)
             {
-                std::cerr << "Error (Factory::getObject): Not a proper LMCP message.";
+                std::cerr << "Error (-<series_name>-Factory::getObject): Not a proper LMCP message.";
                 std::cerr << "   Expected: " << LMCP_CONTROL_STR << "   Received: " << ctrl_str << std::endl;
                 return nullptr;
             }
@@ -98,7 +96,7 @@ namespace avtas {
             uint32_t msgsize = buffer.getUInt();
             if ( buffer.capacity() < msgsize )
             {
-                std::cerr << "Error (Factory::getObject): Buffer size too small for packed object.";
+                std::cerr << "Error (-<series_name>-Factory::getObject): Buffer size too small for packed object.";
                 std::cerr << "   MsgSize: " << msgsize << "    Capacity: " << buffer.capacity() << std::endl;
                 return nullptr;
             }
@@ -106,7 +104,7 @@ namespace avtas {
             // validate the buffer's checksum
             if (!validate(buffer.array(), buffer.capacity()))
             {
-                std::cerr << "Error (SeriesFactory::getObject): checksum invalid.\n";
+                std::cerr << "Error (-<series_name>-Factory::getObject): checksum invalid.\n";
                 return nullptr;
             }
 
@@ -119,7 +117,7 @@ namespace avtas {
             int64_t series_id = buffer.getLong();
             uint32_t msgtype = buffer.getUInt();
             uint16_t version = buffer.getUShort();
-            Object* o = Factory::createObject(series_id, msgtype, version);
+            avtas::lmcp::Object* o = -<series_name>-Factory::createObject(series_id, msgtype, version);
 
             if (o != nullptr)
             {
@@ -134,13 +132,13 @@ namespace avtas {
 
         }
 
-        Object * Factory::createObject(int64_t series_id, uint32_t type, uint16_t version)
+        avtas::lmcp::Object * -<series_name>-Factory::createObject(int64_t series_id, uint32_t type, uint16_t version)
         {
-            -<global_factory_switch>-
+            -<series_factory_switch>-
             return nullptr;
         }
 
-        uint32_t Factory::calculateChecksum(const uint8_t * bytes, const uint32_t size)
+        uint32_t -<series_name>-Factory::calculateChecksum(const uint8_t * bytes, const uint32_t size)
         {
             uint32_t sum = 0;
             for (uint32_t i = 0; i < size - CHECKSUM_SIZE; i++)
@@ -148,7 +146,7 @@ namespace avtas {
             return sum & 0x00000000FFFFFFFF; // truncate value
         }
 
-        uint32_t Factory::getObjectSize(const uint8_t * bytes, const uint32_t size)
+        uint32_t -<series_name>-Factory::getObjectSize(const uint8_t * bytes, const uint32_t size)
         {
             uint32_t id = 0;
             if (size >= HEADER_SIZE)
@@ -164,7 +162,7 @@ namespace avtas {
             return id;
         }
 
-        bool Factory::validate(const uint8_t * bytes, const uint32_t size)
+        bool -<series_name>-Factory::validate(const uint8_t * bytes, const uint32_t size)
         {
             uint32_t cs = 0;
             if (size >= HEADER_SIZE + CHECKSUM_SIZE)
@@ -182,5 +180,4 @@ namespace avtas {
             return false;
         }
 
-    } // end namespace lmcp
-} // end namespace avtas
+-<close_namespace>-
