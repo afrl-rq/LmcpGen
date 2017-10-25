@@ -913,7 +913,7 @@ class CsMethods {
             return "string";
         }
         if (type.equalsIgnoreCase(MDMInfo.LMCP_OBJECT_NAME)) {
-            return "Afrl.Lmcp.ILmcpObject";
+            return "Avtas.Lmcp.ILmcpObject";
         }
         return getCsNamespace(mdms, f.seriesName) + "." + f.type;
     }
@@ -955,7 +955,7 @@ class CsMethods {
             return "String";
         }
         if (type.equalsIgnoreCase(MDMInfo.LMCP_OBJECT_NAME)) {
-            return "Afrl.Lmcp.ILmcpObject";
+            return "Avtas.Lmcp.ILmcpObject";
         }
         return getCsNamespace(mdms, f.seriesName) + "." + f.type;
     }
