@@ -43,6 +43,7 @@
     Extends CDATA ''
     Name CDATA #REQUIRED
     Series CDATA ''
+    ID CDATA ''
   >
 
 <!--- Enumeration definition -->
