@@ -47,6 +47,7 @@ namespace TestServer
         TcpListener socket = new TcpListener( IPAddress.Loopback, _port );
         socket.Start();
 
+        -<server_register_all_series>-
         for ( ;;)
         {
           TcpClient s = socket.AcceptTcpClient();

@@ -37,6 +37,7 @@ public class MDMInfo {
     public String seriesName = "";
     public String namespace = "";
     public String comment = "";
+    public String guid = "";
     public StructInfo[] structs = new StructInfo[0];
     public EnumInfo[] enums = new EnumInfo[0];
     /** a string containing the contents of the MDM file */

@@ -26,15 +26,10 @@ namespace Avtas.Lmcp
 
         private static List<ISeriesList> _seriesLists = new List<ISeriesList>();
 
-        static LmcpFactory() {
-            -<factory_auto_register>-
-        }
-
         public static void RegisterSeries( ISeriesList seriesList )
         {
             _seriesLists.Add( seriesList );
         }
-
         /// <summary>
         /// Returns an array of bytes corresponding to the first message encountered in
         /// the input stream. The method blocks until all of the bytes are read.

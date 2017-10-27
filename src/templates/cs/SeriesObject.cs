@@ -14,7 +14,7 @@ using System.IO;
 using System.Text;
 using System.Collections.Generic;
 using Avtas.Lmcp;
--<import_all_series>-
+-<import_series>-
 
 -<series_namespace>- {
 

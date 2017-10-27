@@ -23,6 +23,7 @@ import java.io.FileReader;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.UUID;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
@@ -95,6 +96,7 @@ public class MDMReader {
         MDMInfo info = new MDMInfo();
 
         info.seriesName = XMLUtil.get(node, "SeriesName", "");
+        info.guid = UUID.nameUUIDFromBytes(info.seriesName.getBytes()).toString().toUpperCase(); // UUID.randomUUID().toString().toUpperCase();
         info.seriesNameAsLong = seriesNameToLong(info.seriesName);
         int startId = 1;
         info.namespace = XMLUtil.get(node, "Namespace", "");

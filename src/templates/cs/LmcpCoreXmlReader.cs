@@ -21,10 +21,6 @@ namespace Avtas.Lmcp
 
         private static List<LmcpXmlReader> readers = new List<LmcpXmlReader>();
 
-        static LmcpXmlReader() {
-            -<xml_add_series_readers>-
-        }
-
         public void RegisterXmlReader( LmcpXmlReader reader )
         {
             readers.Add( reader );
