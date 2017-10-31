@@ -26,6 +26,11 @@ public class SeriesList : ISeriesList
   /* Series name expressed as a long for quick comparisons */
   public const long SERIES_ID = -<series_id>-;
 
+  public SeriesList()
+  {
+    LmcpXmlReader.RegisterXmlReader( new SeriesXmlReader() );
+  }
+
   public static String GetName( uint type )
   {
     switch ( type )
