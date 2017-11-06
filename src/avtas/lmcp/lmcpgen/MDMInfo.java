@@ -148,7 +148,7 @@ public class MDMInfo {
         HashSet<StructInfo> children = new HashSet<>();
         for (StructInfo st : getChildren(infos, st0)) {
             children.add(st);
-            children.addAll(getChildren(infos, st));
+            children.addAll(getAllChildren(infos, st));
         }
         return children;
     }

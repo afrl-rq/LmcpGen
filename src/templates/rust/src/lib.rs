@@ -9,6 +9,8 @@
 
 // This file was auto-created by LmcpGen. Modifications will be overwritten.
 
+#![allow(non_camel_case_types)]
+
 #[macro_use]
 #[cfg(test)]
 extern crate quickcheck;
@@ -17,8 +19,7 @@ extern crate quickcheck;
 pub mod avtas;
 -<declare_top_level_modules>-
 
-use avtas::lmcp::{LmcpSer, StructInfo};
--<use_all_structs>-
+use avtas::lmcp::{LmcpSer, LmcpSubscription, StructInfo};
 
 macro_rules! get(
     ($e:expr) =>
@@ -53,6 +54,12 @@ impl LmcpSer for LmcpType {
             -<match_lmcp_deser>-
             _ => None,
         }
+    }
+}
+
+pub fn lmcp_msg_subscription(obj: &LmcpType) -> &'static str {
+    match *obj {
+        -<match_subscription>-
     }
 }
 

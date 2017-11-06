@@ -21,6 +21,10 @@ pub trait LmcpSer where Self : Sized {
     fn lmcp_size(&self) -> usize;
 }
 
+pub trait LmcpSubscription {
+    fn subscription() -> &'static str;
+}
+
 #[derive(Debug, Default, PartialEq)]
 pub struct StructInfo {
     pub exist : u8,
