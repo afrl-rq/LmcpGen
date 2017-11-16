@@ -67,7 +67,7 @@ impl LmcpSer for -<datatype_name>- {
     }
 }
 
-pub trait -<datatype_name>-T: Debug -<declare_parent_trait>- {
+pub trait -<datatype_name>-T: Debug + Send -<declare_parent_trait>- {
     -<declare_trait_methods>-
 }
 
@@ -136,8 +136,6 @@ impl LmcpSer for Box<-<datatype_name>-T> {
 pub mod tests {
     use super::*;
     use quickcheck::*;
-
-    unsafe impl Send for -<datatype_name>- {}
 
     impl Arbitrary for -<datatype_name>- {
         fn arbitrary<G: Gen>(_g: &mut G) -> -<datatype_name>- {

@@ -528,22 +528,23 @@ public class RustMethods {
         StringBuilder sb = new StringBuilder();
         for (StructInfo st : MDMInfo.getAllParents(infos, st0)) {
             for (FieldInfo field : st.fields) {
+                String prefix_module = getSeriesModule(infos, field.seriesName);
                 if (field.isArray && field.isStruct) {
                     sb.append(ws + String.format(
-                        "%s: Vec::<%s::%s>::arbitrary(_g).into_iter().map(|x| Box::new(x) as Box<%s::%sT>).collect(),\n",
-                        snake_case(field.name), snake_case(field.type), field.type, snake_case(field.type), field.type));
+                        "%s: Vec::<::%s::%s::%s>::arbitrary(_g).into_iter().map(|x| Box::new(x) as Box<::%s::%s::%sT>).collect(),\n",
+                        snake_case(field.name), prefix_module, snake_case(field.type), field.type, prefix_module, snake_case(field.type), field.type));
                 } else if (field.isStruct && field.isOptional) {
                     sb.append(ws + String.format("%s: {\n", snake_case(field.name)));
                     sb.append(ws + String.format("    if _g.gen() {\n"));
-                    sb.append(ws + String.format("        Some(Box::new(%s::%s::arbitrary(_g)))\n",
-                                                 snake_case(field.type), field.type));
+                    sb.append(ws + String.format("        Some(Box::new(::%s::%s::%s::arbitrary(_g)))\n",
+                                                 prefix_module, snake_case(field.type), field.type));
                     sb.append(ws + String.format("    } else {\n"));
                     sb.append(ws + String.format("        None\n"));
                     sb.append(ws + String.format("    }\n"));
                     sb.append(ws + String.format("},\n"));
                 } else if (field.isStruct) {
-                    sb.append(ws + String.format("%s: Box::new(%s::%s::arbitrary(_g)),\n",
-                                                 snake_case(field.name), snake_case(field.type), field.type));
+                    sb.append(ws + String.format("%s: Box::new(::%s::%s::%s::arbitrary(_g)),\n",
+                                                 snake_case(field.name), prefix_module, snake_case(field.type), field.type));
                 } else {
                     sb.append(ws + String.format("%s: Arbitrary::arbitrary(_g),\n", snake_case(field.name)));
                 }
