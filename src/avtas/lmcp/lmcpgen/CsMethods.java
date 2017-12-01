@@ -300,14 +300,8 @@ class CsMethods {
 
     public static String list_type_for_name(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         String ret = "";
-        for (MDMInfo i : infos) {
-            if(i.seriesNameAsLong == 0)
-            {
-                continue;
-            }
-            for (StructInfo s : i.structs) {
-                ret += ws + "if ( name == \"" + s.name + "\" )  return " + s.id + ";\n";
-            }
+        for (StructInfo s : info.structs) {
+            ret += ws + "if ( name == \"" + s.name + "\" )  return " + s.id + ";\n";
         }
         return ret;
     }
