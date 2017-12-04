@@ -23,6 +23,7 @@ import java.io.FileReader;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.UUID;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
@@ -95,6 +96,7 @@ public class MDMReader {
         MDMInfo info = new MDMInfo();
 
         info.seriesName = XMLUtil.get(node, "SeriesName", "");
+        info.guid = UUID.nameUUIDFromBytes(info.seriesName.getBytes()).toString().toUpperCase(); // UUID.randomUUID().toString().toUpperCase();
         info.seriesNameAsLong = seriesNameToLong(info.seriesName);
         int startId = 1;
         info.namespace = XMLUtil.get(node, "Namespace", "");
@@ -106,9 +108,21 @@ public class MDMReader {
         }
 
         info.structs = fillStructs(XMLUtil.getList(node, "StructList", "Struct"), info);
+
+        // Determine start ID by looking for the maximum specified ID (0 by default)
         for (int i = 0; i < info.structs.length; i++) {
-            info.structs[i].id = startId + i;
+            startId = Math.max(startId, info.structs[i].id + 1);
         }
+
+        // Assign IDs for structs that do not yet have one
+        int idOffset = 0;
+        for (int i = 0; i < info.structs.length; i++) {
+            if (info.structs[i].id < 1) {
+                info.structs[i].id = startId + idOffset;
+                idOffset++;
+            }
+        }
+
         info.enums = fillEnums(XMLUtil.getList(node, "EnumList", "Enum"), info);
 
         return info;
@@ -150,6 +164,12 @@ public class MDMReader {
             struct.comment = XMLUtil.get(list[i], "Comment", "").replaceAll("[\n\r\f]+", "");
             if (struct.comment.isEmpty()) {
                 struct.comment = getComment(list[i]).replaceAll("[\n\r\f]+", "");
+            }
+
+            // Optional explicit ID
+            String idStr = XMLUtil.getAttribute(list[i], "ID", "");
+            if (!idStr.isEmpty()) {
+                struct.id = Integer.parseInt(idStr);
             }
 
 
@@ -218,9 +238,15 @@ public class MDMReader {
 
                 // large array tag
                 f.isLargeArray = Boolean.valueOf(XMLUtil.getAttribute(fieldNodes[j], "LargeArray", "false"));
-
-                // Optional tag
+                
+                // optional
                 f.isOptional = Boolean.valueOf(XMLUtil.getAttribute(fieldNodes[j], "Optional", "false"));
+                
+                // max length of array
+                String arrLen = XMLUtil.getAttribute(fieldNodes[j], "MaxArrayLength", "0");
+                if(arrLen != "") {
+                    f.maxArrayLength = Integer.valueOf(arrLen);
+                }
             }
         }
 
@@ -321,7 +347,7 @@ public class MDMReader {
     }
 
     public static void checkDefault(StructInfo s, FieldInfo f) throws Exception {
-        if (MDMInfo.isNumber(f.type)) {
+        if (MDMInfo.isNumber(f.type) && !f.isArray) {
             if (f.defaultVal.isEmpty()) {
                 f.defaultVal = "0";
             }

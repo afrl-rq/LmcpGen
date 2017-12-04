@@ -45,10 +45,11 @@ public class FieldInfo {
     public boolean isScalar = false;
     public boolean isArray = false;
     public boolean isLargeArray = false;
+    public boolean isOptional = false;
     public boolean isEnum = false;
     public boolean isStruct = false;
     public boolean isMap = false;
-    public boolean isOptional = false;
+    public int maxArrayLength = 0;
     
     /** Creates a new instance of FieldInfo */
     public FieldInfo() {
@@ -65,7 +66,7 @@ public class FieldInfo {
 
     @Override
     public String toString() {
-        return "FieldInfo{" + "name=" + name + ", comment=" + comment + ", length=" + length + ", type=" + type + ", defaultVal=" + defaultVal + ", units=" + units + ", seriesName=" + seriesName + ", isScalar=" + isScalar + ", isArray=" + isArray + ", isLargeArray=" + isLargeArray + ", isEnum=" + isEnum + ", isStruct=" + isStruct + ", isMap=" + isMap + ", isOptional=" + isOptional + '}';
+        return "FieldInfo{" + "name=" + name + ", comment=" + comment + ", length=" + length + ", type=" + type + ", defaultVal=" + defaultVal + ", units=" + units + ", seriesName=" + seriesName + ", isScalar=" + isScalar + ", isArray=" + isArray + ", isLargeArray=" + isLargeArray + ", maxArrayLength=" + maxArrayLength + ", isEnum=" + isEnum + ", isStruct=" + isStruct +  ", isOptional=" + isOptional + ", isMap=" + isMap + '}';
     }
 
     @Override

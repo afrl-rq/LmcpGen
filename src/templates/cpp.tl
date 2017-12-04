@@ -23,6 +23,8 @@ PER_MDM         cpp/EntireSeriesHeader.h    -<series_dir>-/-<series_name>-.h
 PER_MDM         cpp/SeriesEnum.h            -<series_dir>-/-<series_name>-Enum.h
 PER_MDM         cpp/SeriesXMLReader.cpp     -<series_dir>-/-<series_name>-XMLReader.cpp
 PER_MDM         cpp/SeriesXMLReader.h       -<series_dir>-/-<series_name>-XMLReader.h
+PER_MDM         cpp/SeriesFactory.cpp       -<series_dir>-/-<series_name>-Factory.cpp
+PER_MDM         cpp/SeriesFactory.h         -<series_dir>-/-<series_name>-Factory.h
 
 PER_STRUCT	cpp/SeriesObject.h          -<series_dir>-/-<datatype_name>-.h
 PER_STRUCT	cpp/SeriesObjectDescend.h   -<series_dir>-/-<datatype_name>-Descendants.h

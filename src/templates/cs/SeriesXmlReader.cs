@@ -16,13 +16,13 @@ using System.Collections.Generic;
 using System.Xml;
 using Avtas.Lmcp;
 
--<series_namespace>- {
+-<series_namespace>-
+{
 
-    public class SeriesXmlReader : LmcpXmlReader
+public class SeriesXmlReader : LmcpXmlReader
 {
 
   private static string SERIES_NAME = "-<xml_seriesname>-";
-
 
   public override ILmcpObject visitType( XmlElement el )
   {

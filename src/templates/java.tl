@@ -11,6 +11,7 @@ ONCE            java/LMCPXMLReader_java             src/avtas/lmcp/LMCPXMLReader
 ONCE		java/nb_build			    build.xml
 ONCE		java/nb_properties		    nbproject/project.properties
 ONCE		java/nb_project			    nbproject/project.xml
+ONCE		java/nb_buildimpl		    nbproject/build-impl.xml
 
 PER_MDM         java/series_enum_java               src/-<namespace>-/SeriesEnum.java
 PER_STRUCT 	java/series_object_java             src/-<namespace>-/-<datatype_name>-.java                    

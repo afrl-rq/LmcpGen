@@ -13,6 +13,8 @@ import avtas.lmcp.lmcpgen.EnumInfo.EnumEntry;
 import java.io.File;
 import java.rmi.server.UID;
 import java.text.DateFormat;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -22,6 +24,7 @@ class CsMethods {
 
     public static String block_comment = "\n*";
     private static String libraryGuid = null;
+    private static String coreLibraryGuid = null;
     private static String testServerGuid = null;
     private static String testClientGuid = null;
     private static String packageName = null;
@@ -44,6 +47,17 @@ class CsMethods {
         return ws + "namespace " + ret.substring(0, ret.length() - 1);
     }
 
+    public static String direct_series_namespace(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        String[] splits = info.namespace.split("/");
+        String ret = "";
+        for (String tmp : splits) {
+            if (tmp.length() > 0) {
+                ret = ret + toPascalCase(tmp) + ".";
+            }
+        }
+        return ws + ret.substring(0, ret.length() - 1);
+    }
+
     public static String series_version(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         return ws + String.valueOf(info.version);
     }
@@ -63,6 +77,42 @@ class CsMethods {
         return ws + ret.substring(0, ret.length() - 1);
     }
 
+    public static String dot_namespace(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        String[] splits = info.namespace.split("/");
+        String ret = "";
+        for (String tmp : splits) {
+            if (tmp.length() > 0) {
+                ret = ret + toPascalCase(tmp) + ".";
+            }
+        }
+        return ws + ret.substring(0, ret.length() - 1);
+    }
+
+    public static String series_root_namespace(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        String[] splits = info.namespace.split("/");
+        String ret = "";
+        for (String tmp : splits) {
+            if (tmp.length() > 0) {
+                ret = toPascalCase(tmp);
+                break;
+            }
+        }
+        return ws + ret;
+    }
+
+    public static String import_series(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        StringBuffer buf = new StringBuffer();
+        String[] splits = info.namespace.split("/");
+        String ret = "";
+        for (String tmp : splits) {
+            if (tmp.length() > 0) {
+                ret = ret + toPascalCase(tmp) + ".";
+            }
+        }
+        buf.append(ws + "using " + ret.substring(0, ret.length() - 1) + ";\n");
+        return buf.toString();
+    }
+    
     public static String import_all_series(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         StringBuffer buf = new StringBuffer();
         for (MDMInfo i : infos) {
@@ -126,7 +176,7 @@ class CsMethods {
         return buf.toString();
     }
 
-    public static String factory_object_type(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+    public static String factory_auto_register(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         StringBuffer buf = new StringBuffer();
         for (MDMInfo in : infos) {            
             if(in.seriesNameAsLong == 0)
@@ -142,11 +192,49 @@ class CsMethods {
                 }
             }
             String seriesListClass = ret + "SeriesList";
-            buf.append(ws + "if ( series_id == " + seriesListClass + ".SERIES_ID )\n");
-            buf.append(ws + "   if ( version == " + seriesListClass + ".SERIES_VERSION )\n");
-            buf.append(ws + "      return " + seriesListClass + ".GetInstance(object_type);\n");
-            buf.append(ws + "   else throw new InvalidOperationException(\"LMCPFactory Exception.  Bad Version Number.\");\n");
+            buf.append(ws + "_seriesLists.Add(new " + seriesListClass + "());\n");
         }
+        return buf.toString();
+    }
+
+    public static String server_register_all_series(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        StringBuffer buf = new StringBuffer();
+        for (MDMInfo in : infos) {            
+            if(in.seriesNameAsLong == 0)
+            {
+                continue;
+            }
+            String[] splits = in.namespace.split("/");
+            String ret = "";
+            for (String tmp : splits) {
+                if (tmp.length() > 0) {
+                    tmp = tmp.substring(0, 1).toUpperCase() + tmp.substring(1);
+                    ret = ret + tmp + ".";
+                }
+            }
+            String seriesListClass = ret + "SeriesList";
+            buf.append(ws + "LmcpFactory.RegisterSeries(new " + seriesListClass + "());\n");
+        }
+        return buf.toString();
+    }
+
+    public static String series_factory_object_type(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        StringBuffer buf = new StringBuffer();
+        
+        String[] splits = info.namespace.split("/");
+        String ret = "";
+        for (String tmp : splits) {
+            if (tmp.length() > 0) {
+                tmp = tmp.substring(0, 1).toUpperCase() + tmp.substring(1);
+                ret = ret + tmp + ".";
+            }
+        }
+        String seriesListClass = ret + "SeriesList";
+        buf.append(ws + "if ( series_id == " + seriesListClass + ".SERIES_ID )\n");
+        buf.append(ws + "   if ( version == " + seriesListClass + ".SERIES_VERSION )\n");
+        buf.append(ws + "      return " + seriesListClass + ".GetInstance(object_type);\n");
+        buf.append(ws + "   else throw new InvalidOperationException(\"" + ret + "SeriesFactory Exception.  Bad Version Number.\");\n");
+
         return buf.toString();
     }
 
@@ -212,18 +300,21 @@ class CsMethods {
 
     public static String list_type_for_name(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         String ret = "";
-        for (MDMInfo i : infos) {
-            if(i.seriesNameAsLong == 0)
-            {
-                continue;
-            }
-            for (StructInfo s : i.structs) {
-                ret += ws + "if ( name == \"" + s.name + "\" )  return " + s.id + ";\n";
-            }
+        for (StructInfo s : info.structs) {
+            ret += ws + "if ( name == \"" + s.name + "\" )  return " + s.id + ";\n";
         }
         return ret;
     }
 
+    public static String series_name(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        return ws + info.seriesName;
+    }
+    
+    public static String cs_series_name(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        String str = info.seriesName.substring(0, 1).toUpperCase() + info.seriesName.substring(1).toLowerCase();
+        return ws + str;
+    }
+    
     public static String series_name_setup(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         return ws + "\"" + info.seriesName + "\"";
     }
@@ -289,7 +380,7 @@ class CsMethods {
                     if (defaultVal.equalsIgnoreCase("null")) {
                         str += " = null;\n";
                     } else {
-                        str += " = new " + type + "();\n";
+                        str += " = new " + getCsType(infos, list[i]) + "();\n";
                     }
                 } else if (list[i].isEnum) {
                     str += " = " + getCsType(infos, list[i]) + "." + defaultVal + ";\n";
@@ -437,9 +528,9 @@ class CsMethods {
                 if (list[i].isStruct) {
                     str += ws + name + " = (" + type + ") br.ReadObject();\n";
                 } else if (list[i].isEnum) {
-                    str += ws + name + " = (" + list[i].type + ") br.ReadInt32();\n\n";
+                    str += ws + name + " = (" + type + ") br.ReadInt32();\n\n";
                 } else {
-                    str += ws + name + " = br.Read" + getCsObjectType(infos, list[i]) + "();\n\n";
+                    str += ws + name + " = br.Read" + type + "();\n\n";
                 }
                 // Array Types
             } else if (list[i].isArray) {
@@ -457,9 +548,9 @@ class CsMethods {
                     if (list[i].isStruct) {
                         str += ws + name + ".Add( (" + type + ") br.ReadObject() );\n";
                     } else if (list[i].isEnum) {
-                        str += ws + "    " + name + ".Add( (" + list[i].type + ") br.ReadInt32());\n";
+                        str += ws + "    " + name + ".Add( (" + type + ") br.ReadInt32());\n";
                     } else {
-                        str += ws + "    " + name + ".Add(" + "br.Read" + getCsObjectType(infos, list[i]) + "());\n";
+                        str += ws + "    " + name + ".Add(" + "br.Read" + type + "());\n";
                     }
                     str += ws + "}\n";
 
@@ -468,9 +559,9 @@ class CsMethods {
                     if (list[i].isStruct) {
                         str += ws + "    " + name + "[i] = (" + type + ") br.ReadObject() );\n";
                     } else if (list[i].isEnum) {
-                        str += ws + "    " + name + "[i] = (" + list[i].type + ") br.ReadInt32();\n";
+                        str += ws + "    " + name + "[i] = (" + type + ") br.ReadInt32();\n";
                     } else {
-                        str += ws + "    " + name + "[i] = " + "br.Read" + getCsObjectType(infos, list[i]) + "();\n";
+                        str += ws + "    " + name + "[i] = " + "br.Read" + type + "();\n";
                     }
                     str += ws + "}\n";
                 }
@@ -833,23 +924,111 @@ class CsMethods {
         }
         return str;
     }
+    
+    public static String series_csproj_sources(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        String str = "";
+        String winDir = getCsNamespace(info.namespace).replaceAll("\\.", "\\\\");
+        for (StructInfo s : info.structs ) {
+            str += ws + "<Compile Include=\"" + winDir + "\\" + s.name + ".cs\"/>\n";
+        }
+        for (EnumInfo s : info.enums ) {
+            str += ws + "<Compile Include=\"" + winDir + "\\" + s.name + ".cs\"/>\n";
+        }
+        str += ws + "<Compile Include=\"" + winDir + "\\"  + "SeriesEnum.cs\"/>\n";
+        str += ws + "<Compile Include=\"" + winDir + "\\"  + "SeriesList.cs\"/>\n";
+        str += ws + "<Compile Include=\"" + winDir + "\\"  + "SeriesXmlReader.cs\"/>\n";
+        return str;
+    }
 
+    public static String series_csproj_references(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        Set<String> deps = new HashSet<String>();
+        for (StructInfo s : info.structs) {
+            deps.add(s.extends_series);
+            for (int i = 0; i < s.fields.length; i++) {
+                if (s.fields[i].isStruct) {
+                    deps.add(s.fields[i].seriesName);
+                }
+            }
+        }
+        deps.remove("");
+        deps.remove(info.seriesName);
+        
+        String str = "";
+        for (String dep : deps) {
+            for (MDMInfo i : infos) {
+                if (i.seriesName.contentEquals(dep))
+                {
+                    String libName = dep.substring(0, 1).toUpperCase() + dep.substring(1).toLowerCase();
+                    str += ws + "<ProjectReference Include=\"Lmcp" + libName + ".csproj\">\n";
+                    str += ws + "  <Project>{" + i.guid + "}</Project>\n";
+                    str += ws + "  <Name>Lmcp" + libName + "</Name>\n";
+                    str += ws + "</ProjectReference>\n";
+                }
+            }
+        }
+        return str;
+    }
+    
+    public static String all_series_csproj_references(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        String str = "";
+        for (MDMInfo i : infos) {
+            if (i.seriesNameAsLong == 0) { continue; }
+            String libName = i.seriesName.substring(0, 1).toUpperCase() + i.seriesName.substring(1).toLowerCase();
+            str += ws + "<ProjectReference Include=\"Lmcp" + libName + ".csproj\">\n";
+            str += ws + "  <Project>{" + i.guid + "}</Project>\n";
+            str += ws + "  <Name>Lmcp" + libName + "</Name>\n";
+            str += ws + "</ProjectReference>\n";
+        }
+        return str;
+    }
+    
+    public static String all_series_projects(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        String str = "";
+        for(MDMInfo i : infos) {
+            String libName = i.seriesName.substring(0, 1).toUpperCase() + i.seriesName.substring(1).toLowerCase();
+            str += ws + "Project(\"{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}\") = \"Lmcp" + libName + "\", \"Library\\Lmcp" + libName + ".csproj\", \"{" + i.guid + "}\"\n";
+            str += ws + "EndProject\n";
+        }
+        return str;
+    }
+    
+    public static String all_series_configurations(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        String str = "";
+        for(MDMInfo i : infos) {
+            str += ws + "{" + i.guid + "}.Debug|Any CPU.ActiveCfg = Debug|Any CPU\n";
+            str += ws + "{" + i.guid + "}.Debug|Any CPU.Build.0 = Debug|Any CPU\n";
+            str += ws + "{" + i.guid + "}.Release|Any CPU.ActiveCfg = Release|Any CPU\n";
+            str += ws + "{" + i.guid + "}.Release|Any CPU.Build.0 = Release|Any CPU\n";
+        }
+        return str;
+    }
+    
     public static String library_make_guid(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         if (libraryGuid == null)
-            libraryGuid = makeGUID();
+            libraryGuid = makeGUID("LMCP");
         return libraryGuid;
+    }
+    
+    public static String core_library_make_guid(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        if (coreLibraryGuid == null)
+            coreLibraryGuid = makeGUID("LmcpCore");
+        return coreLibraryGuid;
     }
     
     public static String test_client_make_guid(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         if (testClientGuid == null)
-            testClientGuid = makeGUID();
+            testClientGuid = makeGUID("TestClient");
         return testClientGuid;
     }
 
    public static String test_server_make_guid(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         if (testServerGuid == null)
-            testServerGuid = makeGUID();
+            testServerGuid = makeGUID("TestServer");
         return testServerGuid;
+    }
+
+   public static String series_guid(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        return info.guid;
     }
 
    public static String major_version(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
@@ -913,7 +1092,7 @@ class CsMethods {
             return "string";
         }
         if (type.equalsIgnoreCase(MDMInfo.LMCP_OBJECT_NAME)) {
-            return "Afrl.Lmcp.ILmcpObject";
+            return "Avtas.Lmcp.ILmcpObject";
         }
         return getCsNamespace(mdms, f.seriesName) + "." + f.type;
     }
@@ -955,7 +1134,7 @@ class CsMethods {
             return "String";
         }
         if (type.equalsIgnoreCase(MDMInfo.LMCP_OBJECT_NAME)) {
-            return "Afrl.Lmcp.ILmcpObject";
+            return "Avtas.Lmcp.ILmcpObject";
         }
         return getCsNamespace(mdms, f.seriesName) + "." + f.type;
     }
@@ -1001,9 +1180,9 @@ class CsMethods {
     /** Generates a Globally Unique ID based on RFC 4122.  
      * @return a Globally unique ID with the format: 8-4-4-4-12 digits
      */
-    private static String makeGUID() {
+    private static String makeGUID(String startName) {
         
-        return UUID.randomUUID().toString().toUpperCase();
+        return UUID.nameUUIDFromBytes(startName.getBytes()).toString().toUpperCase(); //  UUID.randomUUID().toString().toUpperCase();
 
     }
 
@@ -1017,5 +1196,16 @@ class CsMethods {
             }
         }
         return ret.substring(0, ret.length() - 1);
+    }
+    
+    public static String getWinNamespace(String namespace) {
+        String[] splits = namespace.split("/");
+        String ret = "";
+        for (String tmp : splits) {
+            if (tmp.length() > 0) {
+                ret = ret + tmp + "\\";
+            }
+        }
+        return ret;
     }
 }

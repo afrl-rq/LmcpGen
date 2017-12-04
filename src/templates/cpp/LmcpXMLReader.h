@@ -21,7 +21,7 @@
 #include <iostream>
 #include "avtas/lmcp/XMLParser.h"
 
--<xml_include_factories>-
+-<xml_include_readers>-
 
 namespace avtas {
 namespace lmcp {

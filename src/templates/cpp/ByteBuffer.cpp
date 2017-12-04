@@ -482,13 +482,13 @@ namespace lmcp {
       case ENDIAN_BIG:
          if (nelem == 1) {
             // Swap the bytes
-            register uint32_t i;
+            uint32_t i;
             for (i=0; i<length; i++)
                _buf[_position+(length-1-i)] = src[i];
             _position += length;
          } else if (nelem > 0) {
             // Swap the bytes on each element
-            register uint32_t i;
+            uint32_t i;
             for (i=0; i<nelem; i++) {
                copyToBuffer(&src[(length*i)], length);
             }
@@ -511,13 +511,13 @@ namespace lmcp {
       case ENDIAN_BIG:
          if (nelem == 1) {
             // Swap the bytes
-            register uint32_t i;
+            uint32_t i;
             for (i=0; i<length; i++)
                dst[i] = _buf[_position+(length-1-i)];
             _position += length;
          } else if (nelem > 0) {
             // Swap the bytes on each element
-            register uint32_t i;
+            uint32_t i;
             for (i=0; i<nelem; i++) {
                copyFromBuffer(&dst[(length*i)], length);
             }

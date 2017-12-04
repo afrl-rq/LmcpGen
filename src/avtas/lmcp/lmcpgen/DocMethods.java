@@ -108,9 +108,20 @@ public class DocMethods {
                 str.append("<tr><td class=\"field\"><a name=\"").append(info.seriesName).append("_datatype_").append(struct.name).append("_field_").
                         append(struct.fields[j].name).append("\"><B>").append(struct.fields[j].name).append("</B></a><br>");
                 str.append("<p class=\"comment\">").append(processComment(struct.fields[j].comment, infos, info)).append("</p>\n");
-                if (struct.fields[j].defaultVal.length() != 0) {
-                    str.append("<p class=\"comment\">Default Value = ").append(struct.fields[j].defaultVal).append("</p></td>\n");
+                if (struct.fields[j].defaultVal.length() != 0 || struct.fields[j].isOptional || struct.fields[j].maxArrayLength > 0) {
+                    str.append("<p class=\"comment\">");
+                    if (struct.fields[j].isOptional) {
+                        str.append("<i>[Optional]</i>").append("&nbsp;&nbsp;");
+                    }
+                    if (struct.fields[j].defaultVal.length() != 0) {
+                        str.append("Default Value = ").append(struct.fields[j].defaultVal).append("&nbsp;&nbsp;");
+                    }
+                    if (struct.fields[j].maxArrayLength > 0) {
+                        str.append("Max Length = ").append(Integer.toString(struct.fields[j].maxArrayLength));
+                    }
+                    str.append("</p>\n");
                 }
+                str.append("</td>\n");
 
                 if (struct.fields[j].isStruct) {
                     if (struct.fields[j].type.equals(MDMInfo.LMCP_OBJECT_NAME)) {

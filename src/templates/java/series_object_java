@@ -88,8 +88,7 @@ public class -<object_type_name>- -<extends_object_type>- {
     public boolean equals(Object anotherObj) {
         if ( anotherObj == this ) return true;
         if ( anotherObj == null ) return false;
-        if ( !(anotherObj instanceof -<object_type_name>-) ) return false;
-        if ( !super.equals(anotherObj) ) return false;
+        if ( anotherObj.getClass() != this.getClass() ) return false;
         -<object_type_name>- o = (-<object_type_name>-) anotherObj;
         -<member_equals>-
         return true;

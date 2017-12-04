@@ -13,44 +13,52 @@ using System;
 using System.IO;
 using Avtas.Lmcp;
 
--<series_namespace>- {
+-<series_namespace>-
+{
 
     /// <summary>
     /// Class containing access to information about the Series.
     /// </summary>
-    public static class SeriesList
+public class SeriesList : ISeriesList
 {
   public const string SERIES_NAME = -<series_name_setup>-;
   public const ushort SERIES_VERSION = -<series_version>-;
   /* Series name expressed as a long for quick comparisons */
   public const long SERIES_ID = -<series_id>-;
 
+  public SeriesList()
+  {
+    LmcpXmlReader.RegisterXmlReader( new SeriesXmlReader() );
+  }
+
   public static String GetName( uint type )
   {
     switch ( type )
     {
-                -<list_name_for_type>-
-
-                default: return "";
+      -<list_name_for_type>-
+      default: return "";
+    }
   }
-
-}
 
 public static uint GetType( String name )
 {
   -<list_type_for_name>-
-
-           return 0;
+  return 0;
 }
 
-public static ILmcpObject GetInstance( uint type )
+public ILmcpObject GetInstance( uint object_type, ushort version )
 {
-  switch ( type )
-  {
-                -<list_instance_for_type>-
+  if ( version != SERIES_VERSION )
+    throw new InvalidOperationException("-<series_name>- SeriesList Exception. Bad Version Number.");
 
-                default: return null;
+  switch ( object_type )
+  {
+    -<list_instance_for_type>-
+    default: return null;
+  }
 }
-        }
-    }
+
+public long SeriesId => SERIES_ID;
+
+}
 }

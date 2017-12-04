@@ -669,6 +669,9 @@ public class CppMethods {
                     str += ws + "      uint16_t version = buf.getUShort();\n";
                     str += ws + "      " + name + " = (" + type + "*) avtas::lmcp::Factory::createObject( series_id, msgtype, version );\n";
                     str += ws + "      if (" + name + " != nullptr) " + name + "->unpack(buf);\n";
+                    if (!st.fields[i].isOptional) {
+                        str += ws + "      else assert(" + name + " != nullptr);\n";
+                    }
                     str += ws + "   }\n";
                     str += ws + "}\n";
                 }
@@ -713,6 +716,7 @@ public class CppMethods {
                     str += ws + "      uint16_t version = buf.getUShort();\n";
                     str += ws + "      " + type + "* e = (" + type + "*) avtas::lmcp::Factory::createObject( series_id, msgtype, version );\n";
                     str += ws + "      if ( e != nullptr) e->unpack(buf); \n";
+                    str += ws + "      else assert( e != nullptr); \n";
                     if (st.fields[i].length == -1) {
                         str += ws + "      " + name + ".push_back(e);\n";
                     }
@@ -891,7 +895,7 @@ public class CppMethods {
         return buf.toString();
     }
 
-    public static String series_factory_switch(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+    public static String global_factory_switch(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         StringBuffer buf = new StringBuffer();
         for (MDMInfo i : infos) {
             if(i.seriesNameAsLong == 0)
@@ -899,14 +903,23 @@ public class CppMethods {
                 continue;
             }
             buf.append(ws + "if (series_id == " + i.seriesNameAsLong + "LL)\n");
-            buf.append(ws + "   if (version == " + i.version + ")\n");
-            buf.append(ws + "      switch(type)\n" + ws + "      {\n");
-            for (int j = 0; j < i.structs.length; j++) {
-                buf.append(ws + "         case " + i.structs[j].id + ": return new " + namespace(infos, i, outfile, st, en, ws)
-                        + "::" + i.structs[j].name + "; \n");
-            }
-            buf.append(ws + "      }\n");
+            buf.append(ws + "   return " + namespace(infos, i, outfile, st, en, ws) + "::" + i.seriesName + "Factory::createObject(series_id, type, version);\n");
         }
+        return buf.toString();
+    }
+
+    public static String series_factory_switch(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        StringBuffer buf = new StringBuffer();
+        
+        buf.append(ws + "if (series_id == " + info.seriesNameAsLong + "LL)\n");
+        buf.append(ws + "   if (version == " + info.version + ")\n");
+        buf.append(ws + "      switch(type)\n" + ws + "      {\n");
+        for (int j = 0; j < info.structs.length; j++) {
+            buf.append(ws + "         case " + info.structs[j].id + ": return new " + namespace(infos, info, outfile, st, en, ws)
+                    + "::" + info.structs[j].name + "; \n");
+        }
+        buf.append(ws + "      }\n");
+        
         return buf.toString();
     }
 
@@ -941,6 +954,7 @@ public class CppMethods {
                 buf.append("\t" + i.namespace + "/" + cleanNamespace + si.name + ".cpp\\\n");
             }
             buf.append("\t" + i.namespace + "/" + i.seriesName + "XMLReader.cpp\\\n");
+            buf.append("\t" + i.namespace + "/" + i.seriesName + "Factory.cpp\\\n");
         }
         return buf.toString();
     }
@@ -957,6 +971,7 @@ public class CppMethods {
                 buf.append(ws + "'" + i.namespace + "/" + cleanNamespace + si.name + ".cpp',\n");
             }
             buf.append(ws + "'" + i.namespace + "/" + i.seriesName + "XMLReader.cpp',\n");
+            buf.append(ws + "'" + i.namespace + "/" + i.seriesName + "Factory.cpp',\n");
         }
         return buf.toString();
     }
@@ -1015,13 +1030,13 @@ public class CppMethods {
             {
                 continue;
             }
-            String seriesFactory = getCppNamespace(i.namespace) + "::SeriesXMLReader";
-            buf.append(ws + "if (node->getAttribute(\"Series\") == \"" + i.seriesName + "\") return " + seriesFactory + "::visitType(node);\n");
+            String seriesReader = getCppNamespace(i.namespace) + "::" + i.seriesName + "XMLReader";
+            buf.append(ws + "if (node->getAttribute(\"Series\") == \"" + i.seriesName + "\") return " + seriesReader + "::visitType(node);\n");
         }
         return buf.toString();
     }
 
-    public static String xml_include_factories(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+    public static String xml_include_readers(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         StringBuffer buf = new StringBuffer();
         for (MDMInfo i : infos) {
             if(i.seriesNameAsLong == 0)
@@ -1029,6 +1044,18 @@ public class CppMethods {
                 continue;
             }
             buf.append(ws + "#include \"" + i.namespace + "/" + i.seriesName + "XMLReader.h\"\n");
+        }
+        return buf.toString();
+    }
+
+    public static String include_all_factories(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        StringBuffer buf = new StringBuffer();
+        for (MDMInfo i : infos) {
+            if(i.seriesNameAsLong == 0)
+            {
+                continue;
+            }
+            buf.append(ws + "#include \"" + i.namespace + "/" + i.seriesName + "Factory.h\"\n");
         }
         return buf.toString();
     }
@@ -1237,6 +1264,7 @@ public class CppMethods {
                 str += ws + "   <File RelativePath=\".\\" + winDir + "\\" + e.name + ".h\"> </File>\n";
             }
             str += ws + "   <File RelativePath=\".\\" + winDir + "\\" + i.seriesName + "XMLReader.h\"> </File>\n";
+            str += ws + "   <File RelativePath=\".\\" + winDir + "\\" + i.seriesName + "Factory.h\"> </File>\n";
             str += ws + "   <File RelativePath=\".\\" + winDir + "\\" + i.seriesName + "Enum.h\"> </File>\n";
             str += ws + "   <File RelativePath=\".\\" + winDir + "\\" + i.seriesName + ".h\"> </File>\n";
             str += ws + "</Filter>\n";
@@ -1265,6 +1293,7 @@ public class CppMethods {
                 str += ws + "   <File RelativePath=\".\\" + winDir + "\\" + cleanNamespace + s.name + ".cpp\"> </File>\n";
             }
             str += ws + "   <File RelativePath=\".\\" + winDir + "\\" + i.seriesName + "XMLReader.cpp\"> </File>\n";
+            str += ws + "   <File RelativePath=\".\\" + winDir + "\\" + i.seriesName + "Factory.cpp\"> </File>\n";
             str += ws + "</Filter>\n";
         }
         return str;
@@ -1294,6 +1323,7 @@ public class CppMethods {
                 str += ws + "   <ClInclude Include=\"" + winDir + "\\" + e.name + ".h\"/>\n";
             }
             str += ws + "   <ClInclude Include=\"" + winDir + "\\" + i.seriesName + "XMLReader.h\"/>\n";
+            str += ws + "   <ClInclude Include=\"" + winDir + "\\" + i.seriesName + "Factory.h\"/>\n";
             str += ws + "   <ClInclude Include=\"" + winDir + "\\" + i.seriesName + "Enum.h\"/>\n";
             str += ws + "   <ClInclude Include=\"" + winDir + "\\" + i.seriesName + ".h\"/>\n";
         }
@@ -1319,6 +1349,7 @@ public class CppMethods {
                 str += ws + "   <ClCompile Include=\"" + winDir + "\\" + cleanNamespace + s.name + ".cpp\"/>\n";
             }
             str += ws + "   <ClCompile Include=\"" + winDir + "\\" + i.seriesName + "XMLReader.cpp\"/>\n";
+            str += ws + "   <ClCompile Include=\"" + winDir + "\\" + i.seriesName + "Factory.cpp\"/>\n";
         }
         return str;
     }
@@ -1378,6 +1409,7 @@ public class CppMethods {
                 str += ws + "   <ClInclude Include=\"" + folder + "\\" + e.name + ".h\">\n <Filter>" + filter + "</Filter>\n</ClInclude>\n";
             }
             str += ws + "   <ClInclude Include=\"" + folder + "\\" + i.seriesName + "XMLReader.h\">\n <Filter>" + filter + "</Filter>\n</ClInclude>\n";
+            str += ws + "   <ClInclude Include=\"" + folder + "\\" + i.seriesName + "Factory.h\">\n <Filter>" + filter + "</Filter>\n</ClInclude>\n";
             str += ws + "   <ClInclude Include=\"" + folder + "\\" + i.seriesName + "Enum.h\">\n <Filter>" + filter + "</Filter>\n</ClInclude>\n";
             str += ws + "   <ClInclude Include=\"" + folder + "\\" + i.seriesName + ".h\">\n <Filter>" + filter + "</Filter>\n</ClInclude>\n";
         }
@@ -1416,6 +1448,7 @@ public class CppMethods {
             }
 
             str += ws + "   <ClCompile Include=\"" + folder + "\\" + i.seriesName + "XMLReader.cpp\">\n <Filter>" + filter + "</Filter>\n</ClCompile>\n";
+            str += ws + "   <ClCompile Include=\"" + folder + "\\" + i.seriesName + "Factory.cpp\">\n <Filter>" + filter + "</Filter>\n</ClCompile>\n";
             str += ws + "   <ClCompile Include=\"" + folder + "\\" + i.seriesName + "Enum.cpp\">\n <Filter>" + filter + "</Filter>\n</ClCompile>\n";
             str += ws + "   <ClCompile Include=\"" + folder + "\\" + i.seriesName + ".cpp\">\n <Filter>" + filter + "</Filter>\n</ClCompile>\n";
         }
@@ -1440,6 +1473,7 @@ public class CppMethods {
                 str += ws + "\t.\\" + winDir + "\\" + cleanNamespace + s.name + ".cpp\\\n";
             }
             str += ws + "\t.\\" + winDir + "\\" + i.seriesName + "XMLReader.cpp\\\n";
+            str += ws + "\t.\\" + winDir + "\\" + i.seriesName + "Factory.cpp\\\n";
         }
         return str.substring(0, str.length() - 2);
     }
