@@ -16,124 +16,108 @@
 extern crate quickcheck;
 
 #[macro_use]
-pub mod avtas;
+mod avtas;
 -<declare_top_level_modules>-
 
-use avtas::lmcp::{LmcpSer, LmcpSubscription, StructInfo};
-
-macro_rules! get(
-    ($e:expr) =>
-    (match $e { Some(e) => e, None => {println!("{:?}", stringify!($e)); return None} })
-);
-
-macro_rules! get2(
-    ($e:expr) => (match $e { Some(e) => e, None => {println!("error: {:?}", stringify!($e)); return Err(()) } })
-);
+use avtas::lmcp::{Lmcp, StructInfo};
+pub use avtas::lmcp::{Error, ErrorType, LmcpSubscription, SrcLoc};
 
 #[derive(Debug)]
-pub enum LmcpType {
+pub enum Message {
     -<declare_top_enum>-
 }
 
-impl LmcpSer for LmcpType {
-    fn lmcp_ser(&self, buf: &mut [u8]) -> Option<usize> {
+impl Lmcp for Message {
+    fn ser(&self, buf: &mut [u8]) -> Result<usize, Error> {
         match *self {
-            -<match_lmcp_ser>-
+            -<match_ser>-
         }
     }
 
-    fn lmcp_size(&self) -> usize {
+    fn size(&self) -> usize {
         match *self {
-            -<match_lmcp_size>-
+            -<match_size>-
         }
     }
 
-    fn lmcp_deser(buf: &[u8]) -> Option<(LmcpType, usize)> {
-        let (si, _) = get!(StructInfo::lmcp_deser(buf)); // TODO: support null structs or get rid of them
+    fn deser(buf: &[u8]) -> Result<(Message, usize), Error> {
+        let (si, _) = StructInfo::deser(buf)?; // TODO: support null structs or get rid of them
         match (si.series, si.struct_ty) {
-            -<match_lmcp_deser>-
-            _ => None,
+            -<match_deser>-
+            _ => Err(error!(ErrorType::UnknownStruct(si)))
         }
     }
 }
 
-pub fn lmcp_msg_subscription(obj: &LmcpType) -> &'static str {
-    match *obj {
-        -<match_subscription>-
+impl Message {
+    pub fn subscription(&self) -> &'static str {
+        match *self {
+            -<match_subscription>-
+        }
     }
-}
 
-pub fn lmcp_msg_deser(buf: &[u8]) -> Result<Option<LmcpType>, ()> {
-    let size: u32;
-    {
-        let h = get2!(buf.get(0..4));
+    pub fn deser(buf: &[u8]) -> Result<Option<Message>, Error> {
+        let h = get!(buf.get(0..4));
         if h[0] != 76 || h[1] != 77 || h[2] != 67 || h[3] != 80 {
-            return Err(());
+            return Err(error!(ErrorType::InvalidLmcpHeader));
+        }
+
+        let r = get!(buf.get(4..8));
+        let (size, _) = u32::deser(r)?;
+
+        if (size + 12) as usize != buf.len() {
+            // 12 = 8 for header + 4 for checksum
+            return Err(error!(ErrorType::MessageSizeMismatch));
+        }
+        let h = get!(buf.get(8..));
+        let (si, _) = StructInfo::deser(h)?;
+        let ch = get!(buf.get(buf.len() - 4..buf.len()));
+        let (_, _): (u32, _) = u32::deser(ch)?; // TODO: checksum
+        if si.exist == 0 {
+            Ok(None)
+        } else {
+            let (msg, _) = Lmcp::deser(h)?;
+            Ok(Some(msg))
         }
     }
-    {
-        let r = get2!(buf.get(4..8));
-        let (a, _) = get2!(u32::lmcp_deser(r));
-        size = a;
-    }
 
-    if (size + 12) as usize != buf.len() {
-        // 12 = 8 for header + 4 for checksum
-        return Err(());
-    }
-    let h = get2!(buf.get(8..));
-    let (si, _) = get2!(StructInfo::lmcp_deser(h));
-    let ch = get2!(buf.get(buf.len() - 4..buf.len()));
-    let (_, _): (u32, _) = get2!(u32::lmcp_deser(ch)); // checksum
-    if si.exist == 0 {
-        return Ok(None);
-    }
-
-
-    match LmcpSer::lmcp_deser(h) {
-        Some((e, _)) => Ok(Some(e)),
-        None => Err(()),
-    }
-
-
-}
-
-
-pub fn lmcp_msg_ser(obj: &LmcpType, buf: &mut [u8]) -> Result<usize, ()> {
-    let size = obj.lmcp_size();
-    if size > (u32::max_value() as usize) {
-        return Err(());
-    }
-
-    {
-        let r = get2!(buf.get_mut(0..4));
-        r[0] = 76;
-        r[1] = 77;
-        r[2] = 67;
-        r[3] = 80;
-    }
-    {
-        let r = get2!(buf.get_mut(4..));
-        get2!((size as u32).lmcp_ser(r));
-    }
-    {
-        let r = get2!(buf.get_mut(8..));
-        let wr = get2!(obj.lmcp_ser(r));
-        if wr != size {
-            return Err(());
+    pub fn ser(&self, buf: &mut [u8]) -> Result<usize, Error> {
+        let size = self.size();
+        if size > (u32::max_value() as usize) {
+            return Err(error!(ErrorType::MessageTooLarge));
         }
-    }
-    {
-        let r = get2!(buf.get_mut(size + 8..size + 12));
-        r[0] = 0;
-        r[1] = 0;
-        r[2] = 0;
-        r[3] = 0;
+
+        {
+            let r = get!(buf.get_mut(0..4));
+            r[0] = 76;
+            r[1] = 77;
+            r[2] = 67;
+            r[3] = 80;
+        }
+        {
+            let r = get!(buf.get_mut(4..));
+            (size as u32).ser(r)?;
+        }
+        {
+            let r = get!(buf.get_mut(8..));
+            let wr = self.ser(r)?;
+            if wr != size {
+                return Err(error!(ErrorType::MessageSizeMismatch));
+            }
+        }
+        {
+            // TODO: optionally implement checksum
+            let r = get!(buf.get_mut(size + 8..size + 12));
+            r[0] = 0;
+            r[1] = 0;
+            r[2] = 0;
+            r[3] = 0;
+        }
+
+        Ok(size + 12)
     }
 
-    Ok(size + 12)
-}
-
-pub fn lmcp_msg_size(obj: &LmcpType) -> usize {
-    obj.lmcp_size() + 12
+    pub fn size(&self) -> usize {
+        Lmcp::size(self) + 12
+    }
 }

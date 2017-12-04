@@ -9,7 +9,7 @@
 
 // This file was auto-created by LmcpGen. Modifications will be overwritten.
 
-use avtas::lmcp::{LmcpSer};
+use avtas::lmcp::{Error, ErrorType, Lmcp, SrcLoc};
 
 #[derive(PartialEq, Debug, Copy, Clone)]
 pub enum -<enum_name>- {-<declare_enum_fields>-
@@ -24,19 +24,18 @@ impl -<enum_name>- {
     }
 }
 
-impl LmcpSer for -<enum_name>- {
-    fn lmcp_ser(&self, buf: &mut[u8]) -> Option<usize> {
-        let readb = get!((*self as i32).lmcp_ser(buf));
-        Some(readb)
+impl Lmcp for -<enum_name>- {
+    fn ser(&self, buf: &mut[u8]) -> Result<usize, Error> {
+        (*self as i32).ser(buf)
     }
 
-    fn lmcp_deser(buf: &[u8]) -> Option<(-<enum_name>-, usize)> {
-        let (i, readb): (i32, usize) = get!(i32::lmcp_deser(buf));
-        let out = get!(-<enum_name>-::from_i32(i));
-        Some((out, readb))
+    fn deser(buf: &[u8]) -> Result<(-<enum_name>-, usize), Error> {
+        let (i, readb) = i32::deser(buf)?;
+        let out = -<enum_name>-::from_i32(i).ok_or(error!(ErrorType::InvalidEnumValue))?;
+        Ok((out, readb))
     }
 
-    fn lmcp_size(&self) -> usize { 0i32.lmcp_size() }
+    fn size(&self) -> usize { 0i32.size() }
 }
 
 impl Default for -<enum_name>- {
@@ -58,23 +57,17 @@ pub mod tests {
     }
 
     quickcheck! {
-        fn serializes(x: -<enum_name>-) -> TestResult {
-            let mut buf: Vec<u8> = vec![0; x.lmcp_size()];
-            if let Some(sx) = x.lmcp_ser(&mut buf) {
-                return TestResult::from_bool(sx == x.lmcp_size());
-            } else {
-                return TestResult::failed();
-            }
+        fn serializes(x: -<enum_name>-) -> Result<TestResult, Error> {
+            let mut buf: Vec<u8> = vec![0; x.size()];
+            let sx = x.ser(&mut buf)?;
+            Ok(TestResult::from_bool(sx == x.size()))
         }
 
-        fn roundtrips(x: -<enum_name>-) -> TestResult {
-            let mut buf: Vec<u8> = vec![0; x.lmcp_size()];
-            if let Some(sx) = x.lmcp_ser(&mut buf) {
-                if let Some((y, sy)) = -<enum_name>-::lmcp_deser(&buf) {
-                    return TestResult::from_bool(sx == sy && x == y);
-                }
-            }
-            return TestResult::failed();
+        fn roundtrips(x: -<enum_name>-) -> Result<TestResult, Error> {
+            let mut buf: Vec<u8> = vec![0; x.size()];
+            let sx = x.ser(&mut buf)?;
+            let (y, sy) = -<enum_name>-::deser(&buf)?;
+            Ok(TestResult::from_bool(sx == sy && x == y))
         }
     }
 }

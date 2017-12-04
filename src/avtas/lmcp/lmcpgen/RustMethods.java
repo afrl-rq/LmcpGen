@@ -287,54 +287,54 @@ public class RustMethods {
         return sb.toString();
     }
 
-    public static String trait_lmcp_ser_cases(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en, String ws) throws Exception {
+    public static String trait_ser_cases(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en, String ws) throws Exception {
         StringBuilder sb = new StringBuilder();
 
         for (StructInfo child : MDMInfo.getAllChildren(infos, st0)) {
             String prefix = getSeriesSnake(infos, child.seriesName);
             sb.append(ws + String.format("} else if let Some(x) = %sT::as_%s_%s(self.as_ref()) {\n",
                                          st0.name, prefix, snake_case(child.name)));
-            sb.append(ws + String.format("    x.lmcp_ser(buf)\n"));
+            sb.append(ws + String.format("    x.ser(buf)\n"));
         }
 
         return sb.toString();
     }
 
-    public static String trait_lmcp_deser_cases(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en, String ws) throws Exception {
+    public static String trait_deser_cases(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en, String ws) throws Exception {
         StringBuilder sb = new StringBuilder();
 
         for (StructInfo child : MDMInfo.getAllChildren(infos, st0)) {
             String prefix = getSeriesModule(infos, child.seriesName);
             sb.append(ws + String.format("} else if si == ::%s::%s::%s::struct_info() {\n",
                                          prefix, snake_case(child.name), child.name));
-            sb.append(ws + String.format("    let (x, readb) = get!(::%s::%s::%s::lmcp_deser(buf));\n",
+            sb.append(ws + String.format("    let (x, readb) = ::%s::%s::%s::deser(buf)?;\n",
                                          prefix, snake_case(child.name), child.name));
-            sb.append(ws + String.format("    Some((Box::new(x), readb))\n"));
+            sb.append(ws + String.format("    Ok((Box::new(x), readb))\n"));
         }
 
         return sb.toString();
     }
 
-    public static String trait_lmcp_size_cases(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en, String ws) throws Exception {
+    public static String trait_size_cases(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en, String ws) throws Exception {
         StringBuilder sb = new StringBuilder();
 
         for (StructInfo child : MDMInfo.getAllChildren(infos, st0)) {
             String prefix = getSeriesSnake(infos, child.seriesName);
             sb.append(ws + String.format("} else if let Some(x) = %sT::as_%s_%s(self.as_ref()) {\n",
                                          st0.name, prefix, snake_case(child.name)));
-            sb.append(ws + String.format("    x.lmcp_size()\n"));
+            sb.append(ws + String.format("    x.size()\n"));
         }
 
         return sb.toString();
     }
 
-    public static String struct_lmcp_ser_body(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en0, String ws) throws Exception {
+    public static String struct_ser_body(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en0, String ws) throws Exception {
         StringBuilder sb = new StringBuilder();
         for (StructInfo st : MDMInfo.getAllParents(infos, st0)) {
             for (FieldInfo field : st.fields) {
                 sb.append(ws + "{\n");
                 sb.append(ws + "    let r = get!(buf.get_mut(pos ..));\n");
-                sb.append(ws + String.format("    let writeb: usize = get!(self.%s.lmcp_ser(r));\n", snake_case(field.name)));
+                sb.append(ws + String.format("    let writeb: usize = self.%s.ser(r)?;\n", snake_case(field.name)));
                 sb.append(ws + "    pos += writeb;\n");
                 sb.append(ws + "}\n");
             }
@@ -342,7 +342,7 @@ public class RustMethods {
         return sb.toString();
     }
 
-    public static String struct_lmcp_deser_body(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en0, String ws) throws Exception {
+    public static String struct_deser_body(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en0, String ws) throws Exception {
         StringBuilder sb = new StringBuilder();
 
         boolean needMutable = false;
@@ -351,7 +351,7 @@ public class RustMethods {
                 needMutable = true;
                 sb.append(ws + "{\n");
                 sb.append(ws + "    let r = get!(buf.get(pos ..));\n");
-                sb.append(ws + String.format("    let (x, readb): (%s, usize) = get!(LmcpSer::lmcp_deser(r));\n",
+                sb.append(ws + String.format("    let (x, readb): (%s, usize) = Lmcp::deser(r)?;\n",
                                              getBoxedTypeName(infos, field)));
                 sb.append(ws + String.format("    out.%s = x;\n", snake_case(field.name)));
                 sb.append(ws + "    pos += readb;\n");
@@ -365,14 +365,14 @@ public class RustMethods {
         return sb.toString();
     }
 
-    public static String struct_lmcp_size_body(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en0, String ws) throws Exception {
+    public static String struct_size_body(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en0, String ws) throws Exception {
         StringBuilder sb = new StringBuilder();
 
         boolean needMutable = false;
         for (StructInfo st : MDMInfo.getAllParents(infos, st0)) {
             for (FieldInfo field : st.fields) {
                 needMutable = true;
-                sb.append(ws + String.format("size += self.%s.lmcp_size();\n", snake_case(field.name)));
+                sb.append(ws + String.format("size += self.%s.size();\n", snake_case(field.name)));
             }
         }
 
@@ -468,31 +468,31 @@ public class RustMethods {
         return sb.toString();
     }
 
-    public static String match_lmcp_ser(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en, String ws) throws Exception {
+    public static String match_ser(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en, String ws) throws Exception {
         StringBuilder sb = new StringBuilder();
         for (MDMInfo mdm : infos) {
             for (StructInfo st : mdm.structs) {
                 sb.append(ws);
                 String prefix = getSeriesCamel(infos, st.seriesName);
-                sb.append(String.format("LmcpType::%s%s(ref x) => x.lmcp_ser(buf),\n", prefix, st.name));
+                sb.append(String.format("Message::%s%s(ref x) => x.ser(buf),\n", prefix, st.name));
             }
         }
         return sb.toString();
     }
 
-    public static String match_lmcp_size(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en, String ws) throws Exception {
+    public static String match_size(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en, String ws) throws Exception {
         StringBuilder sb = new StringBuilder();
         for (MDMInfo mdm : infos) {
             for (StructInfo st : mdm.structs) {
                 sb.append(ws);
                 String prefix = getSeriesCamel(infos, st.seriesName);
-                sb.append(String.format("LmcpType::%s%s(ref x) => x.lmcp_size(),\n", prefix, st.name));
+                sb.append(String.format("Message::%s%s(ref x) => x.size(),\n", prefix, st.name));
             }
         }
         return sb.toString();
     }
 
-    public static String match_lmcp_deser(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en, String ws) throws Exception {
+    public static String match_deser(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st0, EnumInfo en, String ws) throws Exception {
         StringBuilder sb = new StringBuilder();
         for (MDMInfo mdm : infos) {
             for (StructInfo st : mdm.structs) {
@@ -500,10 +500,10 @@ public class RustMethods {
                 sb.append(String.format("(%d, %d) => {\n", mdm.seriesNameAsLong, st.id));
                 sb.append(ws);
                 String prefix_module = getSeriesModule(infos, st.seriesName);
-                sb.append(String.format("    let (s, i) = get!(%s::%s::%s::lmcp_deser(buf));\n", prefix_module, snake_case(st.name), st.name));
+                sb.append(String.format("    let (s, i) = %s::%s::%s::deser(buf)?;\n", prefix_module, snake_case(st.name), st.name));
                 sb.append(ws);
                 String prefix_camel = getSeriesCamel(infos, st.seriesName);
-                sb.append(String.format("    Some((LmcpType::%s%s(s), i))\n", prefix_camel, st.name));
+                sb.append(String.format("    Ok((Message::%s%s(s), i))\n", prefix_camel, st.name));
                 sb.append(ws);
                 sb.append("}\n");
             }
@@ -518,7 +518,7 @@ public class RustMethods {
                 sb.append(ws);
                 String prefix_module = getSeriesModule(infos, st.seriesName);
                 String prefix_camel = getSeriesCamel(infos, st.seriesName);
-                sb.append(String.format("LmcpType::%s%s(_) => %s::%s::%s::subscription(),\n", prefix_camel, st.name, prefix_module, snake_case(st.name), st.name));
+                sb.append(String.format("Message::%s%s(_) => %s::%s::%s::subscription(),\n", prefix_camel, st.name, prefix_module, snake_case(st.name), st.name));
             }
         }
         return sb.toString();
@@ -564,7 +564,7 @@ public class RustMethods {
                 }
                 needImport = true;
                 sb.append(ws);
-                sb.append(String.format("if x.%s.len() > (u16::MAX as usize) { return TestResult::discard(); }\n", snake_case(field.name)));
+                sb.append(String.format("if x.%s.len() > (u16::MAX as usize) { return Ok(TestResult::discard()); }\n", snake_case(field.name)));
             }
         }
         if (needImport) {

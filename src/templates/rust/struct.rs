@@ -9,7 +9,7 @@
 
 // This file was auto-created by LmcpGen. Modifications will be overwritten.
 
-use avtas::lmcp::{LmcpSer, LmcpStruct, LmcpSubscription, StructInfo};
+use avtas::lmcp::{Error, ErrorType, Lmcp, LmcpSubscription, SrcLoc, Struct, StructInfo};
 use std::fmt::Debug;
 
 #[derive(Clone, -<struct_copy>-Debug, Default)]
@@ -28,7 +28,7 @@ impl LmcpSubscription for -<datatype_name>- {
     fn subscription() -> &'static str { "-<longdatatype_name_dots>-" }
 }
 
-impl LmcpStruct for -<datatype_name>- {
+impl Struct for -<datatype_name>- {
     fn struct_info() -> StructInfo {
         StructInfo {
             exist: 1,
@@ -39,30 +39,31 @@ impl LmcpStruct for -<datatype_name>- {
     }
 }
 
-impl LmcpSer for -<datatype_name>- {
-    fn lmcp_ser(&self, buf: &mut[u8]) -> Option<usize> {
+impl Lmcp for -<datatype_name>- {
+    fn ser(&self, buf: &mut[u8]) -> Result<usize, Error> {
         let mut pos = 0;
         {
-            let x = get!(Self::struct_info().lmcp_ser(buf));
+            let x = Self::struct_info().ser(buf)?;
             pos += x;
         }
-        -<struct_lmcp_ser_body>-
-        Some(pos)
+        -<struct_ser_body>-
+        Ok(pos)
     }
 
-    fn lmcp_deser(buf: &[u8]) -> Option<(-<datatype_name>-, usize)> {
+    fn deser(buf: &[u8]) -> Result<(-<datatype_name>-, usize), Error> {
         let mut pos = 0;
-        {
-            let (_si, u) = get!(StructInfo::lmcp_deser(buf));
-            // TODO: assert correctness properties of StructInfo
-            pos += u;
+        let (si, u) = StructInfo::deser(buf)?;
+        pos += u;
+        if si == -<datatype_name>-::struct_info() {
+            -<struct_deser_body>-
+            Ok((out, pos))
+        } else {
+            Err(error!(ErrorType::InvalidStructInfo))
         }
-        -<struct_lmcp_deser_body>-
-        Some((out, pos))
     }
 
-    fn lmcp_size(&self) -> usize {
-        -<struct_lmcp_size_body>-
+    fn size(&self) -> usize {
+        -<struct_size_body>-
         size
     }
 }
@@ -77,7 +78,7 @@ impl Clone for Box<-<datatype_name>-T> {
             Box::new(x.clone())
         -<trait_clone_cases>-
         } else {
-            panic!("clone error for: {:?}", self)
+            unreachable!()
         }
     }
 }
@@ -99,31 +100,31 @@ impl PartialEq for Box<-<datatype_name>-T> {
     }
 }
 
-impl LmcpSer for Box<-<datatype_name>-T> {
-    fn lmcp_ser(&self, buf: &mut[u8]) -> Option<usize> {
+impl Lmcp for Box<-<datatype_name>-T> {
+    fn ser(&self, buf: &mut[u8]) -> Result<usize, Error> {
         if let Some(x) = -<datatype_name>-T::as_-<series_snake_name>-_-<datatype_snake_name>-(self.as_ref()) {
-            x.lmcp_ser(buf)
-        -<trait_lmcp_ser_cases>-
+            x.ser(buf)
+        -<trait_ser_cases>-
         } else {
             unreachable!()
         }
     }
 
-    fn lmcp_deser(buf: &[u8]) -> Option<(Box<-<datatype_name>-T>, usize)> {
-        let (si, _) = get!(StructInfo::lmcp_deser(buf));
+    fn deser(buf: &[u8]) -> Result<(Box<-<datatype_name>-T>, usize), Error> {
+        let (si, _) = StructInfo::deser(buf)?;
         if si == -<datatype_name>-::struct_info() {
-            let (x, readb) = get!(-<datatype_name>-::lmcp_deser(buf));
-            Some((Box::new(x), readb))
-        -<trait_lmcp_deser_cases>-
+            let (x, readb) = -<datatype_name>-::deser(buf)?;
+            Ok((Box::new(x), readb))
+        -<trait_deser_cases>-
         } else {
-            None
+            Err(error!(ErrorType::InvalidStructInfo))
         }
     }
 
-    fn lmcp_size(&self) -> usize {
+    fn size(&self) -> usize {
         if let Some(x) = -<datatype_name>-T::as_-<series_snake_name>-_-<datatype_snake_name>-(self.as_ref()) {
-            x.lmcp_size()
-        -<trait_lmcp_size_cases>-
+            x.size()
+        -<trait_size_cases>-
         } else {
             unreachable!()
         }
@@ -146,25 +147,19 @@ pub mod tests {
     }
 
     quickcheck! {
-        fn serializes(x: -<datatype_name>-) -> TestResult {
+        fn serializes(x: -<datatype_name>-) -> Result<TestResult, Error> {
             -<discard_long_fields>-
-            let mut buf: Vec<u8> = vec![0; x.lmcp_size()];
-            if let Some(sx) = x.lmcp_ser(&mut buf) {
-                return TestResult::from_bool(sx == x.lmcp_size());
-            } else {
-                return TestResult::failed();
-            }
+            let mut buf: Vec<u8> = vec![0; x.size()];
+            let sx = x.ser(&mut buf)?;
+            Ok(TestResult::from_bool(sx == x.size()))
         }
 
-        fn roundtrips(x: -<datatype_name>-) -> TestResult {
+        fn roundtrips(x: -<datatype_name>-) -> Result<TestResult, Error> {
             -<discard_long_fields>-
-            let mut buf: Vec<u8> = vec![0; x.lmcp_size()];
-            if let Some(sx) = x.lmcp_ser(&mut buf) {
-                if let Some((y, sy)) = -<datatype_name>-::lmcp_deser(&buf) {
-                    return TestResult::from_bool(sx == sy && x == y);
-                }
-            }
-            return TestResult::failed();
+            let mut buf: Vec<u8> = vec![0; x.size()];
+            let sx = x.ser(&mut buf)?;
+            let (y, sy) = -<datatype_name>-::deser(&buf)?;
+            Ok(TestResult::from_bool(sx == sy && x == y))
         }
     }
 }

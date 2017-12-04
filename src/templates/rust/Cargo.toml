@@ -15,10 +15,7 @@ version = "0.1.0"
 authors = ["LmcpGen"]
 
 [dev-dependencies]
-quickcheck = "0.4.1"
-
-[lib]
-crate-type = ["lib", "staticlib"]
+quickcheck = "0.4"
 
 [[bin]]
 name = "mybin"
