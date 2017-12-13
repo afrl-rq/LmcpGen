@@ -33,7 +33,7 @@ class LMCPFactory:
 
     def getObject(self, buffer):
         if len(buffer) < HEADER_SIZE:
-            print  "getObject() : buffer too small for message"
+            print("getObject() : buffer too small for message")
             return None
         type = getLMCPType(buffer)
         series = getLMCPSeries(buffer)
@@ -51,7 +51,7 @@ class LMCPFactory:
         msgSize = getSize(header)
         msgBody = fileobj.read(msgSize + CHECKSUM_SIZE)
         if  validate(header + msgBody) != True:
-            print "LMCPFactory : bad checksum. "
+            print("LMCPFactory : bad checksum. ")
             return None
         return self.getObject(header + msgBody)
 
