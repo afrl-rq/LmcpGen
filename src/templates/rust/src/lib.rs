@@ -82,7 +82,7 @@ impl Message {
     }
 
     pub fn ser(&self, buf: &mut [u8]) -> Result<usize, Error> {
-        let size = self.size();
+        let size = Lmcp::size(self);
         if size > (u32::max_value() as usize) {
             return Err(error!(ErrorType::MessageTooLarge));
         }
@@ -100,7 +100,7 @@ impl Message {
         }
         {
             let r = get!(buf.get_mut(8..));
-            let wr = self.ser(r)?;
+            let wr = Lmcp::ser(self, r)?;
             if wr != size {
                 return Err(error!(ErrorType::MessageSizeMismatch));
             }
