@@ -18,6 +18,8 @@
 
 package avtas.lmcp.lmcpgen;
 
+import java.util.Objects;
+
 /**
  *
  * @author default
@@ -66,5 +68,82 @@ public class FieldInfo {
     public String toString() {
         return "FieldInfo{" + "name=" + name + ", comment=" + comment + ", length=" + length + ", type=" + type + ", defaultVal=" + defaultVal + ", units=" + units + ", seriesName=" + seriesName + ", isScalar=" + isScalar + ", isArray=" + isArray + ", isLargeArray=" + isLargeArray + ", maxArrayLength=" + maxArrayLength + ", isEnum=" + isEnum + ", isStruct=" + isStruct +  ", isOptional=" + isOptional + ", isMap=" + isMap + '}';
     }
-    
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 61 * hash + Objects.hashCode(this.name);
+        hash = 61 * hash + Objects.hashCode(this.comment);
+        hash = 61 * hash + this.length;
+        hash = 61 * hash + Objects.hashCode(this.type);
+        hash = 61 * hash + Objects.hashCode(this.defaultVal);
+        hash = 61 * hash + Objects.hashCode(this.units);
+        hash = 61 * hash + Objects.hashCode(this.seriesName);
+        hash = 61 * hash + (this.isScalar ? 1 : 0);
+        hash = 61 * hash + (this.isArray ? 1 : 0);
+        hash = 61 * hash + (this.isLargeArray ? 1 : 0);
+        hash = 61 * hash + (this.isEnum ? 1 : 0);
+        hash = 61 * hash + (this.isStruct ? 1 : 0);
+        hash = 61 * hash + (this.isMap ? 1 : 0);
+        hash = 61 * hash + (this.isOptional ? 1 : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final FieldInfo other = (FieldInfo) obj;
+        if (this.length != other.length) {
+            return false;
+        }
+        if (this.isScalar != other.isScalar) {
+            return false;
+        }
+        if (this.isArray != other.isArray) {
+            return false;
+        }
+        if (this.isLargeArray != other.isLargeArray) {
+            return false;
+        }
+        if (this.isEnum != other.isEnum) {
+            return false;
+        }
+        if (this.isStruct != other.isStruct) {
+            return false;
+        }
+        if (this.isMap != other.isMap) {
+            return false;
+        }
+        if (this.isOptional != other.isOptional) {
+            return false;
+        }
+        if (!Objects.equals(this.name, other.name)) {
+            return false;
+        }
+        if (!Objects.equals(this.comment, other.comment)) {
+            return false;
+        }
+        if (!Objects.equals(this.type, other.type)) {
+            return false;
+        }
+        if (!Objects.equals(this.defaultVal, other.defaultVal)) {
+            return false;
+        }
+        if (!Objects.equals(this.units, other.units)) {
+            return false;
+        }
+        if (!Objects.equals(this.seriesName, other.seriesName)) {
+            return false;
+        }
+        return true;
+    }
+
 }
