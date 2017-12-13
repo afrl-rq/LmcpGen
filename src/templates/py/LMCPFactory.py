@@ -1,5 +1,5 @@
 import struct
-import LMCPObject;
+from . import LMCPObject;
 import xml.dom.minidom
 
 ## ===============================================================================

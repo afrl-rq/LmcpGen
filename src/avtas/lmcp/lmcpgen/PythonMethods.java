@@ -238,7 +238,7 @@ class PythonMethods {
                 if (f.type.equalsIgnoreCase("string")) {
                     buf.append(ws + "buffer.append(struct.pack(\">H\", len(" + name + ") ))\n");
                     buf.append(ws + "if len(" + name + ") > 0:\n");
-                    buf.append(ws + "    buffer.append(struct.pack( `len(" + name + ")` + \"s\", str(" + name + ")))\n");
+                    buf.append(ws + "    buffer.append(struct.pack( repr(len(" + name + ")) + \"s\", str(" + name + ")))\n");
                 } else if (f.type.equalsIgnoreCase("Bool")) {
                     buf.append(ws + "boolChar = 1 if " + name + " == True else 0\n");
                     buf.append(ws + "buffer.append(struct.pack(\">B\",boolChar))\n");
@@ -274,7 +274,7 @@ class PythonMethods {
                     buf.append(ws + "for x in " + name + ":\n");
                     buf.append(ws + "    buffer.append(struct.pack(\">H\", len(x) ))\n");
                     buf.append(ws + "    if len(x) > 0:\n");
-                    buf.append(ws + "        buffer.append(struct.pack( `len(x)` + \"s\", str(" + name + "[x])))\n");
+                    buf.append(ws + "        buffer.append(struct.pack( repr(len(x)) + \"s\", str(" + name + "[x])))\n");
                 } else if (f.type.equalsIgnoreCase("Bool")) {
                     buf.append(ws + "for x in " + name + ":\n");
                     buf.append(ws + "    boolChar = 1 if x == True else 0\n");
@@ -299,7 +299,7 @@ class PythonMethods {
                     buf.append(ws + "_strlen = struct.unpack_from(\">H\", buffer, _pos )[0]\n");
                     buf.append(ws + "_pos += 2\n");
                     buf.append(ws + "if _strlen > 0:\n");
-                    buf.append(ws + "    " + name + " = struct.unpack_from( `_strlen` + \"s\", buffer, _pos )[0]\n");
+                    buf.append(ws + "    " + name + " = struct.unpack_from( repr(_strlen) + \"s\", buffer, _pos )[0]\n");
                     buf.append(ws + "    _pos += _strlen\n");
                     buf.append(ws + "else:\n ");
                     buf.append(ws + "    " + name + " = \"\"\n");
@@ -363,7 +363,7 @@ class PythonMethods {
                     buf.append(ws + "    _strlen = struct.unpack_from(\">H\", buffer, _pos )[0]\n");
                     buf.append(ws + "    _pos += 2\n");
                     buf.append(ws + "    if _strlen > 0:\n");
-                    buf.append(ws + "        " + name + "[x] = struct.unpack_from( `_strlen` + \"s\", buffer, _pos )[0]\n");
+                    buf.append(ws + "        " + name + "[x] = struct.unpack_from( repr(_strlen) + \"s\", buffer, _pos )[0]\n");
                     buf.append(ws + "        _pos += _strlen\n");
                     buf.append(ws + "    else:\n ");
                     buf.append(ws + "        " + name + "[x] = \"\"\n");
@@ -373,7 +373,7 @@ class PythonMethods {
                     buf.append(ws + "    " + name + "[x] = True if boolChar == 1 else False\n");
                     buf.append(ws + "    _pos += 1\n");
                 } else {
-                    String typeStr = "\">\" + `_arraylen` + \"" + getStructTypeString(f) + "\"";
+                    String typeStr = "\">\" + repr(_arraylen) + \"" + getStructTypeString(f) + "\"";
                     buf.append(ws + "if _arraylen > 0:\n");
                     buf.append(ws + "    " + name + " = struct.unpack_from(" + typeStr + ", buffer, _pos )\n");
                     buf.append(ws + "    _pos += " + sizeOf(f) + " * _arraylen\n");
@@ -459,7 +459,7 @@ class PythonMethods {
         for(MDMInfo in : infos){
             if(in.seriesName.equals(info.seriesName)){
                 for(StructInfo si : in.structs){
-                    buf.append(ws + "import " + si.name + "\n");
+                    buf.append(ws + "from . import " + si.name + "\n");
                 }
             }
         }
