@@ -22,6 +22,6 @@ buf = []
 
 -<pack_all_messages>-
 
-s.send("".join(buf))
+s.send(b"".join(buf))
 
 

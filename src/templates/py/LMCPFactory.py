@@ -149,17 +149,17 @@ def packMessage(lmcpObject, calcChecksum):
     obj_buffer.append(struct.pack(">I", lmcpObject.LMCP_TYPE))
     obj_buffer.append(struct.pack(">H", lmcpObject.SERIES_VERSION))
     obj_buffer.append(obj_tmp)
-    hdr_buffer.append(struct.pack(">I", len("".join(obj_buffer))))
+    hdr_buffer.append(struct.pack(">I", len(b"".join(obj_buffer))))
     total_buffer.extend(hdr_buffer)
     total_buffer.extend(obj_buffer)
 
     #pack the checksum
     if calcChecksum:
-        total_buffer.append(struct.pack(">I", calculateChecksum("".join(total_buffer), 0)))
+        total_buffer.append(struct.pack(">I", calculateChecksum(b"".join(total_buffer), 0)))
     else:
         total_buffer.append(struct.pack(">I", 0))
 
-    return "".join(total_buffer)
+    return b"".join(total_buffer)
 
 def getSize(buffer):
     return struct.unpack_from(">I", buffer, 4)[0]
