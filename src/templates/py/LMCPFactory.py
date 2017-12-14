@@ -83,7 +83,7 @@ class LMCPFactory:
         return objs
 
     def unpackFromDict(self, d):
-        if type(d) is not dict:
+        if not isinstance(d, dict):
             return None
 
         if ("datatype" in d.keys() and "datastring" in d.keys()):
@@ -94,7 +94,7 @@ class LMCPFactory:
         
         obj = None
         for key in d:
-            if type(d[key]) is dict:
+            if isinstance(d[key], dict):
                 name_parts = key.split("/")
                 if len(name_parts) == 2:
                    series_name = name_parts[0]
