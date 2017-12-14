@@ -35,10 +35,10 @@ class LMCPFactory:
         if len(buffer) < HEADER_SIZE:
             print("getObject() : buffer too small for message")
             return None
-        type = getLMCPType(buffer)
+        type_ = getLMCPType(buffer)
         series = getLMCPSeries(buffer)
         version = getLMCPVersion(buffer)
-        obj = self.createObject(series, version, type)
+        obj = self.createObject(series, version, type_)
         if obj != None:
            obj.unpack(buffer, HEADER_SIZE + 15)
         return obj
