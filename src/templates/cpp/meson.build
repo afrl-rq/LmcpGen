@@ -15,7 +15,7 @@ if cpp.get_id() != 'msvc'
   cpp_args += [
     '-std=c++11',
     '-Wall',
-  ],
+  ]
 endif
 
 lib_lmcp = static_library(
