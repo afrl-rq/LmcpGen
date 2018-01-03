@@ -1,5 +1,5 @@
 import struct
-import LMCPObject;
+from . import LMCPObject;
 import xml.dom.minidom
 
 ## ===============================================================================
@@ -33,12 +33,12 @@ class LMCPFactory:
 
     def getObject(self, buffer):
         if len(buffer) < HEADER_SIZE:
-            print  "getObject() : buffer too small for message"
+            print("getObject() : buffer too small for message")
             return None
-        type = getLMCPType(buffer)
+        type_ = getLMCPType(buffer)
         series = getLMCPSeries(buffer)
         version = getLMCPVersion(buffer)
-        obj = self.createObject(series, version, type)
+        obj = self.createObject(series, version, type_)
         if obj != None:
            obj.unpack(buffer, HEADER_SIZE + 15)
         return obj
@@ -51,7 +51,7 @@ class LMCPFactory:
         msgSize = getSize(header)
         msgBody = fileobj.read(msgSize + CHECKSUM_SIZE)
         if  validate(header + msgBody) != True:
-            print "LMCPFactory : bad checksum. "
+            print("LMCPFactory : bad checksum. ")
             return None
         return self.getObject(header + msgBody)
 
@@ -83,7 +83,7 @@ class LMCPFactory:
         return objs
 
     def unpackFromDict(self, d):
-        if type(d) is not dict:
+        if not isinstance(d, dict):
             return None
 
         if ("datatype" in d.keys() and "datastring" in d.keys()):
@@ -94,7 +94,7 @@ class LMCPFactory:
         
         obj = None
         for key in d:
-            if type(d[key]) is dict:
+            if isinstance(d[key], dict):
                 name_parts = key.split("/")
                 if len(name_parts) == 2:
                    series_name = name_parts[0]
@@ -149,17 +149,17 @@ def packMessage(lmcpObject, calcChecksum):
     obj_buffer.append(struct.pack(">I", lmcpObject.LMCP_TYPE))
     obj_buffer.append(struct.pack(">H", lmcpObject.SERIES_VERSION))
     obj_buffer.append(obj_tmp)
-    hdr_buffer.append(struct.pack(">I", len("".join(obj_buffer))))
+    hdr_buffer.append(struct.pack(">I", len(b"".join(obj_buffer))))
     total_buffer.extend(hdr_buffer)
     total_buffer.extend(obj_buffer)
 
     #pack the checksum
     if calcChecksum:
-        total_buffer.append(struct.pack(">I", calculateChecksum("".join(total_buffer), 0)))
+        total_buffer.append(struct.pack(">I", calculateChecksum(b"".join(total_buffer), 0)))
     else:
         total_buffer.append(struct.pack(">I", 0))
 
-    return "".join(total_buffer)
+    return b"".join(total_buffer)
 
 def getSize(buffer):
     return struct.unpack_from(">I", buffer, 4)[0]

@@ -35,7 +35,7 @@ class -<classname>-(-<extends_name>-):
         """
         buffer = []
         -<pack_vars>-
-        return "".join(buffer)
+        return b"".join(buffer)
 
     def unpack(self, buffer, _pos):
         """

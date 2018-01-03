@@ -26,7 +26,7 @@ class LMCPHandler(SocketServer.StreamRequestHandler):
                 size = LMCPFactory.getSize(data[0])
                 print "object size: %d" % (size,)
                 data.append(self.request.recv(size+4)) # compensate for checksum
-                data_str = "".join(data)
+                data_str = b"".join(data)
                 print "%d bytes received" % (len(data_str),)
                 recv_obj = self.factory.getObject(data_str)
                 print "%s received" % recv_obj.__class__
