@@ -58,6 +58,7 @@
     <Compile Include="Avtas\Lmcp\LmcpFactory.cs" />
     <Compile Include="Avtas\Lmcp\LmcpObjectReceivedEventArgs.cs" />
     <Compile Include="Avtas\Lmcp\LmcpXmlReader.cs" />
+    <Compile Include="Avtas\Lmcp\LmcpCoreXmlReader.cs" />
     <Compile Include="Avtas\Lmcp\LmcpXmlWriter.cs" />
     <Compile Include="Avtas\Lmcp\ISeriesList.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

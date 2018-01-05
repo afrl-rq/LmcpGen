@@ -16,24 +16,26 @@ using System.Collections.Generic;
 
 namespace Avtas.Lmcp
 {
-    public abstract class LmcpXmlReader
+    public abstract partial class LmcpXmlReader
     {
-
-        private static List<LmcpXmlReader> readers = new List<LmcpXmlReader>();
+        private static readonly Dictionary<string, LmcpXmlReader> ReadersBySeriesName = new Dictionary<string, LmcpXmlReader>();
 
         public static void RegisterXmlReader( LmcpXmlReader reader )
         {
-            readers.Add( reader );
+            ReadersBySeriesName.Add( reader.getSeriesName(), reader );
         }
 
         /// <summary>
         /// Reads an LMCP XML Element and return the ILMCPObject it contains
         /// </summary>
-        public static ILmcpObject ReadXml(string input) {
-            StringReader sr = new StringReader(input);
-            XmlDocument doc = new XmlDocument();
-            doc.Load(sr);
-            return ReadXML(doc.DocumentElement);
+        public static ILmcpObject ReadXml( string input )
+        {
+            using( var sr = new StringReader( input ) )
+            {
+                var doc = new XmlDocument();
+                doc.Load( sr );
+                return ReadXML( doc.DocumentElement );
+            }
         }
 
         /// <summary>
@@ -41,12 +43,8 @@ namespace Avtas.Lmcp
         /// </summary>
         public static ILmcpObject ReadXML(XmlElement el)
         {
-            foreach( LmcpXmlReader reader in readers) {
-                if (reader.getSeriesName().Equals(el.GetAttribute("Series"))) {
-                    return reader.visitType(el);
-                }
-            }
-            return null;
+            LmcpXmlReader reader;
+            return !ReadersBySeriesName.TryGetValue( el.GetAttribute( "Series" ), out reader ) ? null : reader.visitType(el);
         }
 
         public abstract ILmcpObject visitType(XmlElement el);

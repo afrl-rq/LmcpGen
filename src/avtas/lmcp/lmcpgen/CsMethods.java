@@ -720,7 +720,7 @@ class CsMethods {
             {
                 continue;
             }
-            buf.append(ws + "readers.Add( new ").append(getCsNamespace(i.namespace)).append(".SeriesXmlReader());\n");
+            buf.append(ws + "RegisterXmlReader( new ").append(getCsNamespace(i.namespace)).append(".SeriesXmlReader());\n");
         }
         return buf.toString();
     }
