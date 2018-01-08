@@ -40,6 +40,7 @@ public class MDMInfo {
     public String guid = "";
     public StructInfo[] structs = new StructInfo[0];
     public EnumInfo[] enums = new EnumInfo[0];
+    public Set<String> mdmDependencies = new HashSet<>();
     /** a string containing the contents of the MDM file */
     public String mdmString = "";
     public int version = 0;

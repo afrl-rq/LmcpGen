@@ -941,20 +941,9 @@ class CsMethods {
     }
 
     public static String series_csproj_references(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
-        Set<String> deps = new HashSet<String>();
-        for (StructInfo s : info.structs) {
-            deps.add(s.extends_series);
-            for (int i = 0; i < s.fields.length; i++) {
-                if (s.fields[i].isStruct) {
-                    deps.add(s.fields[i].seriesName);
-                }
-            }
-        }
-        deps.remove("");
-        deps.remove(info.seriesName);
         
         String str = "";
-        for (String dep : deps) {
+        for (String dep : info.mdmDependencies) {
             for (MDMInfo i : infos) {
                 if (i.seriesName.contentEquals(dep))
                 {

@@ -23,6 +23,8 @@ import java.io.FileReader;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -124,7 +126,7 @@ public class MDMReader {
         }
 
         info.enums = fillEnums(XMLUtil.getList(node, "EnumList", "Enum"), info);
-
+        
         return info;
     }
 
@@ -341,7 +343,70 @@ public class MDMReader {
                         throw new Exception("struct and Enum with same name: " + st.name + " in MDM: " + st.seriesName);
                     }
                 }
-
+            }
+            
+            // track dependencies on other MDMs
+            // TODO: add dependencies for Enums
+            for (StructInfo s : info.structs) {
+                info.mdmDependencies.add(s.extends_series);
+                for (int i = 0; i < s.fields.length; i++) {
+                    if (s.fields[i].isStruct) {
+                        info.mdmDependencies.add(s.fields[i].seriesName);
+                    }
+                }
+            }
+            info.mdmDependencies.remove("");
+            info.mdmDependencies.remove(info.seriesName);
+        }
+        
+        // check for circular dependencies among MDMs using modified Floyd-Warshall
+        // https://en.wikipedia.org/wiki/Floyd%E2%80%93Warshall_algorithm
+        
+        // build map from MDM name to index in 'graph'
+        Map<String, Integer> mdmMap = new HashMap<>();
+        Integer v = 0;
+        for(MDMInfo info : infos) {
+            mdmMap.put(info.seriesName, v);
+            v = v + 1;
+        }
+        
+        // create dependency graph with each step of size 1
+        Integer dist[][] = new Integer[infos.length][infos.length];
+        for(int i=0; i<infos.length; i++) {
+            for(int j=0; j<infos.length; j++) {
+                dist[i][j] = 0;
+            }    
+        }
+        for(MDMInfo info : infos) {
+            for(String dep : info.mdmDependencies) {
+                dist[mdmMap.get(dep)][mdmMap.get(info.seriesName)] = 1;
+            }
+        }
+        
+        // iterate over all combinations
+        for(int k=0; k<infos.length; k++) {
+            for(int i=0; i<infos.length; i++) {
+                for(int j=0; j<infos.length; j++) {
+                    // if there is an initialized distance to consider
+                    if(dist[i][k] > 0 && dist[k][j] > 0) {
+                        // if [i][j] is uninitialized or a smaller distance has been found
+                        if(dist[i][j] == 0 || dist[i][j] > dist[i][k] + dist[k][j]) {
+                            dist[i][j] = dist[i][k] + dist[k][j];
+                        }
+                    }
+                }
+            }
+        }
+        
+        // check to see if any mdm is involved in a circular dependency
+        // TODO: track and report complete dependency cycle, possibly with
+        //       offending structs involved
+        for(int m=0; m<infos.length; m++) {
+            //System.out.println(infos[m].seriesName + ": " + infos[m].mdmDependencies.toString());
+            if(dist[m][m] > 0) {
+                String msg = infos[m].seriesName + " is involved in a circular dependancy with " + infos[m].mdmDependencies.toString();
+                System.out.println(msg);
+                throw new Exception(msg);
             }
         }
     }
