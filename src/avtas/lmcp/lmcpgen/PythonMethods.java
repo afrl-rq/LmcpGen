@@ -236,52 +236,58 @@ class PythonMethods {
             String name = "self." + f.name;
             if (!f.isArray) {
                 if (f.type.equalsIgnoreCase("string")) {
-                    buf.append(ws + "buffer.append(struct.pack(\">H\", len(" + name + ") ))\n");
+                    buf.append(ws + "buffer.extend(struct.pack(\">H\", len(" + name + ") ))\n");
                     buf.append(ws + "if len(" + name + ") > 0:\n");
-                    buf.append(ws + "    buffer.append(struct.pack( `len(" + name + ")` + \"s\", str(" + name + ")))\n");
+                    buf.append(ws + "    if (sys.version_info > (3, 0)):\n");
+                    buf.append(ws + "        buffer.extend(struct.pack( repr(len(" + name + ")) + \"s\", bytearray(" + name + ",'ascii')))\n");
+                    buf.append(ws + "    else:\n");
+                    buf.append(ws + "        buffer.extend(struct.pack( repr(len(" + name + ")) + \"s\", " + name + "))\n");
                 } else if (f.type.equalsIgnoreCase("Bool")) {
                     buf.append(ws + "boolChar = 1 if " + name + " == True else 0\n");
-                    buf.append(ws + "buffer.append(struct.pack(\">B\",boolChar))\n");
+                    buf.append(ws + "buffer.extend(struct.pack(\">B\",boolChar))\n");
                 } else if (f.isStruct) {
-                    buf.append(ws + "buffer.append(struct.pack(\"B\", " + name + " != None ))\n");
+                    buf.append(ws + "buffer.extend(struct.pack(\"B\", " + name + " != None ))\n");
                     buf.append(ws + "if " + name + " != None:\n");
-                    buf.append(ws + "    buffer.append(struct.pack(\">q\", " + name + ".SERIES_NAME_ID))\n");
-                    buf.append(ws + "    buffer.append(struct.pack(\">I\", " + name + ".LMCP_TYPE))\n");
-                    buf.append(ws + "    buffer.append(struct.pack(\">H\", " + name + ".SERIES_VERSION))\n");
-                    buf.append(ws + "    buffer.append(" + name + ".pack())\n");
+                    buf.append(ws + "    buffer.extend(struct.pack(\">q\", " + name + ".SERIES_NAME_ID))\n");
+                    buf.append(ws + "    buffer.extend(struct.pack(\">I\", " + name + ".LMCP_TYPE))\n");
+                    buf.append(ws + "    buffer.extend(struct.pack(\">H\", " + name + ".SERIES_VERSION))\n");
+                    buf.append(ws + "    buffer.extend(" + name + ".pack())\n");
                 } else {
-                    buf.append(ws + "buffer.append(struct.pack(\">" + getStructTypeString(f) + "\", " + name + "))\n");
+                    buf.append(ws + "buffer.extend(struct.pack(\">" + getStructTypeString(f) + "\", " + name + "))\n");
                 }
             } // field is an array
             else {
                 // for variable length arrays, precede with length value
                 if (f.length < 0) {
                     if (f.isLargeArray) {
-                       buf.append(ws + "buffer.append(struct.pack(\">I\", len(" + name + ") ))\n"); 
+                       buf.append(ws + "buffer.extend(struct.pack(\">I\", len(" + name + ") ))\n"); 
                     } else {
-                        buf.append(ws + "buffer.append(struct.pack(\">H\", len(" + name + ") ))\n");
+                        buf.append(ws + "buffer.extend(struct.pack(\">H\", len(" + name + ") ))\n");
                     }
                 }
                 if (f.isStruct) {
                     buf.append(ws + "for x in " + name + ":\n");
-                    buf.append(ws + "   buffer.append(struct.pack(\"B\", x != None ))\n");
+                    buf.append(ws + "   buffer.extend(struct.pack(\"B\", x != None ))\n");
                     buf.append(ws + "   if x != None:\n");
-                    buf.append(ws + "       buffer.append(struct.pack(\">q\", x.SERIES_NAME_ID))\n");
-                    buf.append(ws + "       buffer.append(struct.pack(\">I\", x.LMCP_TYPE))\n");
-                    buf.append(ws + "       buffer.append(struct.pack(\">H\", x.SERIES_VERSION))\n");
-                    buf.append(ws + "       buffer.append(x.pack())\n");
+                    buf.append(ws + "       buffer.extend(struct.pack(\">q\", x.SERIES_NAME_ID))\n");
+                    buf.append(ws + "       buffer.extend(struct.pack(\">I\", x.LMCP_TYPE))\n");
+                    buf.append(ws + "       buffer.extend(struct.pack(\">H\", x.SERIES_VERSION))\n");
+                    buf.append(ws + "       buffer.extend(x.pack())\n");
                 } else if (f.type.equalsIgnoreCase("string")) {
                     buf.append(ws + "for x in " + name + ":\n");
-                    buf.append(ws + "    buffer.append(struct.pack(\">H\", len(x) ))\n");
+                    buf.append(ws + "    buffer.extend(struct.pack(\">H\", len(x) ))\n");
                     buf.append(ws + "    if len(x) > 0:\n");
-                    buf.append(ws + "        buffer.append(struct.pack( `len(x)` + \"s\", str(" + name + "[x])))\n");
+                    buf.append(ws + "        if (sys.version_info > (3, 0)):\n");
+                    buf.append(ws + "            buffer.extend(struct.pack( repr(len(" + name + "[x])) + \"s\", bytearray(" + name + "[x],'ascii')))\n");
+                    buf.append(ws + "        else:\n");
+                    buf.append(ws + "            buffer.extend(struct.pack( repr(len(" + name + "[x])) + \"s\", " + name + "[x]))\n");
                 } else if (f.type.equalsIgnoreCase("Bool")) {
                     buf.append(ws + "for x in " + name + ":\n");
                     buf.append(ws + "    boolChar = 1 if x == True else 0\n");
-                    buf.append(ws + "    buffer.append(struct.pack(\">B\",boolChar))\n");
+                    buf.append(ws + "    buffer.extend(struct.pack(\">B\",boolChar))\n");
                 } else {
                     buf.append(ws + "for x in " + name + ":\n");
-                    buf.append(ws + "    buffer.append(struct.pack(\">" + getStructTypeString(f) + "\", x ))\n");
+                    buf.append(ws + "    buffer.extend(struct.pack(\">" + getStructTypeString(f) + "\", x ))\n");
                 }
             }
         }
@@ -296,10 +302,11 @@ class PythonMethods {
             String name = "self." + f.name;
             if (!f.isArray) {
                 if (f.type.equalsIgnoreCase("string")) {
+                    //buf.append(ws + "print('" + name + " =  ' + ':'.join(hex(x)[2:] for x in buffer[_pos:_pos+2]))\n");
                     buf.append(ws + "_strlen = struct.unpack_from(\">H\", buffer, _pos )[0]\n");
                     buf.append(ws + "_pos += 2\n");
                     buf.append(ws + "if _strlen > 0:\n");
-                    buf.append(ws + "    " + name + " = struct.unpack_from( `_strlen` + \"s\", buffer, _pos )[0]\n");
+                    buf.append(ws + "    " + name + " = struct.unpack_from( repr(_strlen) + \"s\", buffer, _pos )[0]\n");
                     buf.append(ws + "    _pos += _strlen\n");
                     buf.append(ws + "else:\n ");
                     buf.append(ws + "    " + name + " = \"\"\n");
@@ -332,12 +339,12 @@ class PythonMethods {
                 if (f.length < 0) {
                     if (f.isLargeArray) {
                         buf.append(ws + "_arraylen = struct.unpack_from(\">I\", buffer, _pos )[0]\n");
+                        buf.append(ws + "_pos += 4\n");
                     } else {
                         buf.append(ws + "_arraylen = struct.unpack_from(\">H\", buffer, _pos )[0]\n");
+                        buf.append(ws + "_pos += 2\n");
                     }
-                    buf.append(ws + "_arraylen = struct.unpack_from(\">H\", buffer, _pos )[0]\n");
                     buf.append(ws + name + " = [None] * _arraylen\n");
-                    buf.append(ws + "_pos += 2\n");
                 } else {
                     buf.append(ws + name + " = [None] * " + f.length + "\n");
                     buf.append(ws + "_arraylen = " + f.length + "\n");
@@ -363,7 +370,7 @@ class PythonMethods {
                     buf.append(ws + "    _strlen = struct.unpack_from(\">H\", buffer, _pos )[0]\n");
                     buf.append(ws + "    _pos += 2\n");
                     buf.append(ws + "    if _strlen > 0:\n");
-                    buf.append(ws + "        " + name + "[x] = struct.unpack_from( `_strlen` + \"s\", buffer, _pos )[0]\n");
+                    buf.append(ws + "        " + name + "[x] = struct.unpack_from( repr(_strlen) + \"s\", buffer, _pos )[0]\n");
                     buf.append(ws + "        _pos += _strlen\n");
                     buf.append(ws + "    else:\n ");
                     buf.append(ws + "        " + name + "[x] = \"\"\n");
@@ -373,7 +380,7 @@ class PythonMethods {
                     buf.append(ws + "    " + name + "[x] = True if boolChar == 1 else False\n");
                     buf.append(ws + "    _pos += 1\n");
                 } else {
-                    String typeStr = "\">\" + `_arraylen` + \"" + getStructTypeString(f) + "\"";
+                    String typeStr = "\">\" + repr(_arraylen) + \"" + getStructTypeString(f) + "\"";
                     buf.append(ws + "if _arraylen > 0:\n");
                     buf.append(ws + "    " + name + " = struct.unpack_from(" + typeStr + ", buffer, _pos )\n");
                     buf.append(ws + "    _pos += " + sizeOf(f) + " * _arraylen\n");
@@ -458,8 +465,9 @@ class PythonMethods {
         StringBuffer buf = new StringBuffer();
         for(MDMInfo in : infos){
             if(in.seriesName.equals(info.seriesName)){
+                String import_path = in.namespace.replace("/", ".");
                 for(StructInfo si : in.structs){
-                    buf.append(ws + "import " + si.name + "\n");
+                    buf.append(ws + "from " + import_path + " import " + si.name + "\n");
                 }
             }
         }
@@ -544,7 +552,7 @@ class PythonMethods {
             for(StructInfo si : i.structs){
                 buf.append(ws + "#Pack " + si.name + "\n");
                 buf.append(ws + "obj = " + si.name + "." + si.name + "()\n");
-                buf.append(ws + "buf.append(LMCPFactory.packMessage(obj, True))\n");
+                buf.append(ws + "buf.extend(LMCPFactory.packMessage(obj, True))\n");
             }
         }
         return buf.toString();
