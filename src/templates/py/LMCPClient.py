@@ -18,10 +18,10 @@ s = socket.socket()
 host = socket.gethostname()
 port = 11041
 s.connect((host, port))
-buf = []
+buf = bytearray()
 
 -<pack_all_messages>-
 
-s.send("".join(buf))
+s.send(buf)
 
 
