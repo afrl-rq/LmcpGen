@@ -13,6 +13,7 @@ ONCE            cpp/XMLParser.cpp           avtas/lmcp/XMLParser.cpp
 ONCE            cpp/XMLParser.h             avtas/lmcp/XMLParser.h
 ONCE            cpp/LmcpXMLReader.h         avtas/lmcp/LmcpXMLReader.h
 ONCE            cpp/Makefile                Makefile
+ONCE            cpp/CMakeLists.txt          CMakeLists.txt
 ONCE            cpp/meson.build             meson.build
 ONCE            cpp/LMCP.vcproj             LMCP.vcproj
 ONCE            cpp/LMCP.vcxproj            LMCP.vcxproj

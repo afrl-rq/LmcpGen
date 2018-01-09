@@ -958,6 +958,23 @@ public class CppMethods {
         }
         return buf.toString();
     }
+
+    public static String cmake_source_list(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        StringBuffer buf = new StringBuffer();
+        for (MDMInfo i : infos) {
+            if(i.seriesNameAsLong == 0)
+            {
+                continue;
+            }
+            for (StructInfo si : i.structs) {
+                String cleanNamespace = i.namespace.replaceAll("/","");
+                buf.append(ws + i.namespace + "/" + cleanNamespace + si.name + ".cpp\n");
+            }
+            buf.append(ws + i.namespace + "/" + i.seriesName + "XMLReader.cpp\n");
+            buf.append(ws + i.namespace + "/" + i.seriesName + "Factory.cpp\n");
+        }
+        return buf.toString();
+    }
     
     public static String meson_source_list(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         StringBuffer buf = new StringBuffer();
