@@ -28,18 +28,18 @@ class LMCPHandler(ss.StreamRequestHandler):
             try:
                 data = bytearray(self.request.recv(LMCPFactory.HEADER_SIZE))
                 if(len(data) >= LMCPFactory.HEADER_SIZE):
-	            print("header size: %d" % (len(data),) )
-	            size = LMCPFactory.getSize(data)
-	            print("object size: %d" % (size,))
-	            data.extend(bytearray(self.request.recv(size+4))) # compensate for checksum
-	            print("%d bytes received" % (len(data),))
-	            recv_obj = self.factory.getObject(data)
-	            print("%s received" % recv_obj.__class__)
-	            if recv_obj != None:
-	                print("Printing object XML...")
-	                print(recv_obj.toXMLStr(""))
-	            else:
-	                print("Invalid object received.")
+                    print("header size: %d" % (len(data),) )
+                    size = LMCPFactory.getSize(data)
+                    print("object size: %d" % (size,))
+                    data.extend(bytearray(self.request.recv(size+4))) # compensate for checksum
+                    print("%d bytes received" % (len(data),))
+                    recv_obj = self.factory.getObject(data)
+                    print("%s received" % recv_obj.__class__)
+                    if recv_obj != None:
+                        print("Printing object XML...")
+                        print(recv_obj.toXMLStr(""))
+                    else:
+                       print("Invalid object received.")
             except socket.error:
                 self.stop = True
         self.request.close()
