@@ -17,13 +17,13 @@ from lmcp.LMCPObject import *
 
 class SeriesEnum:
 
-    def getName(self, type):
+    def getName(self, type_):
         -<list_name_for_type>-
 
     def getType(self, name):
         -<list_type_for_name>-
         return -1
 
-    def getInstance(self, type):
+    def getInstance(self, type_):
         -<list_instance_for_type>-
         return None

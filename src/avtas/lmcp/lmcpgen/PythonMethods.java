@@ -440,7 +440,7 @@ class PythonMethods {
     public static String list_name_for_type(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         StringBuffer buf = new StringBuffer();
         for (int i = 0; i < info.structs.length; i++) {
-            buf.append( ws + "if(type ==  " + info.structs[i].id + "): return \"" + info.structs[i].name + "\"\n" );
+            buf.append( ws + "if(type_ ==  " + info.structs[i].id + "): return \"" + info.structs[i].name + "\"\n" );
         }
         return buf.toString();
     }
@@ -456,7 +456,7 @@ class PythonMethods {
     public static String list_instance_for_type(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         StringBuffer buf = new StringBuffer();
         for (int i = 0; i < info.structs.length; i++) {
-            buf.append( ws + "if(type ==  " + info.structs[i].id + "): return " + info.structs[i].name + "." + info.structs[i].name + "()\n" );
+            buf.append( ws + "if(type_ ==  " + info.structs[i].id + "): return " + info.structs[i].name + "." + info.structs[i].name + "()\n" );
         }
         return buf.toString();
     }
