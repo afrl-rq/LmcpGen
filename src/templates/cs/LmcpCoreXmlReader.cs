@@ -22,7 +22,8 @@ namespace Avtas.Lmcp
 
         public static void RegisterXmlReader( LmcpXmlReader reader )
         {
-            ReadersBySeriesName.Add( reader.getSeriesName(), reader );
+            if ( !ReadersBySeriesName.ContainsKey( reader.getSeriesName() ) )
+                ReadersBySeriesName.Add( reader.getSeriesName(), reader );
         }
 
         /// <summary>

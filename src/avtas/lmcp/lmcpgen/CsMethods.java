@@ -192,7 +192,7 @@ class CsMethods {
                 }
             }
             String seriesListClass = ret + "SeriesList";
-            buf.append(ws + "_seriesLists.Add(new " + seriesListClass + "());\n");
+            buf.append(ws + "RegisterSeries( new " + seriesListClass + "() );\n");
         }
         return buf.toString();
     }

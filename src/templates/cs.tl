@@ -8,6 +8,7 @@ ONCE            cs/LibraryAssemblyInfo.cs           Library/Properties/AssemblyI
 ONCE            cs/ILmcpObject.cs                   Library/Avtas/Lmcp/ILmcpObject.cs
 ONCE            cs/LmcpFactory.cs                   Library/Avtas/Lmcp/LmcpFactory.cs
 ONCE            cs/LmcpCoreFactory.cs               Library/Avtas/Lmcp/LmcpCoreFactory.cs
+ONCE            cs/LmcpFactoryException.cs          Library/Avtas/Lmcp/LmcpFactoryException.cs
 ONCE            cs/LmcpBinaryReader.cs              Library/Avtas/Lmcp/LmcpBinaryReader.cs
 ONCE            cs/LmcpBinaryWriter.cs              Library/Avtas/Lmcp/LmcpBinaryWriter.cs
 ONCE            cs/LmcpBinaryProcessor.cs           Library/Avtas/Lmcp/LmcpBinaryProcessor.cs
