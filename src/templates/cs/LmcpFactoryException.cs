@@ -9,16 +9,14 @@
 
 // This file was auto-created by LmcpGen. Modifications will be overwritten.
 
+using System;
+
 namespace Avtas.Lmcp
 {
-    /// <summary>
-    /// Factory for creating LMCP objects.
-    /// </summary>
-    public abstract partial class LmcpFactory
+    public class LmcpFactoryException : Exception
     {
-        static LmcpFactory()
+        public LmcpFactoryException( string message ) : base( message )
         {
-            -<factory_auto_register>-
         }
     }
 }

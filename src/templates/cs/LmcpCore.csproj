@@ -56,6 +56,7 @@
     <Compile Include="Avtas\Lmcp\LmcpBinaryReader.cs" />
     <Compile Include="Avtas\Lmcp\LmcpBinaryWriter.cs" />
     <Compile Include="Avtas\Lmcp\LmcpCoreFactory.cs" />
+    <Compile Include="Avtas\Lmcp\LmcpFactoryException.cs" />
     <Compile Include="Avtas\Lmcp\LmcpObjectReceivedEventArgs.cs" />
     <Compile Include="Avtas\Lmcp\LmcpCoreXmlReader.cs" />
     <Compile Include="Avtas\Lmcp\LmcpXmlWriter.cs" />

@@ -18,40 +18,42 @@ namespace Avtas.Lmcp
     /// <summary>
     /// Factory for creating LMCP objects.
     /// </summary>
-    public abstract class LmcpFactory
+    public abstract partial class LmcpFactory
     {
         internal const int HEADER_SIZE = 8;
         internal const int CHECKSUM_SIZE = 4;
         internal const int LMCP_CONTROL_STR = 0x4c4d4350;
 
-        private static List<ISeriesList> _seriesLists = new List<ISeriesList>();
+        private static readonly Dictionary<long, ISeriesList> _seriesListsBySeriesId = new Dictionary<long, ISeriesList>();
 
         public static void RegisterSeries( ISeriesList seriesList )
         {
-            _seriesLists.Add( seriesList );
+            if ( !_seriesListsBySeriesId.ContainsKey( seriesList.SeriesId ) )
+            _seriesListsBySeriesId.Add( seriesList.SeriesId, seriesList );
         }
+
         /// <summary>
         /// Returns an array of bytes corresponding to the first message encountered in
         /// the input stream. The method blocks until all of the bytes are read.
         /// </summary>
         /// <returns>An array of bytes corresponding to the first message encountered in
         /// the input stream.</returns>
-        public static byte[] GetMessageBytes(BinaryReader sr)
+        public static byte[] GetMessageBytes( BinaryReader sr )
         {
             byte[] bytes = new byte[HEADER_SIZE];
-            int i = sr.Read(bytes, 0, HEADER_SIZE);
-            while(i <bytes.Length)
-                i += sr.Read(bytes, i, bytes.Length-i);
+            int i = sr.Read( bytes, 0, HEADER_SIZE );
+            while( i < bytes.Length )
+                i += sr.Read( bytes, i, bytes.Length-i );
 
             // retrieves the "size" value in BIG_ENDIAN order
-            uint size = GetSize(bytes);
+            uint size = GetSize( bytes );
 
             byte[] buf = new byte[size + HEADER_SIZE + CHECKSUM_SIZE];
-            bytes.CopyTo(buf, 0);
+            bytes.CopyTo( buf, 0 );
 
             i = bytes.Length;
-            while(i <buf.Length)
-                i += sr.Read(buf, i, buf.Length-i);
+            while( i < buf.Length )
+                i += sr.Read( buf, i, buf.Length-i );
 
             return buf;
         }
@@ -62,22 +64,21 @@ namespace Avtas.Lmcp
         /// checksum is validated. 
         /// </summary>
         /// <returns>An ILmcpObject or null if the root object type is not defined.</returns>
-        public static ILmcpObject GetObject(byte[] bytes)
+        public static ILmcpObject GetObject( byte[] bytes )
         {
-            if (bytes == null || bytes.Length < HEADER_SIZE)
-                throw new Exception("Lmcp Factory Exception: Null buffer or not enough bytes in buffer");
+            if ( bytes == null || bytes.Length < HEADER_SIZE )
+                throw new LmcpFactoryException( "Null buffer or not enough bytes in buffer." );
 
-            if (!Validate(bytes))
-                throw new Exception("Lmcp Factory Exception: Checksum does not match");
+            if ( !Validate( bytes ) )
+                throw new LmcpFactoryException( "Checksum does not match." );
 
-            LmcpBinaryReader buf = new LmcpBinaryReader(bytes);
+            var buf = new LmcpBinaryReader( bytes );
 
-            if (buf.ReadInt32() != LMCP_CONTROL_STR) {
-                throw new Exception("Lmcp Factory Exception: Not a valid LMCP message.");
-            }
-            if ( buf.ReadInt32() > bytes.Length - HEADER_SIZE - CHECKSUM_SIZE) {
-                throw new Exception("LMCP Factory Exception: not enough bytes in buffer to create object.");
-            }
+            if ( buf.ReadInt32() != LMCP_CONTROL_STR )
+                throw new LmcpFactoryException( "Not a valid LMCP message." );
+
+            if ( buf.ReadInt32() > bytes.Length - HEADER_SIZE - CHECKSUM_SIZE )
+                throw new LmcpFactoryException( "Not enough bytes in buffer to create object." );
 
             return buf.ReadObject();
         }
@@ -86,34 +87,31 @@ namespace Avtas.Lmcp
         /// Returns an byte array containing an ILmcpObject packed as a message.
         /// </summary>
         /// <returns>The packed message.</returns>
-        public static byte[] PackMessage(ILmcpObject rootObject, bool calculatechecksum)
+        public static byte[] PackMessage( ILmcpObject rootObject, bool calculatechecksum )
         {
-            if (rootObject == null) return null;
+            if ( rootObject == null ) return null;
 
             int size = rootObject.CalculateSize();
             byte[] bytes = new byte[size + HEADER_SIZE + CHECKSUM_SIZE];
 
-            MemoryStream buf = new MemoryStream(bytes);
-            LmcpBinaryWriter bw = new LmcpBinaryWriter(buf);
+            using ( var buf = new MemoryStream(bytes) )
+            using ( var bw = new LmcpBinaryWriter(buf) )
+            {
+                bw.Write( LMCP_CONTROL_STR );
+                bw.Write( size );
+                bw.Write( rootObject );
 
-            bw.Write(LMCP_CONTROL_STR);
-            bw.Write(size);
-            bw.Write(rootObject);
+                uint cs = calculatechecksum ? CalculateChecksum( bytes ) : 0;
+                bw.Write( cs );
 
-            uint cs = calculatechecksum ? CalculateChecksum(bytes) : 0;
-            bw.Write(cs);
-
-            return buf.ToArray();
+                return buf.ToArray();
+            }
         }
 
-        internal static ILmcpObject CreateObject(long series_id, uint object_type, ushort version) {
-            foreach ( var series in _seriesLists )
-            {
-                if ( series_id != series.SeriesId )
-                    continue;
-                return series.GetInstance( object_type, version );
-            }
-            return null;
+        internal static ILmcpObject CreateObject(long series_id, uint object_type, ushort version)
+        {
+            ISeriesList series;
+            return _seriesListsBySeriesId.TryGetValue( series_id, out series ) ? series.GetInstance( object_type, version ) : null;
         }
 
         /// <summary>
