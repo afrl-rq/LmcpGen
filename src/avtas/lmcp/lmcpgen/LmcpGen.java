@@ -201,7 +201,7 @@ public class LmcpGen {
         return true;
     }
 
-    /** calls the methodClass methods based on strings encountered in the file.  Each tag has a -<\\w*>- format */
+    /** calls the methodClass methods based on strings encountered in the file.  Each tag has a -{@literal <}\\w*{@literal >}- format */
     public static String replaceTags(String input, File outfile, Class<?> methodClass,
             MDMInfo[] infos, MDMInfo info, StructInfo st, EnumInfo en) throws Exception {
         String outputStr = input;
