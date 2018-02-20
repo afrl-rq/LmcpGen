@@ -239,7 +239,7 @@ class PythonMethods {
                     buf.append(ws + "buffer.extend(struct.pack(\">H\", len(" + name + ") ))\n");
                     buf.append(ws + "if len(" + name + ") > 0:\n");
                     buf.append(ws + "    if (sys.version_info > (3, 0)):\n");
-                    buf.append(ws + "        buffer.extend(struct.pack( repr(len(" + name + ")) + \"s\", bytearray(" + name + ",'ascii')))\n");
+                    buf.append(ws + "        buffer.extend(struct.pack( repr(len(" + name + ")) + \"s\", " + name + ".encode('utf-8')))\n");
                     buf.append(ws + "    else:\n");
                     buf.append(ws + "        buffer.extend(struct.pack( repr(len(" + name + ")) + \"s\", " + name + "))\n");
                 } else if (f.type.equalsIgnoreCase("Bool")) {
@@ -278,9 +278,9 @@ class PythonMethods {
                     buf.append(ws + "    buffer.extend(struct.pack(\">H\", len(x) ))\n");
                     buf.append(ws + "    if len(x) > 0:\n");
                     buf.append(ws + "        if (sys.version_info > (3, 0)):\n");
-                    buf.append(ws + "            buffer.extend(struct.pack( repr(len(" + name + "[x])) + \"s\", bytearray(" + name + "[x],'ascii')))\n");
+                    buf.append(ws + "            buffer.extend(struct.pack( repr(len(x)) + \"s\", x.encode('utf-8')))\n");
                     buf.append(ws + "        else:\n");
-                    buf.append(ws + "            buffer.extend(struct.pack( repr(len(" + name + "[x])) + \"s\", " + name + "[x]))\n");
+                    buf.append(ws + "            buffer.extend(struct.pack( repr(len(x)) + \"s\", x))\n");
                 } else if (f.type.equalsIgnoreCase("Bool")) {
                     buf.append(ws + "for x in " + name + ":\n");
                     buf.append(ws + "    boolChar = 1 if x == True else 0\n");
@@ -302,11 +302,13 @@ class PythonMethods {
             String name = "self." + f.name;
             if (!f.isArray) {
                 if (f.type.equalsIgnoreCase("string")) {
-                    //buf.append(ws + "print('" + name + " =  ' + ':'.join(hex(x)[2:] for x in buffer[_pos:_pos+2]))\n");
                     buf.append(ws + "_strlen = struct.unpack_from(\">H\", buffer, _pos )[0]\n");
                     buf.append(ws + "_pos += 2\n");
                     buf.append(ws + "if _strlen > 0:\n");
-                    buf.append(ws + "    " + name + " = struct.unpack_from( repr(_strlen) + \"s\", buffer, _pos )[0]\n");
+                    buf.append(ws + "    if (sys.version_info > (3, 0)):\n");
+                    buf.append(ws + "        " + name + " = struct.unpack_from( repr(_strlen) + \"s\", buffer, _pos )[0].decode('utf-8')\n");
+                    buf.append(ws + "    else:\n ");
+                    buf.append(ws + "        " + name + " = struct.unpack_from( repr(_strlen) + \"s\", buffer, _pos )[0]\n");
                     buf.append(ws + "    _pos += _strlen\n");
                     buf.append(ws + "else:\n ");
                     buf.append(ws + "    " + name + " = \"\"\n");
@@ -370,7 +372,10 @@ class PythonMethods {
                     buf.append(ws + "    _strlen = struct.unpack_from(\">H\", buffer, _pos )[0]\n");
                     buf.append(ws + "    _pos += 2\n");
                     buf.append(ws + "    if _strlen > 0:\n");
-                    buf.append(ws + "        " + name + "[x] = struct.unpack_from( repr(_strlen) + \"s\", buffer, _pos )[0]\n");
+                    buf.append(ws + "        if (sys.version_info > (3, 0)):\n");
+                    buf.append(ws + "            " + name + "[x] = struct.unpack_from( repr(_strlen) + \"s\", buffer, _pos )[0].decode('utf-8')\n");
+                    buf.append(ws + "        else:\n ");
+                    buf.append(ws + "            " + name + "[x] = struct.unpack_from( repr(_strlen) + \"s\", buffer, _pos )[0]\n");
                     buf.append(ws + "        _pos += _strlen\n");
                     buf.append(ws + "    else:\n ");
                     buf.append(ws + "        " + name + "[x] = \"\"\n");
