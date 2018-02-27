@@ -78,11 +78,6 @@ public class LmcpGenGUI {
     FilePanel classField = new FilePanel("Select");
     FilePanel templateField = new FilePanel("Select");
     JPanel checkPanel = new JPanel();
-    JCheckBox javaBox = new JCheckBox("Java");
-    JCheckBox cppBox = new JCheckBox("C++");
-    JCheckBox csBox = new JCheckBox("C#");
-    JCheckBox htmlBox = new JCheckBox("Docs");
-    JCheckBox pythonBox = new JCheckBox("Python");
     JCheckBox customBox = new JCheckBox("Custom Language");
     MDMInfo[] infos = null;
     File outputDir = null;

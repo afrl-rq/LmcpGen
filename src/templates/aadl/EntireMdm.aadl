@@ -1,0 +1,9 @@
+package -<series_name>-
+public
+	-<mdm_inclusion>-
+	with Data_Model;
+	with Base_Types;
+	with Common_Data;
+	renames Common_Data::all;
+    
+-<list_all_messages>-

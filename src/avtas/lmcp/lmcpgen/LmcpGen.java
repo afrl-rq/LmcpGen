@@ -335,6 +335,11 @@ public class LmcpGen {
                 methodClassName = "avtas.lmcp.lmcpgen.DocMethods";
                 i -= 1;
             }
+            else if (args[i].equalsIgnoreCase("-aadl")) {
+                template = LmcpGen.class.getResource("/templates/aadl.tl");
+                methodClassName = "avtas.lmcp.lmcpgen.AadlMethods";
+                i -= 1;
+            }
             else if (args[i].equalsIgnoreCase("-help")) {
                 System.out.println(getHelpString());
                 return;
@@ -396,6 +401,7 @@ public class LmcpGen {
         buf.append("-cpp Adds proper template and method name for C++ output.\n\n");
         buf.append("-cs Adds proper template and method name for C# output.\n\n");
         buf.append("-py Adds proper template and method name for Python output.\n\n");
+        buf.append("-aadl Adds proper template and method name for AADL output.\n\n");
         buf.append("-xsd Adds proper template and method name for XML schema output.\n\n");
         buf.append("-doc Adds proper template and method name for documentation output.\n\n");
         buf.append("-dir <directory path> path to the directory where files are to be written\n");

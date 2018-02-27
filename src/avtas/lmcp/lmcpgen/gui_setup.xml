@@ -7,5 +7,6 @@
         <Package DisplayName="Rust" TemplateListing="/templates/rust.tl" MethodsClass="avtas.lmcp.lmcpgen.RustMethods" SubFolder="rust"/>
         <Package DisplayName="Docs" TemplateListing="/templates/doc.tl" MethodsClass="avtas.lmcp.lmcpgen.DocMethods" SubFolder="doc"/>
         <Package DisplayName="XML Schema" TemplateListing="/templates/xsd.tl" MethodsClass="avtas.lmcp.lmcpgen.XsdMethods" SubFolder="xsd"/>
+        <Package DisplayName="AADL" TemplateListing="/templates/aadl.tl" MethodsClass="avtas.lmcp.lmcpgen.AadlMethods" SubFolder="aadl"/>
     </PackageList>
 </LmcpGen>
