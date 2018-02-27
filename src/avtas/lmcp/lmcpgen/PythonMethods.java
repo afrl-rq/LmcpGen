@@ -278,9 +278,9 @@ class PythonMethods {
                     buf.append(ws + "    buffer.extend(struct.pack(\">H\", len(x) ))\n");
                     buf.append(ws + "    if len(x) > 0:\n");
                     buf.append(ws + "        if (sys.version_info > (3, 0)):\n");
-                    buf.append(ws + "            buffer.extend(struct.pack( repr(len(x)) + \"s\", x.encode('utf-8')))\n");
+                    buf.append(ws + "            buffer.extend(struct.pack( repr(len(" + name + "[x])) + \"s\", " + name + "[x].encode('utf-8')))\n");
                     buf.append(ws + "        else:\n");
-                    buf.append(ws + "            buffer.extend(struct.pack( repr(len(x)) + \"s\", x))\n");
+                    buf.append(ws + "            buffer.extend(struct.pack( repr(len(" + name + "[x])) + \"s\", " + name + "[x]))\n");
                 } else if (f.type.equalsIgnoreCase("Bool")) {
                     buf.append(ws + "for x in " + name + ":\n");
                     buf.append(ws + "    boolChar = 1 if x == True else 0\n");
