@@ -17,6 +17,7 @@ ONCE            cs/LmcpXmlReader.cs                 Library/Avtas/Lmcp/LmcpXmlRe
 ONCE            cs/LmcpCoreXmlReader.cs             Library/Avtas/Lmcp/LmcpCoreXmlReader.cs
 ONCE            cs/LmcpXmlWriter.cs                 Library/Avtas/Lmcp/LmcpXmlWriter.cs
 ONCE            cs/ISeriesList.cs                   Library/Avtas/Lmcp/ISeriesList.cs
+ONCE            cs/CreateNugetPackages.bat          Library/CreateNugetPackages.bat
 
 ONCE            cs/TestClient.csproj                TestClient/TestClient.csproj
 ONCE            cs/TestClient.cs                    TestClient/Program.cs
@@ -29,6 +30,7 @@ PER_MDM         cs/SeriesList.cs                    Library/-<namespace>-/Series
 PER_MDM         cs/SeriesEnum.cs                    Library/-<namespace>-/SeriesEnum.cs
 PER_MDM         cs/SeriesXmlReader.cs               Library/-<namespace>-/SeriesXmlReader.cs
 PER_MDM         cs/SeriesProj.csproj                Library/Lmcp-<cs_series_name>-.csproj
+PER_MDM         cs/SeriesNuget.nuspec               Library/-<cs_series_name>-.nuspec
 
 PER_STRUCT      cs/SeriesObject.cs                  Library/-<namespace>-/-<datatype_name>-.cs
 
