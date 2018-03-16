@@ -29,13 +29,6 @@ class CsMethods {
     private static String testClientGuid = null;
     private static String packageName = null;
 
-    public static String package_name(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
-        if (packageName == null)
-            packageName = getCsNamespace(infos[0].namespace);
-
-        return packageName;
-    }
-
     public static String series_namespace(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         String[] splits = info.namespace.split("/");
         String ret = "";
@@ -968,6 +961,28 @@ class CsMethods {
             str += ws + "  <Name>Lmcp" + libName + "</Name>\n";
             str += ws + "</ProjectReference>\n";
         }
+        return str;
+    }
+	
+	public static String get_nuget_mdm_dependencies(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        String str = "    <dependencies>\n";
+        if ( infos.length == 0 )
+            return str + "    </dependencies>\n";
+        
+        for (String dep : info.mdmDependencies) {
+            for (MDMInfo i : infos) {
+                if (i.seriesName.contentEquals(dep))
+                {
+                    String currentVersion = String.valueOf(i.version);
+                    String nextVersion = String.valueOf(i.version + 1);
+                    
+                    String nugetPkg = dep.substring(0, 1).toUpperCase() + dep.substring(1).toLowerCase();
+                    str += "      <dependency id=\""+nugetPkg+"\" version=\"["+currentVersion+","+nextVersion+")\"/>\n";
+                }
+            }
+        }
+        
+        str += "    </dependencies>";
         return str;
     }
     

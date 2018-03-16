@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("A test LMCP client.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Air Force Research Laboratory")]
-[assembly: AssemblyProduct("-<package_name>-")]
+[assembly: AssemblyProduct("TestClient")]
 [assembly: AssemblyCopyright("Copyright © Air Force Research Laboratory 2011")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
