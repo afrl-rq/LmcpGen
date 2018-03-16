@@ -871,7 +871,11 @@ class CsMethods {
                 code += String.format("%1$s}\n\n", ws, name);
             }
             else{
-                code += String.format("%1$sif (!%2$s.Equals(other.%2$s)) return false;\n\n", ws, name);
+                code += String.format("%1$sif (", ws);
+                if (f.isStruct && f.isOptional) {
+                    code += String.format("%1$s != null && ", name);
+                }
+                code += String.format("!%1$s.Equals(other.%1$s)) return false;\n\n", name);
             }
         }
 
