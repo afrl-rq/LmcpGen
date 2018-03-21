@@ -82,13 +82,13 @@ class PythonMethods {
         ArrayList<String> namespaces = new ArrayList<String>();
         ArrayList<String> structs = new ArrayList<String>();
         if(!st.extends_name.isEmpty()){
-            namespaces.add(getNamespaceForSeries(infos, st));
+            namespaces.add(getNamespaceForSeries(infos, st.extends_series));
             structs.add(st.extends_name);
         }
         for(FieldInfo f : st.fields){
             if(f.isStruct || f.isEnum){
-                String namespace = getNamespaceForType(infos, f);
-                if(!structs.contains(f.type) && namespace != null){
+                String namespace = getNamespaceForSeries(infos, f.seriesName);
+                if(!structs.contains(f.type) && !namespace.isEmpty()){
                     namespaces.add(namespace);
                     structs.add(f.type);
                 }
@@ -739,36 +739,12 @@ class PythonMethods {
         
     }
 
-    private static String getNamespaceForSeries(MDMInfo[] infos, StructInfo st) throws Exception {
-        for(MDMInfo info : infos){
-            for(StructInfo s : info.structs){
-                if(st.extends_name.equals(s.name)){
-                    return s.namespace;
-                }
-            }
+    private static String getNamespaceForSeries(MDMInfo[] infos, String series_name) throws Exception {
+        MDMInfo i = MDMReader.getMDM(series_name, infos);
+        if (i != null) {
+            return i.namespace;
         }
-        return null;
-    }
-
-    private static String getNamespaceForType(MDMInfo[] infos, FieldInfo f) throws Exception {
-        for(MDMInfo info : infos){
-            if(f.isStruct){
-                for(StructInfo si : info.structs){
-                    if(f.type.equals(si.name)){
-                        return si.namespace;
-                    }
-                }
-            }
-            if(f.isEnum){
-                for(EnumInfo ei : info.enums){
-                    if(f.type.equals(ei.name)){
-                        //System.out.println("Enum namespace: " + ei.namespace + "Enum type: " + ei.name);
-                        return ei.namespace;
-                    }
-                }
-            }
-        }
-        return null;
+        return "";
     }
 
     private static String getPythonType(String type) {
