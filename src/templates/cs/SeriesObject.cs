@@ -162,7 +162,7 @@ public -<_override>- long SeriesNameAsLong
 /// <summary>
 /// Gets a version number for the object.
 /// </summary>
-public -<_override>- ushort Version
+public -<_override>- ushort SeriesVersion
 { get { return SERIES_VERSION; } }
 
         -<member_gets_and_sets>-

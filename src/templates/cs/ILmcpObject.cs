@@ -61,6 +61,6 @@ namespace Avtas.Lmcp
         /// <summary>
         /// Gets a version number for the object.
         /// </summary>
-        ushort Version { get; }
+        ushort SeriesVersion { get; }
     }
 }
