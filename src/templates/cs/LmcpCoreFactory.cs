@@ -108,10 +108,10 @@ namespace Avtas.Lmcp
             }
         }
 
-        internal static ILmcpObject CreateObject(long series_id, uint object_type, ushort version)
+        internal static ILmcpObject CreateObject(long series_id, uint object_type, ushort series_version)
         {
             ISeriesList series;
-            return _seriesListsBySeriesId.TryGetValue( series_id, out series ) ? series.GetInstance( object_type, version ) : null;
+            return _seriesListsBySeriesId.TryGetValue( series_id, out series ) ? series.GetInstance( object_type, series_version ) : null;
         }
 
         /// <summary>

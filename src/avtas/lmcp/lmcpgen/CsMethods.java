@@ -224,7 +224,7 @@ class CsMethods {
         }
         String seriesListClass = ret + "SeriesList";
         buf.append(ws + "if ( series_id == " + seriesListClass + ".SERIES_ID )\n");
-        buf.append(ws + "   if ( version == " + seriesListClass + ".SERIES_VERSION )\n");
+        buf.append(ws + "   if ( series_version == " + seriesListClass + ".SERIES_VERSION )\n");
         buf.append(ws + "      return " + seriesListClass + ".GetInstance(object_type);\n");
         buf.append(ws + "   else throw new InvalidOperationException(\"" + ret + "SeriesFactory Exception.  Bad Version Number.\");\n");
 

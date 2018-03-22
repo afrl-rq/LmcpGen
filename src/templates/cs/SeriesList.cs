@@ -46,9 +46,9 @@ public static uint GetType( String name )
   return 0;
 }
 
-public ILmcpObject GetInstance( uint object_type, ushort version )
+public ILmcpObject GetInstance( uint object_type, ushort series_version )
 {
-  if ( version != SERIES_VERSION )
+  if ( series_version != SERIES_VERSION )
     throw new InvalidOperationException("-<series_name>- SeriesList Exception. Bad Version Number.");
 
   switch ( object_type )
