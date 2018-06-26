@@ -65,9 +65,9 @@ impl Message {
         let r = get!(buf.get(4..8));
         let (size, _) = u32::deser(r)?;
 
-        if (size + 12) as usize != buf.len() {
+        if (size + 12) as usize > buf.len() {
             // 12 = 8 for header + 4 for checksum
-            return Err(error!(ErrorType::MessageSizeMismatch));
+            return Err(error!(ErrorType::NotEnoughBytes));
         }
         let h = get!(buf.get(8..));
         let (si, _) = StructInfo::deser(h)?;
