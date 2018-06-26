@@ -399,9 +399,9 @@ public class RustMethods {
             if (mdm.namespace.equals(info.namespace)) {
                 continue;
             }
-            if (mdm.namespace.startsWith(info.namespace)) {
-                String child = mdm.namespace.replaceFirst(info.namespace, "");
-                children.add(child.split("/")[1]);
+            if (mdm.namespace.startsWith(info.namespace + "/")) {
+                String child = mdm.namespace.replaceFirst(info.namespace + "/", "");
+                children.add(child.split("/")[0]);
             }
         }
 
