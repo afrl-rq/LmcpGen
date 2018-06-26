@@ -931,6 +931,15 @@ public class RustMethods {
                 sb.append('_');
             }
         }
-        return sb.toString();
+        return mangle_keywords(sb.toString());
+    }
+
+    private static String mangle_keywords(String str) {
+        switch (str) {
+        case "type":
+            return "typ";
+        default:
+            return str;
+        }
     }
 };
