@@ -399,9 +399,9 @@ public class RustMethods {
             if (mdm.namespace.equals(info.namespace)) {
                 continue;
             }
-            if (mdm.namespace.startsWith(info.namespace)) {
-                String child = mdm.namespace.replaceFirst(info.namespace, "");
-                children.add(child.split("/")[1]);
+            if (mdm.namespace.startsWith(info.namespace + "/")) {
+                String child = mdm.namespace.replaceFirst(info.namespace + "/", "");
+                children.add(child.split("/")[0]);
             }
         }
 
@@ -931,6 +931,15 @@ public class RustMethods {
                 sb.append('_');
             }
         }
-        return sb.toString();
+        return mangle_keywords(sb.toString());
+    }
+
+    private static String mangle_keywords(String str) {
+        switch (str) {
+        case "type":
+            return "typ";
+        default:
+            return str;
+        }
     }
 };
