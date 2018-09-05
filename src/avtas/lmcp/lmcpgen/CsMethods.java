@@ -900,43 +900,7 @@ class CsMethods {
         }
         return buf.toString();
     }
-
-    public static String project_sources(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
-        String str = "";
-        for (MDMInfo i : infos) {
-            if(i.seriesNameAsLong == 0)
-            {
-                continue;
-            }
-            String winDir = getCsNamespace(i.namespace).replaceAll("\\.", "\\\\");
-            for (StructInfo s : i.structs ) {
-                str += ws + "<Compile Include=\"" + winDir + "\\" + s.name + ".cs\"/>\n";
-            }
-            for (EnumInfo s : i.enums ) {
-                str += ws + "<Compile Include=\"" + winDir + "\\" + s.name + ".cs\"/>\n";
-            }
-            str += ws + "<Compile Include=\"" + winDir + "\\"  + "SeriesEnum.cs\"/>\n";
-            str += ws + "<Compile Include=\"" + winDir + "\\"  + "SeriesList.cs\"/>\n";
-            str += ws + "<Compile Include=\"" + winDir + "\\"  + "SeriesXmlReader.cs\"/>\n";
-        }
-        return str;
-    }
     
-    public static String series_csproj_sources(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
-        String str = "";
-        String winDir = getCsNamespace(info.namespace).replaceAll("\\.", "\\\\");
-        for (StructInfo s : info.structs ) {
-            str += ws + "<Compile Include=\"" + winDir + "\\" + s.name + ".cs\"/>\n";
-        }
-        for (EnumInfo s : info.enums ) {
-            str += ws + "<Compile Include=\"" + winDir + "\\" + s.name + ".cs\"/>\n";
-        }
-        str += ws + "<Compile Include=\"" + winDir + "\\"  + "SeriesEnum.cs\"/>\n";
-        str += ws + "<Compile Include=\"" + winDir + "\\"  + "SeriesList.cs\"/>\n";
-        str += ws + "<Compile Include=\"" + winDir + "\\"  + "SeriesXmlReader.cs\"/>\n";
-        return str;
-    }
-
     public static String series_csproj_references(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         
         String str = "";
@@ -945,10 +909,7 @@ class CsMethods {
                 if (i.seriesName.contentEquals(dep))
                 {
                     String libName = dep.substring(0, 1).toUpperCase() + dep.substring(1).toLowerCase();
-                    str += ws + "<ProjectReference Include=\"Lmcp" + libName + ".csproj\">\n";
-                    str += ws + "  <Project>{" + i.guid + "}</Project>\n";
-                    str += ws + "  <Name>Lmcp" + libName + "</Name>\n";
-                    str += ws + "</ProjectReference>\n";
+                    str += ws + "<ProjectReference Include=\"..\\" + libName + "\\Lmcp" + libName + ".csproj\" />\n";
                 }
             }
         }
@@ -960,10 +921,7 @@ class CsMethods {
         for (MDMInfo i : infos) {
             if (i.seriesNameAsLong == 0) { continue; }
             String libName = i.seriesName.substring(0, 1).toUpperCase() + i.seriesName.substring(1).toLowerCase();
-            str += ws + "<ProjectReference Include=\"Lmcp" + libName + ".csproj\">\n";
-            str += ws + "  <Project>{" + i.guid + "}</Project>\n";
-            str += ws + "  <Name>Lmcp" + libName + "</Name>\n";
-            str += ws + "</ProjectReference>\n";
+            str += ws + "<ProjectReference Include=\"..\\Library\\" + libName + "\\Lmcp" + libName + ".csproj\" />\n";
         }
         return str;
     }
@@ -994,7 +952,7 @@ class CsMethods {
         String str = "";
         for(MDMInfo i : infos) {
             String libName = i.seriesName.substring(0, 1).toUpperCase() + i.seriesName.substring(1).toLowerCase();
-            str += ws + "Project(\"{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}\") = \"Lmcp" + libName + "\", \"Library\\Lmcp" + libName + ".csproj\", \"{" + i.guid + "}\"\n";
+            str += ws + "Project(\"{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}\") = \"Lmcp" + libName + "\", \"Library\\" + libName + "\\Lmcp" + libName + ".csproj\", \"{" + i.guid + "}\"\n";
             str += ws + "EndProject\n";
         }
         return str;
