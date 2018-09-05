@@ -17,6 +17,7 @@ ONCE            cs/LmcpCoreXmlReader.cs             Library/LmcpCore/Avtas/Lmcp/
 ONCE            cs/LmcpCoreXmlReader.cs             Library/LmcpCore/Avtas/Lmcp/LmcpXmlReader.cs
 ONCE            cs/LmcpXmlWriter.cs                 Library/LmcpCore/Avtas/Lmcp/LmcpXmlWriter.cs
 ONCE            cs/ISeriesList.cs                   Library/LmcpCore/Avtas/Lmcp/ISeriesList.cs
+ONCE            cs/LmcpCore.nuspec                  Library/LmcpCore/LmcpCore.nuspec
 ONCE            cs/CreateNugetPackages.bat          Library/CreateNugetPackages.bat
 
 ONCE            cs/TestClient.csproj                TestClient/TestClient.csproj
