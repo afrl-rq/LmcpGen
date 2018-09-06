@@ -928,6 +928,7 @@ class CsMethods {
 	
 	public static String get_nuget_mdm_dependencies(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         String str = "    <dependencies>\n";
+        str += "      <dependency id=\"Lmcp.Core\" version=\"[1,2)\"/>\n";
         if ( infos.length == 0 )
             return str + "    </dependencies>\n";
         
