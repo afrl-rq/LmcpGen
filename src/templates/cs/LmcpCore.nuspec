@@ -13,7 +13,7 @@
     <dependencies />
   </metadata>
   <files>
-    <file src="Bin\Release\netstandard2.0\LmcpCore.dll" target="lib\net452"/>
-    <file src="Bin\Release\netstandard2.0\LmcpCore.xml" target="lib\net452"/>
+    <file src="Bin\Release\netstandard2.0\LmcpCore.dll" target="lib\netstandard2.0"/>
+    <file src="Bin\Release\netstandard2.0\LmcpCore.xml" target="lib\netstandard2.0"/>
   </files>
 </package>
