@@ -36,7 +36,9 @@ namespace xml {
         /** reads an LMCP XML string and returns an LMCP object */
         inline avtas::lmcp::Object* readXML(std::string input) {
             Node* el = avtas::lmcp::XMLParser::parseString(input, false);
-            return readXML(el);
+            Object* ret = readXML(el);
+            delete el;
+            return ret;
         }
 
         inline bool get_bool(Node* node) {
