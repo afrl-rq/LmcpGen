@@ -1,0 +1,2 @@
+afrl-cmasi-objects.ads:5:19: warning: file name does not match unit name, should be "afrl-cmasi-object.ads"
+afrl-cmasi-objects.ads:5:20: "object" conflicts with declaration at afrl-cmasi.ads:6

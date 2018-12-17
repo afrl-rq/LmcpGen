@@ -1,0 +1,239 @@
+V "GNAT Lib v18"
+M P W=b
+A -gnatA
+A -mtune=generic
+A -march=x86-64
+P ZX
+
+RN
+RV NO_ALLOCATORS
+RV NO_DISPATCHING_CALLS
+RV NO_EXCEPTION_HANDLERS
+RV NO_EXCEPTION_PROPAGATION
+RV NO_EXCEPTIONS
+RV NO_FLOATING_POINT
+RV NO_IO
+RV NO_LOCAL_ALLOCATORS
+RV NO_NESTED_FINALIZATION
+RV NO_SECONDARY_STACK
+RV NO_STANDARD_ALLOCATORS_AFTER_ELABORATION
+RV NO_STANDARD_STORAGE_POOLS
+RV NO_DEFAULT_INITIALIZATION
+RV NO_IMPLEMENTATION_PRAGMAS
+RV SPARK_05
+
+U main%b		main.adb		ce0211ec NE OO SU
+W ada%s			ada.ads			ada.ali
+W ada.exceptions%s	a-except.adb		a-except.ali
+W ada.integer_text_io%s	a-inteio.ads		a-inteio.ali
+W ada.strings%s		a-string.ads		a-string.ali
+W ada.strings.unbounded%s  a-strunb.adb		a-strunb.ali
+W ada.tags%s		a-tags.adb		a-tags.ali
+W ada.text_io%s		a-textio.adb		a-textio.ali
+W afrl%s		afrl.ads		afrl.ali
+W afrl.cmasi%s		afrl-cmasi.ads		afrl-cmasi.ali
+W afrl.cmasi.abstractgeometry%s  afrl-cmasi-abstractgeometry.adb  afrl-cmasi-abstractgeometry.ali
+W afrl.cmasi.abstractzone%s  afrl-cmasi-abstractzone.adb  afrl-cmasi-abstractzone.ali
+W afrl.cmasi.cameraconfiguration%s  afrl-cmasi-cameraconfiguration.adb  afrl-cmasi-cameraconfiguration.ali
+W afrl.cmasi.circle%s	afrl-cmasi-circle.adb	afrl-cmasi-circle.ali
+W afrl.cmasi.entityconfiguration%s  afrl-cmasi-entityconfiguration.adb  afrl-cmasi-entityconfiguration.ali
+W afrl.cmasi.enumerations%s  afrl-cmasi-enumerations.ads  afrl-cmasi-enumerations.ali
+W afrl.cmasi.gimbalconfiguration%s  afrl-cmasi-gimbalconfiguration.adb  afrl-cmasi-gimbalconfiguration.ali
+W afrl.cmasi.keepinzone%s  afrl-cmasi-keepinzone.adb  afrl-cmasi-keepinzone.ali
+W afrl.cmasi.keyvaluepair%s  afrl-cmasi-keyvaluepair.adb  afrl-cmasi-keyvaluepair.ali
+W afrl.cmasi.location3d%s  afrl-cmasi-location3d.adb  afrl-cmasi-location3d.ali
+W afrl.cmasi.payloadconfiguration%s  afrl-cmasi-payloadconfiguration.adb  afrl-cmasi-payloadconfiguration.ali
+W avtas%s		avtas.ads		avtas.ali
+W avtas.lmcp%s		avtas-lmcp.ads		avtas-lmcp.ali
+W avtas.lmcp.types%s	avtas-lmcp-types.ads	avtas-lmcp-types.ali
+W system%s		system.ads		system.ali
+W system.img_lli%s	s-imglli.adb		s-imglli.ali
+W system.pool_global%s	s-pooglo.adb		s-pooglo.ali
+W system.secondary_stack%s  s-secsta.adb	s-secsta.ali
+W system.soft_links%s	s-soflin.adb		s-soflin.ali
+W system.standard_library%s  s-stalib.adb	s-stalib.ali
+W system.storage_elements%s  s-stoele.adb	s-stoele.ali
+W system.storage_pools%s  s-stopoo.adb		s-stopoo.ali
+W system.storage_pools.subpools%s  s-stposu.adb	s-stposu.ali
+
+D ada.ads		20170727072659 76789da1 ada%s
+D a-charac.ads		20170725134137 2d3ec45b ada.characters%s
+D a-chlat1.ads		20170725134137 66457d31 ada.characters.latin_1%s
+D a-contai.ads		20170725134137 61e5e089 ada.containers%s
+D a-conhel.ads		20170725134137 20298884 ada.containers.helpers%s
+D a-convec.ads		20170725134137 7e2b0fdf ada.containers.vectors%s
+D a-except.ads		20170725134137 291912d5 ada.exceptions%s
+D a-finali.ads		20170725134137 bf4f806b ada.finalization%s
+D a-inteio.ads		20170725134137 f64b89a4 ada.integer_text_io%s
+D a-ioexce.ads		20170725134137 e4a01f64 ada.io_exceptions%s
+D a-iteint.ads		20170725134137 7c7305e9 ada.iterator_interfaces%s
+D a-stream.ads		20170725134137 119b8fb3 ada.streams%s
+D a-string.ads		20170725134137 90ac6797 ada.strings%s
+D a-strmap.ads		20170725134137 e8bb714a ada.strings.maps%s
+D a-strunb.ads		20170727093336 ecdfa332 ada.strings.unbounded%s
+D a-tags.ads		20170911163219 491b781d ada.tags%s
+D a-textio.ads		20170725134137 386df5d4 ada.text_io%s
+D a-tiinio.ads		20170725134137 aa04e5d6 ada.text_io.integer_io%s
+D a-unccon.ads		20170725134137 0e9b276f ada.unchecked_conversion%s
+D a-uncdea.ads		20170725134137 eff36322 ada.unchecked_deallocation%s
+D afrl.ads		20181213155759 1b3a74c6 afrl%s
+D afrl-cmasi.ads	20181214183435 6d18f5d9 afrl.cmasi%s
+D afrl-cmasi-abstractgeometry.ads  20181214183607 fe89a983 afrl.cmasi.abstractgeometry%s
+D afrl-cmasi-abstractzone.ads  20181214184725 062b9c7a afrl.cmasi.abstractzone%s
+D afrl-cmasi-cameraconfiguration.ads  20181214223715 93187f4f afrl.cmasi.cameraconfiguration%s
+D afrl-cmasi-circle.ads	20181214205517 d6d67fe4 afrl.cmasi.circle%s
+D afrl-cmasi-entityconfiguration.ads  20181214224251 7d8f1861 afrl.cmasi.entityconfiguration%s
+D afrl-cmasi-enumerations.ads  20181214215520 6179d503 afrl.cmasi.enumerations%s
+D afrl-cmasi-gimbalconfiguration.ads  20181214223656 4552da64 afrl.cmasi.gimbalconfiguration%s
+D afrl-cmasi-keepinzone.ads  20181214184212 e93f8e90 afrl.cmasi.keepinzone%s
+D afrl-cmasi-keyvaluepair.ads  20181214184318 5b8c684d afrl.cmasi.keyvaluepair%s
+D afrl-cmasi-location3d.ads  20181214205113 f26fe2c1 afrl.cmasi.location3d%s
+D afrl-cmasi-object.ads	20181214183044 fb022c40 afrl.cmasi.object%s
+D afrl-cmasi-payloadconfiguration.ads  20181214224040 beac59b1 afrl.cmasi.payloadconfiguration%s
+D avtas.ads		20181207210504 eb1fc8ab avtas%s
+D avtas-lmcp.ads	20181213155724 e3081ec7 avtas.lmcp%s
+D avtas-lmcp-object.ads	20181214182918 0047b6cc avtas.lmcp.object%s
+D avtas-lmcp-types.ads	20181213194010 9a3efbee avtas.lmcp.types%s
+D interfac.ads		20170725134137 5ab55268 interfaces%s
+D i-cstrea.ads		20170725134137 e53d8b8e interfaces.c_streams%s
+D main.adb		20181214224754 8f75547e main%b
+D system.ads		20170911102249 4635ec04 system%s
+D s-atocou.ads		20170725134137 b45c2d8d system.atomic_counters%s
+D s-crtl.ads		20170725134137 0ebbdb71 system.crtl%s
+D s-exctab.ads		20170725134137 54135002 system.exception_table%s
+D s-ficobl.ads		20170725134137 078245e4 system.file_control_block%s
+D s-finmas.ads		20170725134137 7811a767 system.finalization_masters%s
+D s-finroo.ads		20170725134137 4ff27390 system.finalization_root%s
+D s-imglli.ads		20170725134137 114f55d1 system.img_lli%s
+D s-memory.ads		20170725134137 597d6634 system.memory%s
+D s-parame.ads		20171219171438 f896c45c system.parameters%s
+D s-pooglo.ads		20170725134137 ede33ef8 system.pool_global%s
+D s-secsta.ads		20170926153132 283dec34 system.secondary_stack%s
+D s-soflin.ads		20170928191508 a7318a92 system.soft_links%s
+D s-stache.ads		20170725134137 a37c21ec system.stack_checking%s
+D s-stalib.ads		20170725134137 09bd3940 system.standard_library%s
+D s-stalib.adb		20170725134137 f2fe2716 system.standard_library%b
+D s-stoele.ads		20170725134137 2dc34a04 system.storage_elements%s
+D s-stoele.adb		20170725134137 ed88f8fb system.storage_elements%b
+D s-stopoo.ads		20170725134137 b16154c2 system.storage_pools%s
+D s-stposu.ads		20170725134137 97a6219c system.storage_pools.subpools%s
+D s-stratt.ads		20170725134137 aedef97e system.stream_attributes%s
+D s-string.ads		20170725134137 8fe54fb7 system.strings%s
+D s-ststop.ads		20170725134137 5fbf1b38 system.strings.stream_ops%s
+D s-traent.ads		20170725134137 005bf670 system.traceback_entries%s
+D s-unstyp.ads		20170725134137 34867c83 system.unsigned_types%s
+D s-wchcon.ads		20170725134137 1b7d22d2 system.wch_con%s
+X 1 ada.ads
+16K9*Ada 20e8 41|1r6 1r23 2r6 2r31 6r6 6r33
+X 6 a-convec.ads
+57R9*Vector<8|43R9>
+245U14*Append 41|106s27[24|13] 107s27[24|13] 108s27[24|13] 148s35[27|14]
+. 149s35[27|14]
+X 9 a-inteio.ads
+18K13*Integer_Text_IO[18|46] 41|2w10 2r35
+X 11 a-iteint.ads
+24h9 Forward_Iterator
+32h9 Reversible_Iterator<24R9[6|72]>
+X 13 a-string.ads
+16K13*Strings 35e16 41|6r10 6r37
+X 15 a-strunb.ads
+76K21*Unbounded 490e26 41|6w18 6r45
+79R9*Unbounded_String<8|43R9> 474e14 41|69r26 120r16
+94V13*To_Unbounded_String{79R9} 41|120s34
+100V13*To_String{string} 41|122s8
+166V14*"="{boolean} 6|44i19
+X 17 a-textio.ads
+49K13*Text_IO 471e16 41|1w10 1r27
+166U14*New_Line 41|98s4 102s4 104s4 110s4 117s4 123s4 127s4
+242U14*Put 41|101s4 103s4 109s4 115s7 121s4 122s4 125s4 126s4
+X 21 afrl.ads
+1K9*afrl 3e9 41|5r6 5r35 7r6 7r35 8r6 8r33 9r6 9r39 10r6 10r35 11r6 11r33
+. 12r6 12r29 13r6 13r42 14r6 14r43 15r6 15r42 16r6 16r42
+X 22 afrl-cmasi.ads
+4K14*cmasi 6e15 41|5r11 5r40 7r11 7r40 8r11 8r38 9r11 9r44 10r11 10r40 11r11
+. 11r38 12r11 12r34 13r11 13r47 14r11 14r48 15r11 15r47 16r11 16r47
+X 23 afrl-cmasi-abstractgeometry.ads
+5K20*abstractGeometry 18e32 41|9w17 9r50
+8P9*AbstractGeometry_Acc(7R9) 41|134r19
+X 24 afrl-cmasi-abstractzone.ads
+8K20*abstractZone 60e28 41|10w17 10r46
+10R9*AbstractZone<33|7R9> 58e14 41|75r9
+16P9*Vect_Int64_t_Acc(6|57R9[13])
+22U14*setZoneId 41|131s7
+24U14*setMinAltitude 41|132s7
+28U14*setMaxAltitude 41|133s7
+31V13*getAffectedAircraft{16P9} 41|106s7 107s7 108s7 114s16
+38V13*getLabel{15|79R9} 41|122s21
+39U14*setLabel 41|120s7
+41U14*setBoundary 41|134s7
+X 25 afrl-cmasi-cameraconfiguration.ads
+7K20*cameraConfiguration 46e35 41|15w17 15r53
+9R9*CameraConfiguration<34|9R9> 44e14 41|147r18
+X 26 afrl-cmasi-circle.ads
+8K20*circle 29e22 41|12w17 12r40
+10R9*Circle<23|7R9> 27e14 41|72r26
+11P9*Circle_Acc(10R9) 41|72r8
+17U14*setRadius 41|96s6
+19U14*setCenterPoint 41|97s6
+20V13*toString{string} 41|103s10
+X 27 afrl-cmasi-entityconfiguration.ads
+9K20*entityConfiguration 58e35 41|13w17 13r53
+11R9*EntityConfiguration<33|7R9> 56e14 41|77r9
+17P9*Vect_PayloadConfiguration_Class_Acc_Acc(6|57R9[14])
+41V13*getPayloadConfigurationList{17P9} 41|148s7 149s7
+X 28 afrl-cmasi-enumerations.ads
+1K20*enumerations 139e28 41|5w17 5r46
+6E9*AltitudeTypeEnum 6e39 41|86r24
+6n35*MSL{6E9} 41|86r42
+X 29 afrl-cmasi-gimbalconfiguration.ads
+7K20*gimbalconfiguration 87e35 41|16w17 16r53
+9R9*GimbalConfiguration<34|9R9> 85e14 41|146r18
+X 30 afrl-cmasi-keepinzone.ads
+6K20*keepInZone 19e26 41|11w17 11r44
+8R9*KeepInZone<24|10R9> 17e69 41|71r9
+X 31 afrl-cmasi-keyvaluepair.ads
+6K20*keyValuePair 26e28 41|7w17 7r46
+8R9*KeyValuePair<33|7R9> 24e14 41|76r10
+11V13*getFullLmcpTypeName{string}<37|14p13> 41|126s12
+X 32 afrl-cmasi-location3d.ads
+5K20*location3D 31e26 41|8w17 8r44
+7R9*Location3D<33|7R9> 29e14 41|73r10 88r19
+8P9*Location3D_Acc(7R9) 41|74r14
+14U14*setLatitude 41|83s8 89s12
+16U14*setLongitude 41|84s8 90s12
+18U14*setAltitude 41|85s8 91s12
+20U14*setAltitudeType 41|86s8
+X 34 afrl-cmasi-payloadconfiguration.ads
+7K20*payloadConfiguration 35e36 41|14w17 14r54
+11P9*PayloadConfiguration_Class_Acc(9R9) 41|78r13 79r13
+X 35 avtas.ads
+1K9*avtas 3e10 41|3r6 3r22 4r6 4r28
+X 36 avtas-lmcp.ads
+1K15*lmcp 3e15 41|3w12 3r28 4r12 4r34
+X 38 avtas-lmcp-types.ads
+3K20*types 14e21 41|4w17 4r39
+10I9*Int64_t<39|55I9>
+X 39 interfac.ads
+55I9*Integer_64<long_long_integer>
+X 41 main.adb
+67U11*Main 67b11 151l5 151t9
+69r4 tempUnboundedString{15|79R9}
+71r4 kz{30|8R9} 131m4 131r4 132m4 132r4 133m4 133r4 134m4 134r4
+72p4 c{26|11P9} 96r4 97r4 103r8 134r40
+73r4 l3d{32|7R9} 83m4 83r4 84m4 84r4 85m4 85r4 86m4 86r4
+74p4 l3d_Acc{32|8P9} 88m4 89r4 90r4 91r4 97r21
+75r4 az{24|10R9} 106r4 107r4 108r4 114r13 120m4 120r4 122r18
+76r4 kvp{31|8R9} 126r8
+77r4 ec{27|11R9} 148r4 149r4
+78p4 cc_Acc{34|11P9} 147m4 149r42
+79p4 gc_Acc{34|11P9} 146m4 148r42
+114i8 i{38|10I9} 115r11
+X 42 system.ads
+67M9*Address
+X 50 s-memory.ads
+53V13*Alloc{42|67M9} 103i<c,__gnat_malloc>22
+68U14*Free 104i<c,__gnat_free>22
+76V13*Realloc{42|67M9} 105i<c,__gnat_realloc>22
+X 57 s-stalib.adb
+93U14 Break_Start 94i<c,__gnat_break_start>22
+

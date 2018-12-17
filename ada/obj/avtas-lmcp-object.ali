@@ -1,0 +1,86 @@
+V "GNAT Lib v18"
+A -gnatA
+A -mtune=generic
+A -march=x86-64
+P ZX
+
+RN
+RV NO_DISPATCH
+RV NO_DISPATCHING_CALLS
+RV NO_EXCEPTION_HANDLERS
+RV NO_EXCEPTIONS
+RV NO_IMPLICIT_CONDITIONALS
+RV NO_SECONDARY_STACK
+RV NO_STANDARD_STORAGE_POOLS
+RV NO_IMPLEMENTATION_PRAGMAS
+RV NO_ELABORATION_CODE
+RV SPARK_05
+
+U avtas.lmcp.object%s	avtas-lmcp-object.ads	797153e5 EE OO PF PK IL
+W ada.exceptions%s	a-except.adb		a-except.ali
+W ada.streams%s		a-stream.adb		a-stream.ali
+W ada.tags%s		a-tags.adb		a-tags.ali
+W avtas%s		avtas.ads		avtas.ali
+W avtas.lmcp%s		avtas-lmcp.ads		avtas-lmcp.ali
+W avtas.lmcp.types%s	avtas-lmcp-types.ads	avtas-lmcp-types.ali
+W system%s		system.ads		system.ali
+W system.secondary_stack%s  s-secsta.adb	s-secsta.ali
+W system.storage_elements%s  s-stoele.adb	s-stoele.ali
+
+D ada.ads		20170727072659 76789da1 ada%s
+D a-except.ads		20170725134137 291912d5 ada.exceptions%s
+D a-stream.ads		20170725134137 119b8fb3 ada.streams%s
+D a-tags.ads		20170911163219 491b781d ada.tags%s
+D a-unccon.ads		20170725134137 0e9b276f ada.unchecked_conversion%s
+D avtas.ads		20181207210504 eb1fc8ab avtas%s
+D avtas-lmcp.ads	20181213155724 e3081ec7 avtas.lmcp%s
+D avtas-lmcp-object.ads	20181214182918 0047b6cc avtas.lmcp.object%s
+D avtas-lmcp-types.ads	20181213194010 9a3efbee avtas.lmcp.types%s
+D interfac.ads		20170725134137 5ab55268 interfaces%s
+D system.ads		20170911102249 4635ec04 system%s
+D s-exctab.ads		20170725134137 54135002 system.exception_table%s
+D s-parame.ads		20171219171438 f896c45c system.parameters%s
+D s-secsta.ads		20170926153132 283dec34 system.secondary_stack%s
+D s-soflin.ads		20170928191508 a7318a92 system.soft_links%s
+D s-stache.ads		20170725134137 a37c21ec system.stack_checking%s
+D s-stalib.ads		20170725134137 09bd3940 system.standard_library%s
+D s-stoele.ads		20170725134137 2dc34a04 system.storage_elements%s
+D s-stoele.adb		20170725134137 ed88f8fb system.storage_elements%b
+D s-traent.ads		20170725134137 005bf670 system.traceback_entries%s
+X 6 avtas.ads
+1K9*avtas 3e10 8|1r6 1r28 3r9 24r5
+X 7 avtas-lmcp.ads
+1K15*lmcp 6|1k9 7|3e15 8|1r12 1r34 3r15 24r11
+X 8 avtas-lmcp-object.ads
+3K20*object 7|1k15 8|24l16 24e22
+5R9*Object 5e37 6r30 10p14 10r29 12p13 12r36 14p13 14r40 16r32 18r34 20r40
+. 22r37
+6P9*Object_Acc(5R9) 8r31 8r50
+8y13*clone{6P9} 8>19 8>25
+8p19 this{6P9}
+8p25 that{6P9}
+10V14*"="{boolean} 10>17 10>23
+10r17 this{5R9}
+10r23 that{5R9}
+12V13*getLmcpTypeName{string} 12>29
+12r29 this{5R9}
+14V13*getFullLmcpTypeName{string} 14>33
+14r33 this{5R9}
+16y13*getLmcpType{9|9I9} 16>25
+16c25 this<5R9>
+18y13*getSeriesName{string} 18>27
+18c27 this<5R9>
+20y13*getSeriesNameAsLong{9|10I9} 20>33
+20c33 this<5R9>
+22y13*getSeriesVersion{9|6M9} 22>30
+22c30 this<5R9>
+X 9 avtas-lmcp-types.ads
+3K20*types 8|1w17 1r39 9|14e21
+6M9*UInt16_t<10|66M9> 8|22r58
+9I9*Int32_t<10|52I9> 8|16r53
+10I9*Int64_t<10|55I9> 8|20r61
+X 10 interfac.ads
+52I9*Integer_32<integer>
+55I9*Integer_64<long_long_integer>
+66M9*Unsigned_16
+

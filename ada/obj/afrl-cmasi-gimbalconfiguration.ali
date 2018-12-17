@@ -1,0 +1,287 @@
+V "GNAT Lib v18"
+A -gnatA
+A -mtune=generic
+A -march=x86-64
+P ZX
+
+RN
+RV NO_DISPATCH
+RV NO_DISPATCHING_CALLS
+RV NO_EXCEPTION_HANDLERS
+RV NO_EXCEPTION_PROPAGATION
+RV NO_EXCEPTIONS
+RV NO_FLOATING_POINT
+RV NO_IMPLICIT_CONDITIONALS
+RV NO_LOCAL_ALLOCATORS
+RV NO_NESTED_FINALIZATION
+RV NO_SECONDARY_STACK
+RV NO_STANDARD_STORAGE_POOLS
+RV NO_DEFAULT_INITIALIZATION
+RV NO_IMPLEMENTATION_PRAGMAS
+RV NO_ELABORATION_CODE
+RV SPARK_05
+
+U afrl.cmasi.gimbalconfiguration%b  afrl-cmasi-gimbalconfiguration.adb  2e1f0ca7 NE OO PK IL
+W afrl.cmasi%s		afrl-cmasi.ads		afrl-cmasi.ali
+W system.secondary_stack%s  s-secsta.adb	s-secsta.ali
+
+U afrl.cmasi.gimbalconfiguration%s  afrl-cmasi-gimbalconfiguration.ads  e8887b7e EE OO PF PK IL
+W ada%s			ada.ads			ada.ali
+W ada.containers%s	a-contai.ads		a-contai.ali
+Z ada.containers.generic_array_sort%s
+Z ada.containers.helpers%s  a-conhel.adb	a-conhel.ali
+W ada.containers.vectors%s
+W ada.exceptions%s	a-except.adb		a-except.ali
+Z ada.finalization%s	a-finali.ads		a-finali.ali
+Z ada.iterator_interfaces%s
+W ada.streams%s		a-stream.adb		a-stream.ali
+W ada.tags%s		a-tags.adb		a-tags.ali
+Z ada.unchecked_deallocation%s
+W afrl%s		afrl.ads		afrl.ali
+W afrl.cmasi%s		afrl-cmasi.ads		afrl-cmasi.ali
+W afrl.cmasi.enumerations%s  afrl-cmasi-enumerations.ads  afrl-cmasi-enumerations.ali
+W afrl.cmasi.object%s	afrl-cmasi-object.ads	afrl-cmasi-object.ali
+W afrl.cmasi.payloadconfiguration%s  afrl-cmasi-payloadconfiguration.adb  afrl-cmasi-payloadconfiguration.ali
+W avtas%s		avtas.ads		avtas.ali
+W avtas.lmcp%s		avtas-lmcp.ads		avtas-lmcp.ali
+W avtas.lmcp.types%s	avtas-lmcp-types.ads	avtas-lmcp-types.ali
+W system%s		system.ads		system.ali
+W system.finalization_masters%s  s-finmas.adb	s-finmas.ali
+W system.pool_global%s	s-pooglo.adb		s-pooglo.ali
+W system.secondary_stack%s  s-secsta.adb	s-secsta.ali
+W system.soft_links%s	s-soflin.adb		s-soflin.ali
+W system.standard_library%s  s-stalib.adb	s-stalib.ali
+W system.storage_elements%s  s-stoele.adb	s-stoele.ali
+W system.storage_pools%s  s-stopoo.adb		s-stopoo.ali
+W system.storage_pools.subpools%s  s-stposu.adb	s-stposu.ali
+W system.stream_attributes%s  s-stratt.adb	s-stratt.ali
+
+D ada.ads		20170727072659 76789da1 ada%s
+D a-charac.ads		20170725134137 2d3ec45b ada.characters%s
+D a-chlat1.ads		20170725134137 66457d31 ada.characters.latin_1%s
+D a-contai.ads		20170725134137 61e5e089 ada.containers%s
+D a-cgarso.ads		20170725134137 9129bfa8 ada.containers.generic_array_sort%s
+D a-conhel.ads		20170725134137 20298884 ada.containers.helpers%s
+D a-conhel.adb		20170725134137 9cc5095b ada.containers.helpers%b
+D a-convec.ads		20170725134137 7e2b0fdf ada.containers.vectors%s
+D a-convec.adb		20170725134137 1450cb2b ada.containers.vectors%b
+D a-except.ads		20170725134137 291912d5 ada.exceptions%s
+D a-finali.ads		20170725134137 bf4f806b ada.finalization%s
+D a-iteint.ads		20170725134137 7c7305e9 ada.iterator_interfaces%s
+D a-stream.ads		20170725134137 119b8fb3 ada.streams%s
+D a-string.ads		20170725134137 90ac6797 ada.strings%s
+D a-strmap.ads		20170725134137 e8bb714a ada.strings.maps%s
+D a-strunb.ads		20170727093336 ecdfa332 ada.strings.unbounded%s
+D a-tags.ads		20170911163219 491b781d ada.tags%s
+D a-unccon.ads		20170725134137 0e9b276f ada.unchecked_conversion%s
+D a-uncdea.ads		20170725134137 eff36322 ada.unchecked_deallocation%s
+D afrl.ads		20181213155759 1b3a74c6 afrl%s
+D afrl-cmasi.ads	20181214183435 6d18f5d9 afrl.cmasi%s
+D afrl-cmasi-enumerations.ads  20181214215520 6179d503 afrl.cmasi.enumerations%s
+D afrl-cmasi-gimbalconfiguration.ads  20181214223656 4552da64 afrl.cmasi.gimbalconfiguration%s
+D afrl-cmasi-gimbalconfiguration.adb  20181214222815 6b4dd6c3 afrl.cmasi.gimbalconfiguration%b
+D afrl-cmasi-object.ads	20181214183044 fb022c40 afrl.cmasi.object%s
+D afrl-cmasi-payloadconfiguration.ads  20181214224040 beac59b1 afrl.cmasi.payloadconfiguration%s
+D avtas.ads		20181207210504 eb1fc8ab avtas%s
+D avtas-lmcp.ads	20181213155724 e3081ec7 avtas.lmcp%s
+D avtas-lmcp-object.ads	20181214182918 0047b6cc avtas.lmcp.object%s
+D avtas-lmcp-types.ads	20181213194010 9a3efbee avtas.lmcp.types%s
+D interfac.ads		20170725134137 5ab55268 interfaces%s
+D system.ads		20170911102249 4635ec04 system%s
+D s-atocou.ads		20170725134137 b45c2d8d system.atomic_counters%s
+D s-atocou.adb		20170727093336 b65612c0 system.atomic_counters%b
+D s-exctab.ads		20170725134137 54135002 system.exception_table%s
+D s-finmas.ads		20170725134137 7811a767 system.finalization_masters%s
+D s-finroo.ads		20170725134137 4ff27390 system.finalization_root%s
+D s-memory.ads		20170725134137 597d6634 system.memory%s
+D s-parame.ads		20171219171438 f896c45c system.parameters%s
+D s-pooglo.ads		20170725134137 ede33ef8 system.pool_global%s
+D s-secsta.ads		20170926153132 283dec34 system.secondary_stack%s
+D s-soflin.ads		20170928191508 a7318a92 system.soft_links%s
+D s-stache.ads		20170725134137 a37c21ec system.stack_checking%s
+D s-stalib.ads		20170725134137 09bd3940 system.standard_library%s
+D s-stalib.adb		20170725134137 f2fe2716 system.standard_library%b
+D s-stoele.ads		20170725134137 2dc34a04 system.storage_elements%s
+D s-stoele.adb		20170725134137 ed88f8fb system.storage_elements%b
+D s-stopoo.ads		20170725134137 b16154c2 system.storage_pools%s
+D s-stposu.ads		20170725134137 97a6219c system.storage_pools.subpools%s
+D s-stratt.ads		20170725134137 aedef97e system.stream_attributes%s
+D s-string.ads		20170725134137 8fe54fb7 system.strings%s
+D s-ststop.ads		20170725134137 5fbf1b38 system.strings.stream_ops%s
+D s-traent.ads		20170725134137 005bf670 system.traceback_entries%s
+D s-unstyp.ads		20170725134137 34867c83 system.unsigned_types%s
+X 1 ada.ads
+16K9*Ada 20e8 23|5r6 12r47 17r32
+X 4 a-contai.ads
+16K13*Containers 24e19 23|5r10 12r51 17r36
+X 8 a-convec.ads
+41I9 Index_Type 23|13r7 18r7
+42+9 Element_Type 23|14r7 19r7
+46k24*Vectors 518e27 23|5w21 12r62 17r47
+57R9*Vector<11|43R9> 23|15r83[12] 20r53[17]
+X 12 a-iteint.ads
+24h9 Forward_Iterator
+32h9 Reversible_Iterator<24R9[8|72]>
+X 16 a-strunb.ads
+166V14*"="{boolean} 8|44i19
+X 20 afrl.ads
+1K9*afrl 3e9 23|2r6 2r29 3r6 3r35 4r6 4r43 7r9 9r36 70r36 87r5 24|1r14 97r5
+X 21 afrl-cmasi.ads
+4K14*cmasi 20|1k9 21|6e15 23|2r11 2r34 3r11 3r40 4r11 4r48 7r14 9r41 70r41
+. 87r10 24|1r19 97r10
+X 22 afrl-cmasi-enumerations.ads
+1K20*enumerations 139e28 23|3w17 3r46
+12E9*GimbalPointingModeEnum 12e151 23|14r23
+15E9*CmasiEnum 75e23 24|7r80
+38n23*GIMBALCONFIGURATION_ENUM{15E9} 24|7r94
+X 23 afrl-cmasi-gimbalconfiguration.ads
+7K20*gimbalconfiguration 21|4k14 23|70E9 87l16 87e35 24|1b25 97l16 97t35
+9R9*GimbalConfiguration<26|9R9> 10r47 22r40 23r36 24r32 41r46 42r34 43r39
+. 44r34 45r39 46r40 47r45 48r36 49r41 50r36 51r41 52r42 53r47 54r35 55r40
+. 56r35 57r40 58r41 59r46 60r42 61r47 62r44 63r49 64r39 65r44 66r44 70c9
+. 85e14 24|3r40 5r37 7r33 9r46 11r35 13r39 18r35 20r39 25r40 27r45 32r36
+. 34r41 39r36 41r41 46r42 48r47 53r36 55r40 60r35 62r40 67r41 69r46 74r42
+. 76r47 81r44 83r49 88r39 90r44 95r44 25|9p13 10p13 11p13 26|18P13 19P13
+. 20p13
+10P9*GimbalConfiguration_Acc(9R9)
+12K12*Vect_GimbalPointingModeEnum[8|46] 15r55
+15P9*Vect_GimbalPointingModeEnum_Acc(8|57R9[12]) 26r35 41r80 71r32 24|9r80
+17K12*Vect_Int64_t[8|46] 20r40
+20P9*Vect_Int64_t_Acc(8|57R9[17]) 39r30 66r78 84r30 24|95r78
+22V13*getFullLmcpTypeName{string} 22>33 24|3b13
+22c33 this<9R9>
+23V13*getLmcpTypeName{string} 23>29 24|5b13
+23c29 this<9R9>
+24V13*getLmcpType{30|7M9} 24>25 24|7b13
+24c25 this<9R9>
+26p10*SupportedPointingModes{15P9}
+27f7*MinAzimuth{30|11F9}
+28f7*MaxAzimuth{30|11F9}
+29b7*IsAzimuthClamped{boolean}
+30f7*MinElevation{30|11F9}
+31f7*MaxElevation{30|11F9}
+32b7*IsElevationClamped{boolean}
+33f7*MinRotation{30|11F9}
+34f7*MaxRotation{30|11F9}
+35b7*IsRotationClamped{boolean}
+36f7*MaxAzimuthSlewRate{30|11F9}
+37f7*MaxElevationSlewRate{30|11F9}
+38f7*MaxRotationRate{30|11F9}
+39p7*ContainedPayloadList{20P9}
+41V13*getSupportedPointingModes{15P9} 41>39 24|9b13
+41c39 this<9R9> 24|9r116
+42V13*getMinAzimuth{30|11F9} 42>27 24|11b13
+42c27 this<9R9> 24|11r81
+43U14*setMinAzimuth 43<28 43>66 24|13b14 16l8 16t21
+43c28 this<9R9> 24|13b28 15m7
+43f66 MinAzimuth{30|11F9} 24|13b66 15r26
+44V13*getMaxAzimuth{30|11F9} 44>27 24|18b13
+44c27 this<9R9> 24|18r81
+45U14*setMaxAzimuth 45<28 45>66 24|20b14 23l8 23t21
+45c28 this<9R9> 24|20b28 22m7
+45f66 MaxAzimuth{30|11F9} 24|20b66 22r26
+46V13*getIsAzimuthClamped{boolean} 46>33 24|25b13
+46c33 this<9R9> 24|25r86
+47U14*setIsAzimuthClamped 47<34 47>72 24|27b14 30l8 30t27
+47c34 this<9R9> 24|27b34 29m7
+47b72 IsAzimuthClamped{boolean} 24|27b72 29r32
+48V13*getMinElevation{30|11F9} 48>29 24|32b13
+48c29 this<9R9> 24|32r82
+49U14*setMinElevation 49<30 49>68 24|34b14 37l8 37t23
+49c30 this<9R9> 24|34b30 36m7
+49f68 MinElevation{30|11F9} 24|34b68 36r28
+50V13*getMaxElevation{30|11F9} 50>29 24|39b13
+50c29 this<9R9> 24|39r82
+51U14*setMaxElevation 51<30 51>68 24|41b14 44l8 44t23
+51c30 this<9R9> 24|41b30 43m7
+51f68 MaxElevation{30|11F9} 24|41b68 43r28
+52V13*getIsElevationClamped{boolean} 52>35 24|46b13
+52c35 this<9R9> 24|46r88
+53U14*setIsElevationClamped 53<36 53>74 24|48b14 51l8 51t29
+53c36 this<9R9> 24|48b36 50m7
+53b74 IsElevationClamped{boolean} 24|48b74 50r34
+54V13*getMinRotation{30|11F9} 54>28 24|53b13
+54c28 this<9R9> 24|53r82
+55U14*getMinRotation 55<29 55>67 24|55b14 58l8 58t22
+55c29 this<9R9> 24|55b29 57m7
+55f67 MinRotation{30|11F9} 24|55b67 57r27
+56V13*getMaxRotation{30|11F9} 56>28 24|60b13
+56c28 this<9R9> 24|60r81
+57U14*setMaxRotation 57<29 57>67 24|62b14 65l8 65t22
+57c29 this<9R9> 24|62b29 64m7
+57f67 MaxRotation{30|11F9} 24|62b67 64r27
+58V13*getIsRotationClamped{boolean} 58>34 24|67b13
+58c34 this<9R9> 24|67r87
+59U14*setIsRotationClamped 59<35 59>73 24|69b14 72l8 72t28
+59c35 this<9R9> 24|69b35 71m7
+59b73 IsRotationClamped{boolean} 24|69b73 71r33
+60V13*getMaxAzimuthSlewRate{30|11F9} 60>35 24|74b13
+60c35 this<9R9> 24|74r88
+61U14*setMaxAzimuthSlewRate 61<36 61>74 24|76b14 79l8 79t29
+61c36 this<9R9> 24|76b36 78m7
+61f74 MaxAzimuthSlewRate{30|11F9} 24|76b74 78r34
+62V13*getMaxElevationSlewRate{30|11F9} 62>37 24|81b13
+62c37 this<9R9> 24|81r90
+63U14*setMaxElevationSlewRate 63<38 63>76 24|83b14 86l8 86t31
+63c38 this<9R9> 24|83b38 85m7
+63f76 MaxElevationSlewRate{30|11F9} 24|83b76 85r36
+64V13*getMaxRotationRate{30|11F9} 64>32 24|88b13
+64c32 this<9R9> 24|88r85
+65U14*setMaxRotationRate 65<33 65>71 24|90b14 93l8 93t26
+65c33 this<9R9> 24|90b33 92m7
+65f71 MaxRotationRate{30|11F9} 24|90b71 92r31
+66V13*getContainedPayloadList{20P9} 66>37 24|95b13
+66c37 this<9R9> 24|95r99
+71p7 SupportedPointingModes{15P9} 24|9r121
+72f7 MinAzimuth{30|11F9} 24|11r86 15m12
+73f7 MaxAzimuth{30|11F9} 24|18r86 22m12
+74b7 IsAzimuthClamped{boolean} 24|25r91 29m12
+75f7 MinElevation{30|11F9} 24|32r87 36m12
+76f7 MaxElevation{30|11F9} 24|39r87 43m12
+77b7 IsElevationClamped{boolean} 24|46r93 50m12
+78f7 MinRotation{30|11F9} 24|53r87 57m12
+79f7 MaxRotation{30|11F9} 24|60r86 64m12
+80b7 IsRotationClamped{boolean} 24|67r92 71m12
+81f7 MaxAzimuthSlewRate{30|11F9} 24|74r93 78m12
+82f7 MaxElevationSlewRate{30|11F9} 24|81r95 85m12
+83f7 MaxRotationRate{30|11F9} 24|88r90 92m12
+84p7 ContainedPayloadList{20P9} 24|95r104
+X 25 afrl-cmasi-object.ads
+5K20*object 23|2w17 2r40 25|17e22
+9V13*getSeriesVersion{30|6M9}
+10V13*getSeriesName{string}
+11V13*getSeriesNameAsLong{30|10I9}
+X 26 afrl-cmasi-payloadconfiguration.ads
+7K20*payloadConfiguration 23|4w17 4r54 9r47 70r47 26|35e36
+9R9*PayloadConfiguration<25|7R9> 23|9r68 70r68 26|33e14
+18V13*getFullLmcpTypeName{string}<29|14p13>
+19V13*getLmcpTypeName{string}<29|12p13>
+20V13*getLmcpType{30|7M9}
+X 27 avtas.ads
+1K9*avtas 23|1r6 1r28 27|3e10
+X 28 avtas-lmcp.ads
+1K15*lmcp 23|1r12 1r34 28|3e15
+X 30 avtas-lmcp-types.ads
+3K20*types 23|1w17 1r39 30|14e21
+6M9*UInt16_t<31|66M9>
+7M9*UInt32_t<31|74M9> 23|24r66 24|7r67
+10I9*Int64_t<31|55I9> 23|19r23
+11F9*Float_t<31|169F9> 23|27r20 28r20 30r21 31r22 33r20 34r21 36r28 37r30
+. 38r25 42r68 43r82 44r68 45r82 48r70 49r86 50r70 51r86 54r69 55r84 56r69
+. 57r84 60r76 61r98 62r78 63r102 64r73 65r92 72r20 73r20 75r21 76r22 78r20
+. 79r21 81r28 82r30 83r25 24|11r69 13r82 18r69 20r82 32r70 34r86 39r70 41r86
+. 53r70 55r84 60r69 62r84 74r76 76r98 81r78 83r102 88r73 90r92
+X 31 interfac.ads
+55I9*Integer_64<long_long_integer>
+66M9*Unsigned_16
+74M9*Unsigned_32
+169F9*IEEE_Float_32<short_float>
+X 32 system.ads
+67M9*Address
+X 38 s-memory.ads
+53V13*Alloc{32|67M9} 103i<c,__gnat_malloc>22
+68U14*Free 104i<c,__gnat_free>22
+76V13*Realloc{32|67M9} 105i<c,__gnat_realloc>22
+X 45 s-stalib.adb
+93U14 Break_Start 94i<c,__gnat_break_start>22
+

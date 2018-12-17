@@ -1,0 +1,129 @@
+V "GNAT Lib v18"
+A -gnatA
+A -mtune=generic
+A -march=x86-64
+P ZX
+
+RN
+RV NO_DISPATCH
+RV NO_DISPATCHING_CALLS
+RV NO_FLOATING_POINT
+RV NO_IMPLICIT_CONDITIONALS
+RV NO_SECONDARY_STACK
+RV NO_STANDARD_STORAGE_POOLS
+RV NO_IMPLEMENTATION_PRAGMAS
+RV NO_ELABORATION_CODE
+RV SPARK_05
+
+U afrl.cmasi.location3ds%b  afrl-cmasi-location3ds.adb  b3a3a2ea NE OO PK IL
+W afrl.cmasi%s		afrl-cmasi.ads		afrl-cmasi.ali
+W system.secondary_stack%s  s-secsta.adb	s-secsta.ali
+
+U afrl.cmasi.location3ds%s  afrl-cmasi-location3ds.ads  e0daa4dc EE OO PF PK IL
+W ada.exceptions%s	a-except.adb		a-except.ali
+W ada.streams%s		a-stream.adb		a-stream.ali
+W ada.tags%s		a-tags.adb		a-tags.ali
+W afrl%s		afrl.ads		afrl.ali
+W afrl.cmasi%s		afrl-cmasi.ads		afrl-cmasi.ali
+W afrl.cmasi.enumerations%s  afrl-cmasi-enumerations.ads  afrl-cmasi-enumerations.ali
+W afrl.cmasi.objects%s	afrl-cmasi-objects.ads	afrl-cmasi-objects.ali
+W avtas%s		avtas.ads		avtas.ali
+W avtas.lmcp%s		avtas-lmcp.ads		avtas-lmcp.ali
+W avtas.lmcp.types%s	avtas-lmcp-types.ads	avtas-lmcp-types.ali
+W system%s		system.ads		system.ali
+W system.secondary_stack%s  s-secsta.adb	s-secsta.ali
+W system.storage_elements%s  s-stoele.adb	s-stoele.ali
+W system.stream_attributes%s  s-stratt.adb	s-stratt.ali
+
+D ada.ads		20170727072659 76789da1 ada%s
+D a-except.ads		20170725134137 291912d5 ada.exceptions%s
+D a-stream.ads		20170725134137 119b8fb3 ada.streams%s
+D a-tags.ads		20170911163219 491b781d ada.tags%s
+D a-unccon.ads		20170725134137 0e9b276f ada.unchecked_conversion%s
+D afrl.ads		20181213155759 1b3a74c6 afrl%s
+D afrl-cmasi.ads	20181213204520 ea5bd624 afrl.cmasi%s
+D afrl-cmasi-enumerations.ads  20181213202214 fa386e46 afrl.cmasi.enumerations%s
+D afrl-cmasi-location3ds.ads  20181213204435 29dca213 afrl.cmasi.location3ds%s
+D afrl-cmasi-location3ds.adb  20181213194721 9a7f00f9 afrl.cmasi.location3ds%b
+D afrl-cmasi-objects.ads  20181213191100 435b4543 afrl.cmasi.objects%s
+D avtas.ads		20181207210504 eb1fc8ab avtas%s
+D avtas-lmcp.ads	20181213155724 e3081ec7 avtas.lmcp%s
+D avtas-lmcp-objects.ads  20181213182831 68666fb6 avtas.lmcp.objects%s
+D avtas-lmcp-types.ads	20181213194010 9a3efbee avtas.lmcp.types%s
+D interfac.ads		20170725134137 5ab55268 interfaces%s
+D system.ads		20170911102249 4635ec04 system%s
+D s-exctab.ads		20170725134137 54135002 system.exception_table%s
+D s-parame.ads		20171219171438 f896c45c system.parameters%s
+D s-secsta.ads		20170926153132 283dec34 system.secondary_stack%s
+D s-soflin.ads		20170928191508 a7318a92 system.soft_links%s
+D s-stache.ads		20170725134137 a37c21ec system.stack_checking%s
+D s-stalib.ads		20170725134137 09bd3940 system.standard_library%s
+D s-stoele.ads		20170725134137 2dc34a04 system.storage_elements%s
+D s-stoele.adb		20170725134137 ed88f8fb system.storage_elements%b
+D s-stratt.ads		20170725134137 aedef97e system.stream_attributes%s
+D s-traent.ads		20170725134137 005bf670 system.traceback_entries%s
+D s-unstyp.ads		20170725134137 34867c83 system.unsigned_types%s
+X 6 afrl.ads
+1K9*afrl 3e9 9|2r6 2r30 3r6 3r35 5r9 31r5 10|1r14 37r5
+X 7 afrl-cmasi.ads
+4K14*cmasi 6|1k9 7|12e15 9|2r11 2r35 3r11 3r40 5r14 31r10 10|1r19 37r10
+6H9*Object<14|5R9> 10e65 9|7r27 24r27
+X 8 afrl-cmasi-enumerations.ads
+1K20*enumerations 133e28 9|3w17 3r46
+6E9*AltitudeTypeEnum 6e39 9|19r61 20r77 28r22 10|30r61 32r77
+6n35*MSL{6E9} 9|28r42
+9E9*CmasiEnum 69e23 10|7r64
+13n23*PAYLOADCONFIGURATION_ENUM{9E9} 10|7r78
+X 9 afrl-cmasi-location3ds.ads
+5K20*location3ds 7|4k14 9|24E9 31l16 31e27 10|1b25 37l16 37t27
+7R9*Location3D<7|6R9> 8r38 10P13 10r40 11P13 11r36 12p13 12r32 13r32 14r37
+. 15r33 16r38 17r32 18r37 19r36 20r41 24c9 29e14 10|3r40 5r36 7r32 9r33 11r37
+. 16r33 18r38 23r32 25r37 30r36 32r41
+8P9*Location3D_Acc(7R9)
+10V13*getFullLmcpTypeName{string}<14|14p13> 10>33 10|3b13
+10r33 this{7R9}
+11V13*getLmcpTypeName{string}<14|12p13> 11>29 10|5b13
+11r29 this{7R9}
+12V13*getLmcpType{15|7M9} 12>25 10|7b13
+12r25 this{7R9}
+13V13*getLatitude{15|12F9} 13>25 10|9b13
+13c25 this<7R9> 10|9r71
+14U14*setLatitude 14<26 14>55 10|11b14 14l8 14t19
+14c26 this<7R9> 10|11b26 13m7
+14f55 Latitude{15|12F9} 10|11b55 13r24
+15V13*getLongitude{15|12F9} 15>26 10|16b13
+15c26 this<7R9> 10|16r71
+16U14*setLongitude 16<27 16>56 10|18b14 21l8 21t20
+16c27 this<7R9> 10|18b27 20m7
+16f56 Longitude{15|12F9} 10|18b56 20r25
+17V13*getAltitude{15|11F9} 17>25 10|23b13
+17c25 this<7R9> 10|23r69
+18U14*setAltitude 18<26 18>55 10|25b14 28l8 28t19
+18c26 this<7R9> 10|25b26 27m7
+18f55 Altitude{15|11F9} 10|25b55 27r24
+19V13*getAltitudeType{8|6E9} 19>29 10|30b13
+19c29 this<7R9> 10|30r82
+20U14*setAltitudeType 20<30 20>59 10|32b14 35l8 35t23
+20c30 this<7R9> 10|32b30 34m7
+20e59 AltitudeType{8|6E9} 10|32b59 34r28
+25f7 Latitude{15|12F9} 10|9r76 13m12
+26f7 Longitude{15|12F9} 10|16r76 20m12
+27f7 Altitude{15|11F9} 10|23r74 27m12
+28e7 AltitudeType{8|6E9} 10|30r87 34m12
+X 11 afrl-cmasi-objects.ads
+5K20*objects 9|2w17 2r41 11|17e23
+X 12 avtas.ads
+1K9*avtas 9|1r6 1r28 12|3e10
+X 13 avtas-lmcp.ads
+1K15*lmcp 9|1r12 1r34 13|3e15
+X 15 avtas-lmcp-types.ads
+3K20*types 9|1w17 1r39 15|14e21
+7M9*UInt32_t<16|74M9> 9|12r51 10|7r51
+11F9*Float_t<16|169F9> 9|17r57 18r69 27r18 10|23r57 25r69
+12F9*Double_t<16|172F9> 9|13r57 14r69 15r58 16r71 25r18 26r19 10|9r58 11r69
+. 16r58 18r71
+X 16 interfac.ads
+74M9*Unsigned_32
+169F9*IEEE_Float_32<short_float>
+172F9*IEEE_Float_64<long_float>
+

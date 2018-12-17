@@ -1,0 +1,101 @@
+V "GNAT Lib v18"
+A -gnatA
+A -mtune=generic
+A -march=x86-64
+P ZX
+
+RN
+RV NO_DISPATCHING_CALLS
+RV NO_IMPLICIT_CONDITIONALS
+RV NO_SECONDARY_STACK
+RV NO_STANDARD_STORAGE_POOLS
+RV NO_IMPLEMENTATION_PRAGMAS
+RV NO_ELABORATION_CODE
+RV SPARK_05
+
+U afrl.cmasi.abstractgeometry%b  afrl-cmasi-abstractgeometry.adb  2ed99a36 NE OO PK IL
+W afrl.cmasi%s		afrl-cmasi.ads		afrl-cmasi.ali
+W system.secondary_stack%s  s-secsta.adb	s-secsta.ali
+
+U afrl.cmasi.abstractgeometry%s  afrl-cmasi-abstractgeometry.ads  93d45ef7 EE OO PF PK IL
+W ada.exceptions%s	a-except.adb		a-except.ali
+W ada.streams%s		a-stream.adb		a-stream.ali
+W ada.tags%s		a-tags.adb		a-tags.ali
+W afrl%s		afrl.ads		afrl.ali
+W afrl.cmasi%s		afrl-cmasi.ads		afrl-cmasi.ali
+W afrl.cmasi.enumerations%s  afrl-cmasi-enumerations.ads  afrl-cmasi-enumerations.ali
+W afrl.cmasi.object%s	afrl-cmasi-object.ads	afrl-cmasi-object.ali
+W avtas%s		avtas.ads		avtas.ali
+W avtas.lmcp%s		avtas-lmcp.ads		avtas-lmcp.ali
+W avtas.lmcp.types%s	avtas-lmcp-types.ads	avtas-lmcp-types.ali
+W system%s		system.ads		system.ali
+W system.secondary_stack%s  s-secsta.adb	s-secsta.ali
+W system.storage_elements%s  s-stoele.adb	s-stoele.ali
+
+D ada.ads		20170727072659 76789da1 ada%s
+D a-except.ads		20170725134137 291912d5 ada.exceptions%s
+D a-stream.ads		20170725134137 119b8fb3 ada.streams%s
+D a-tags.ads		20170911163219 491b781d ada.tags%s
+D a-unccon.ads		20170725134137 0e9b276f ada.unchecked_conversion%s
+D afrl.ads		20181213155759 1b3a74c6 afrl%s
+D afrl-cmasi.ads	20181214183435 6d18f5d9 afrl.cmasi%s
+D afrl-cmasi-abstractgeometry.ads  20181214183607 fe89a983 afrl.cmasi.abstractgeometry%s
+D afrl-cmasi-abstractgeometry.adb  20181214182657 d05033b5 afrl.cmasi.abstractgeometry%b
+D afrl-cmasi-enumerations.ads  20181214215520 6179d503 afrl.cmasi.enumerations%s
+D afrl-cmasi-object.ads	20181214183044 fb022c40 afrl.cmasi.object%s
+D avtas.ads		20181207210504 eb1fc8ab avtas%s
+D avtas-lmcp.ads	20181213155724 e3081ec7 avtas.lmcp%s
+D avtas-lmcp-object.ads	20181214182918 0047b6cc avtas.lmcp.object%s
+D avtas-lmcp-types.ads	20181213194010 9a3efbee avtas.lmcp.types%s
+D interfac.ads		20170725134137 5ab55268 interfaces%s
+D system.ads		20170911102249 4635ec04 system%s
+D s-exctab.ads		20170725134137 54135002 system.exception_table%s
+D s-parame.ads		20171219171438 f896c45c system.parameters%s
+D s-secsta.ads		20170926153132 283dec34 system.secondary_stack%s
+D s-soflin.ads		20170928191508 a7318a92 system.soft_links%s
+D s-stache.ads		20170725134137 a37c21ec system.stack_checking%s
+D s-stalib.ads		20170725134137 09bd3940 system.standard_library%s
+D s-stoele.ads		20170725134137 2dc34a04 system.storage_elements%s
+D s-stoele.adb		20170725134137 ed88f8fb system.storage_elements%b
+D s-traent.ads		20170725134137 005bf670 system.traceback_entries%s
+D s-unstyp.ads		20170725134137 34867c83 system.unsigned_types%s
+X 6 afrl.ads
+1K9*afrl 3e9 8|1r6 1r29 2r6 2r35 5r9 7r33 16r33 18r5 9|1r14 7r5
+X 7 afrl-cmasi.ads
+4K14*cmasi 6|1k9 7|6e15 8|1r11 1r34 2r11 2r40 5r14 7r38 16r38 18r10 9|1r19
+. 7r10
+X 8 afrl-cmasi-abstractgeometry.ads
+5K20*abstractGeometry 7|4k14 8|16E9 18l16 18e32 9|1b25 7l16 7t32
+7R9*AbstractGeometry<11|7R9> 8r44 10P13 10r40 11P13 11r36 12p13 12r32 16c9
+. 16e74 9|3r40 4r36 5r32 11|9p13 10p13 11p13
+8P9*AbstractGeometry_Acc(7R9)
+10V13*getFullLmcpTypeName{string}<14|14p13> 10>33 9|3b13
+10r33 this{7R9}
+11V13*getLmcpTypeName{string}<14|12p13> 11>29 9|4b13
+11r29 this{7R9}
+12V13*getLmcpType{15|7M9} 12>25 9|5b13
+12r25 this{7R9}
+X 10 afrl-cmasi-enumerations.ads
+1K20*enumerations 8|2w17 2r46 10|139e28
+15E9*CmasiEnum 9|5r70 10|75e23
+15n23*ABSTRACTGEOMETRY_ENUM{15E9} 9|5r84
+X 11 afrl-cmasi-object.ads
+5K20*object 8|1w17 1r40 7r44 16r44 11|17e22
+7H9*Object<14|5R9> 8|7r51 16r51 11|15e64
+9V13*getSeriesVersion{15|6M9}
+10V13*getSeriesName{string}
+11V13*getSeriesNameAsLong{15|10I9}
+X 12 avtas.ads
+1K9*avtas 8|3r6 3r28 12|3e10
+X 13 avtas-lmcp.ads
+1K15*lmcp 8|3r12 3r34 13|3e15
+X 15 avtas-lmcp-types.ads
+3K20*types 8|3w17 3r39 15|14e21
+6M9*UInt16_t<16|66M9>
+7M9*UInt32_t<16|74M9> 8|12r57 9|5r57
+10I9*Int64_t<16|55I9>
+X 16 interfac.ads
+55I9*Integer_64<long_long_integer>
+66M9*Unsigned_16
+74M9*Unsigned_32
+

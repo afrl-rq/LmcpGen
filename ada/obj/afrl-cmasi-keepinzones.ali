@@ -1,0 +1,142 @@
+V "GNAT Lib v18"
+A -gnatA
+A -mtune=generic
+A -march=x86-64
+P ZX
+
+RN
+RV NO_DISPATCHING_CALLS
+RV NO_EXCEPTION_HANDLERS
+RV NO_EXCEPTION_PROPAGATION
+RV NO_EXCEPTIONS
+RV NO_IMPLICIT_CONDITIONALS
+RV NO_LOCAL_ALLOCATORS
+RV NO_NESTED_FINALIZATION
+RV NO_SECONDARY_STACK
+RV NO_STANDARD_STORAGE_POOLS
+RV NO_IMPLEMENTATION_PRAGMAS
+RV NO_ELABORATION_CODE
+RV SPARK_05
+
+U afrl.cmasi.keepinzones%b  afrl-cmasi-keepinzones.adb  6707c3f9 NE OO PK IL
+W afrl.cmasi%s		afrl-cmasi.ads		afrl-cmasi.ali
+W system.secondary_stack%s  s-secsta.adb	s-secsta.ali
+
+U afrl.cmasi.keepinzones%s  afrl-cmasi-keepinzones.ads  28ffcc53 EE OO PF PK IL
+W ada.exceptions%s	a-except.adb		a-except.ali
+W ada.streams%s		a-stream.adb		a-stream.ali
+W ada.tags%s		a-tags.adb		a-tags.ali
+W afrl%s		afrl.ads		afrl.ali
+W afrl.cmasi%s		afrl-cmasi.ads		afrl-cmasi.ali
+W afrl.cmasi.abstractzones%s  afrl-cmasi-abstractzones.adb  afrl-cmasi-abstractzones.ali
+W afrl.cmasi.enumerations%s  afrl-cmasi-enumerations.ads  afrl-cmasi-enumerations.ali
+W afrl.cmasi.objects%s	afrl-cmasi-objects.ads	afrl-cmasi-objects.ali
+W avtas%s		avtas.ads		avtas.ali
+W avtas.lmcp%s		avtas-lmcp.ads		avtas-lmcp.ali
+W avtas.lmcp.types%s	avtas-lmcp-types.ads	avtas-lmcp-types.ali
+W system%s		system.ads		system.ali
+W system.finalization_masters%s  s-finmas.adb	s-finmas.ali
+W system.pool_global%s	s-pooglo.adb		s-pooglo.ali
+W system.secondary_stack%s  s-secsta.adb	s-secsta.ali
+W system.soft_links%s	s-soflin.adb		s-soflin.ali
+W system.standard_library%s  s-stalib.adb	s-stalib.ali
+W system.storage_elements%s  s-stoele.adb	s-stoele.ali
+W system.storage_pools.subpools%s  s-stposu.adb	s-stposu.ali
+
+D ada.ads		20170727072659 76789da1 ada%s
+D a-charac.ads		20170725134137 2d3ec45b ada.characters%s
+D a-chlat1.ads		20170725134137 66457d31 ada.characters.latin_1%s
+D a-contai.ads		20170725134137 61e5e089 ada.containers%s
+D a-conhel.ads		20170725134137 20298884 ada.containers.helpers%s
+D a-convec.ads		20170725134137 7e2b0fdf ada.containers.vectors%s
+D a-except.ads		20170725134137 291912d5 ada.exceptions%s
+D a-finali.ads		20170725134137 bf4f806b ada.finalization%s
+D a-iteint.ads		20170725134137 7c7305e9 ada.iterator_interfaces%s
+D a-stream.ads		20170725134137 119b8fb3 ada.streams%s
+D a-string.ads		20170725134137 90ac6797 ada.strings%s
+D a-strmap.ads		20170725134137 e8bb714a ada.strings.maps%s
+D a-strunb.ads		20170727093336 ecdfa332 ada.strings.unbounded%s
+D a-tags.ads		20170911163219 491b781d ada.tags%s
+D a-unccon.ads		20170725134137 0e9b276f ada.unchecked_conversion%s
+D a-uncdea.ads		20170725134137 eff36322 ada.unchecked_deallocation%s
+D afrl.ads		20181213155759 1b3a74c6 afrl%s
+D afrl-cmasi.ads	20181213204520 ea5bd624 afrl.cmasi%s
+D afrl-cmasi-abstractgeometry.ads  20181214171502 47b69520 afrl.cmasi.abstractgeometry%s
+D afrl-cmasi-abstractzones.ads  20181214180809 2fe30bfd afrl.cmasi.abstractzones%s
+D afrl-cmasi-enumerations.ads  20181213202214 fa386e46 afrl.cmasi.enumerations%s
+D afrl-cmasi-keepinzones.ads  20181213204423 ce1ac161 afrl.cmasi.keepinzones%s
+D afrl-cmasi-keepinzones.adb  20181213204210 a91d0298 afrl.cmasi.keepinzones%b
+D afrl-cmasi-objects.ads  20181213191100 435b4543 afrl.cmasi.objects%s
+D avtas.ads		20181207210504 eb1fc8ab avtas%s
+D avtas-lmcp.ads	20181213155724 e3081ec7 avtas.lmcp%s
+D avtas-lmcp-objects.ads  20181213182831 68666fb6 avtas.lmcp.objects%s
+D avtas-lmcp-types.ads	20181213194010 9a3efbee avtas.lmcp.types%s
+D interfac.ads		20170725134137 5ab55268 interfaces%s
+D system.ads		20170911102249 4635ec04 system%s
+D s-atocou.ads		20170725134137 b45c2d8d system.atomic_counters%s
+D s-exctab.ads		20170725134137 54135002 system.exception_table%s
+D s-finmas.ads		20170725134137 7811a767 system.finalization_masters%s
+D s-finroo.ads		20170725134137 4ff27390 system.finalization_root%s
+D s-memory.ads		20170725134137 597d6634 system.memory%s
+D s-parame.ads		20171219171438 f896c45c system.parameters%s
+D s-pooglo.ads		20170725134137 ede33ef8 system.pool_global%s
+D s-secsta.ads		20170926153132 283dec34 system.secondary_stack%s
+D s-soflin.ads		20170928191508 a7318a92 system.soft_links%s
+D s-stache.ads		20170725134137 a37c21ec system.stack_checking%s
+D s-stalib.ads		20170725134137 09bd3940 system.standard_library%s
+D s-stalib.adb		20170725134137 f2fe2716 system.standard_library%b
+D s-stoele.ads		20170725134137 2dc34a04 system.storage_elements%s
+D s-stoele.adb		20170725134137 ed88f8fb system.storage_elements%b
+D s-stopoo.ads		20170725134137 b16154c2 system.storage_pools%s
+D s-stposu.ads		20170725134137 97a6219c system.storage_pools.subpools%s
+D s-stratt.ads		20170725134137 aedef97e system.stream_attributes%s
+D s-string.ads		20170725134137 8fe54fb7 system.strings%s
+D s-ststop.ads		20170725134137 5fbf1b38 system.strings.stream_ops%s
+D s-traent.ads		20170725134137 005bf670 system.traceback_entries%s
+D s-unstyp.ads		20170725134137 34867c83 system.unsigned_types%s
+X 9 a-iteint.ads
+24h9 Forward_Iterator
+32h9 Reversible_Iterator<24R9[6|72]>
+X 17 afrl.ads
+1K9*afrl 3e9 22|2r6 2r30 3r6 3r35 4r6 4r36 6r9 19r5 23|1r14 9r5
+X 18 afrl-cmasi.ads
+4K14*cmasi 17|1k9 18|12e15 22|2r11 2r35 3r11 3r40 4r11 4r41 6r14 19r10 23|1r19
+. 9r10
+X 20 afrl-cmasi-abstractzones.ads
+8K20*abstractZones 60e29 22|4w17 4r47
+10R9*AbstractZone<18|6R9> 58e14 22|8r27 17r27
+X 21 afrl-cmasi-enumerations.ads
+1K20*enumerations 133e28 22|3w17 3r46
+9E9*CmasiEnum 69e23 23|7r65
+37n23*KEEPINZONE_ENUM{9E9} 23|7r79
+X 22 afrl-cmasi-keepinzones.ads
+6K20*keepInZones 18|4k14 22|17E9 19l16 19e27 23|1b25 9l16 9t27
+8R9*KeepInZone<20|10R9> 9r38 11P13 11r40 12P13 12r36 13p13 13r32 17c9 17e56
+. 23|3r40 5r36 7r33
+9P9*KeepInZone_Acc(8R9)
+11V13*getFullLmcpTypeName{string}<27|14p13> 11>33 23|3b13
+11r33 this{8R9}
+12V13*getLmcpTypeName{string}<27|12p13> 12>29 23|5b13
+12r29 this{8R9}
+13V13*getLmcpType{28|7M9} 13>25 23|7b13
+13r25 this{8R9}
+X 24 afrl-cmasi-objects.ads
+5K20*objects 22|2w17 2r41 24|17e23
+X 25 avtas.ads
+1K9*avtas 22|1r6 1r28 25|3e10
+X 26 avtas-lmcp.ads
+1K15*lmcp 22|1r12 1r34 26|3e15
+X 28 avtas-lmcp-types.ads
+3K20*types 22|1w17 1r39 28|14e21
+7M9*UInt32_t<29|74M9> 22|13r51 23|7r52
+X 29 interfac.ads
+74M9*Unsigned_32
+X 30 system.ads
+67M9*Address
+X 35 s-memory.ads
+53V13*Alloc{30|67M9} 103i<c,__gnat_malloc>22
+68U14*Free 104i<c,__gnat_free>22
+76V13*Realloc{30|67M9} 105i<c,__gnat_realloc>22
+X 42 s-stalib.adb
+93U14 Break_Start 94i<c,__gnat_break_start>22
+

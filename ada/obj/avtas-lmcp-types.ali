@@ -1,0 +1,43 @@
+V "GNAT Lib v18"
+A -gnatA
+A -mtune=generic
+A -march=x86-64
+P ZX
+
+RN
+RV NO_FLOATING_POINT
+RV NO_IMPLEMENTATION_PRAGMAS
+RV SPARK_05
+
+U avtas.lmcp.types%s	avtas-lmcp-types.ads	2383b741 NE OO PK IL
+W avtas.lmcp%s		avtas-lmcp.ads		avtas-lmcp.ali
+W interfaces%s		interfac.ads		interfac.ali
+
+D avtas.ads		20181207210504 eb1fc8ab avtas%s
+D avtas-lmcp.ads	20181213155724 e3081ec7 avtas.lmcp%s
+D avtas-lmcp-types.ads	20181213194010 9a3efbee avtas.lmcp.types%s
+D interfac.ads		20170725134137 5ab55268 interfaces%s
+D system.ads		20170911102249 4635ec04 system%s
+X 1 avtas.ads
+1K9*avtas 3e10 3|3r9 14r5
+X 2 avtas-lmcp.ads
+1K15*lmcp 1|1k9 2|3e15 3|3r15 14r11
+X 3 avtas-lmcp-types.ads
+3K20*types 2|1k15 3|14l16 14e21
+6M9*UInt16_t<4|66M9>
+7M9*UInt32_t<4|74M9>
+8I9*Int16_t<4|49I9>
+9I9*Int32_t<4|52I9>
+10I9*Int64_t<4|55I9>
+11F9*Float_t<4|169F9>
+12F9*Double_t<4|172F9>
+X 4 interfac.ads
+38K9*Interfaces 3|1w6 1r22 6r25 7r25 8r24 9r24 10r24 11r24 12r25 4|184e15
+49I9*Integer_16<short_integer> 3|8r35
+52I9*Integer_32<integer> 3|9r35
+55I9*Integer_64<long_long_integer> 3|10r35
+66M9*Unsigned_16 3|6r36
+74M9*Unsigned_32 3|7r36
+169F9*IEEE_Float_32<short_float> 3|11r35
+172F9*IEEE_Float_64<long_float> 3|12r36
+

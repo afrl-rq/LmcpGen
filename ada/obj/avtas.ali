@@ -1,0 +1,16 @@
+V "GNAT Lib v18"
+A -gnatA
+A -mtune=generic
+A -march=x86-64
+P ZX
+
+RN
+RV NO_IMPLEMENTATION_PRAGMAS
+
+U avtas%s		avtas.ads		eb1fc8ab NE OO PK IL
+
+D avtas.ads		20181207210504 eb1fc8ab avtas%s
+D system.ads		20170911102249 4635ec04 system%s
+X 1 avtas.ads
+1K9*avtas 3l5 3e10
+
