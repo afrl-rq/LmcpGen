@@ -7,6 +7,7 @@ package afrl.cmasi.operatingRegion is
 
    type OperatingRegion is new afrl.cmasi.object.Object with private;
    type OperatingRegion_Acc is access all OperatingRegion;
+   type OperatingRegion_Class_Acc is access all OperatingRegion'Class;
    
    package Vect_Int64_t is new Ada.Containers.Vectors
      (Index_Type   => Natural,

@@ -10,6 +10,7 @@ package afrl.cmasi.entityConfiguration is
 
    type EntityConfiguration is new afrl.cmasi.object.Object with private;
    type EntityConfiguration_Acc is access all EntityConfiguration;
+   type EntityConfiguration_Class_Acc is access all EntityConfiguration'Class;
    
    package Vect_PayloadConfiguration_Class_Acc is new Ada.Containers.Vectors
      (Index_Type   => Natural,

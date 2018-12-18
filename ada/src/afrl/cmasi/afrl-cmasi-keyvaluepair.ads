@@ -7,6 +7,8 @@ package afrl.cmasi.keyValuePair is
    
    type KeyValuePair is new afrl.cmasi.object.Object with private;
    type KeyValuePair_Acc is access all KeyValuePair;
+   -- Technically, nothing inherits from this, so we don't need a class access type
+   type KeyValuePair_Class_Acc is access all KeyValuePair'Class;
    
    function getFullLmcpTypeName(this : KeyValuePair) return String;
    function getLmcpTypeName(this : KeyValuePair) return String;

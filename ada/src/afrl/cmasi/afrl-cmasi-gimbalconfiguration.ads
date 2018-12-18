@@ -8,6 +8,8 @@ package afrl.cmasi.gimbalconfiguration is
 
    type GimbalConfiguration is new afrl.cmasi.payloadConfiguration.PayloadConfiguration with private;
    type GimbalConfiguration_Acc is access all GimbalConfiguration;
+   -- Technically, nothing inherits from this, so we don't need a class access type
+   type GimbalConfiguration_Class_Acc is access all GimbalConfiguration'Class;
    
    package Vect_GimbalPointingModeEnum is new Ada.Containers.Vectors
      (Index_Type   => Natural,

@@ -4,6 +4,7 @@ package avtas.lmcp.object is
    
    type Object is tagged null record;
    type Object_Acc is access Object;
+   type Object_Class_Acc is access Object'Class;
    
    function clone(this, that: Object_Acc) return Object_Acc is abstract;
    

@@ -5,6 +5,7 @@ A -march=x86-64
 P ZX
 
 RN
+RV NO_DISPATCH
 RV NO_DISPATCHING_CALLS
 RV NO_EXCEPTION_HANDLERS
 RV NO_EXCEPTION_PROPAGATION
@@ -18,11 +19,11 @@ RV NO_IMPLEMENTATION_PRAGMAS
 RV NO_ELABORATION_CODE
 RV SPARK_05
 
-U afrl.cmasi.keepinzone%b  afrl-cmasi-keepinzone.adb  af11bfaa NE OO PK IL
+U afrl.cmasi.keepinzone%b  afrl-cmasi-keepinzone.adb  9193cf5d NE OO PK IL
 W afrl.cmasi%s		afrl-cmasi.ads		afrl-cmasi.ali
 W system.secondary_stack%s  s-secsta.adb	s-secsta.ali
 
-U afrl.cmasi.keepinzone%s  afrl-cmasi-keepinzone.ads  8249e59e EE OO PF PK IL
+U afrl.cmasi.keepinzone%s  afrl-cmasi-keepinzone.ads  5864c19c EE OO PF PK IL
 W ada.exceptions%s	a-except.adb		a-except.ali
 W ada.streams%s		a-stream.adb		a-stream.ali
 W ada.tags%s		a-tags.adb		a-tags.ali
@@ -61,15 +62,15 @@ D a-unccon.ads		20170725134137 0e9b276f ada.unchecked_conversion%s
 D a-uncdea.ads		20170725134137 eff36322 ada.unchecked_deallocation%s
 D afrl.ads		20181213155759 1b3a74c6 afrl%s
 D afrl-cmasi.ads	20181214183435 6d18f5d9 afrl.cmasi%s
-D afrl-cmasi-abstractgeometry.ads  20181214183607 fe89a983 afrl.cmasi.abstractgeometry%s
-D afrl-cmasi-abstractzone.ads  20181214184725 062b9c7a afrl.cmasi.abstractzone%s
+D afrl-cmasi-abstractgeometry.ads  20181218144407 4842dee5 afrl.cmasi.abstractgeometry%s
+D afrl-cmasi-abstractzone.ads  20181218144355 dfe35d9a afrl.cmasi.abstractzone%s
 D afrl-cmasi-enumerations.ads  20181214215520 6179d503 afrl.cmasi.enumerations%s
-D afrl-cmasi-keepinzone.ads  20181214184212 e93f8e90 afrl.cmasi.keepinzone%s
+D afrl-cmasi-keepinzone.ads  20181218144759 d7bdfe67 afrl.cmasi.keepinzone%s
 D afrl-cmasi-keepinzone.adb  20181214184247 462e313a afrl.cmasi.keepinzone%b
-D afrl-cmasi-object.ads	20181214183044 fb022c40 afrl.cmasi.object%s
+D afrl-cmasi-object.ads	20181218143428 c665b955 afrl.cmasi.object%s
 D avtas.ads		20181207210504 eb1fc8ab avtas%s
 D avtas-lmcp.ads	20181213155724 e3081ec7 avtas.lmcp%s
-D avtas-lmcp-object.ads	20181214182918 0047b6cc avtas.lmcp.object%s
+D avtas-lmcp-object.ads	20181218143215 f96815d3 avtas.lmcp.object%s
 D avtas-lmcp-types.ads	20181213194010 9a3efbee avtas.lmcp.types%s
 D interfac.ads		20170725134137 5ab55268 interfaces%s
 D system.ads		20170911102249 4635ec04 system%s
@@ -98,33 +99,34 @@ X 9 a-iteint.ads
 24h9 Forward_Iterator
 32h9 Reversible_Iterator<24R9[6|72]>
 X 17 afrl.ads
-1K9*afrl 3e9 22|2r6 2r29 3r6 3r35 4r6 4r35 6r9 19r5 23|1r14 9r5
+1K9*afrl 3e9 22|2r6 2r29 3r6 3r35 4r6 4r35 6r9 21r5 23|1r14 9r5
 X 18 afrl-cmasi.ads
-4K14*cmasi 17|1k9 18|6e15 22|2r11 2r34 3r11 3r40 4r11 4r40 6r14 19r10 23|1r19
+4K14*cmasi 17|1k9 18|6e15 22|2r11 2r34 3r11 3r40 4r11 4r40 6r14 21r10 23|1r19
 . 9r10
 X 20 afrl-cmasi-abstractzone.ads
-8K20*abstractZone 60e28 22|4w17 4r46 8r27 17r27
-10R9*AbstractZone<24|7R9> 58e14 22|8r40 17r40
+8K20*abstractZone 61e28 22|4w17 4r46 8r27 19r27
+10R9*AbstractZone<24|7R9> 59e14 22|8r40 19r40
 X 21 afrl-cmasi-enumerations.ads
 1K20*enumerations 139e28 22|3w17 3r46
 15E9*CmasiEnum 75e23 23|7r65
 43n23*KEEPINZONE_ENUM{15E9} 23|7r79
 X 22 afrl-cmasi-keepinzone.ads
-6K20*keepInZone 18|4k14 22|17E9 19l16 19e26 23|1b25 9l16 9t26
-8R9*KeepInZone<20|10R9> 9r38 11P13 11r40 12P13 12r36 13p13 13r32 17c9 17e69
-. 23|3r40 5r36 7r33 24|9p13 10p13 11p13
+6K20*keepInZone 18|4k14 22|19E9 21l16 21e26 23|1b25 9l16 9t26
+8R9*KeepInZone<20|10R9> 9r38 11r44 13P13 13r40 14P13 14r36 15p13 15r32 19c9
+. 19e69 23|3r40 5r36 7r33 24|11p13 12p13 13p13
 9P9*KeepInZone_Acc(8R9)
-11V13*getFullLmcpTypeName{string}<27|14p13> 11>33 23|3b13
-11r33 this{8R9}
-12V13*getLmcpTypeName{string}<27|12p13> 12>29 23|5b13
-12r29 this{8R9}
-13V13*getLmcpType{28|7M9} 13>25 23|7b13
-13r25 this{8R9}
+11P9*KeepInZone_Class_Acc(8R9)
+13V13*getFullLmcpTypeName{string}<27|15p13> 13>33 23|3b13
+13r33 this{8R9}
+14V13*getLmcpTypeName{string}<27|13p13> 14>29 23|5b13
+14r29 this{8R9}
+15V13*getLmcpType{28|7M9} 15>25 23|7b13
+15r25 this{8R9}
 X 24 afrl-cmasi-object.ads
-5K20*object 22|2w17 2r40 24|17e22
-9V13*getSeriesVersion{28|6M9}
-10V13*getSeriesName{string}
-11V13*getSeriesNameAsLong{28|10I9}
+5K20*object 22|2w17 2r40 24|19e22
+11V13*getSeriesVersion{28|6M9}
+12V13*getSeriesName{string}
+13V13*getSeriesNameAsLong{28|10I9}
 X 25 avtas.ads
 1K9*avtas 22|1r6 1r28 25|3e10
 X 26 avtas-lmcp.ads
@@ -132,7 +134,7 @@ X 26 avtas-lmcp.ads
 X 28 avtas-lmcp-types.ads
 3K20*types 22|1w17 1r39 28|14e21
 6M9*UInt16_t<29|66M9>
-7M9*UInt32_t<29|74M9> 22|13r51 23|7r52
+7M9*UInt32_t<29|74M9> 22|15r51 23|7r52
 10I9*Int64_t<29|55I9>
 X 29 interfac.ads
 55I9*Integer_64<long_long_integer>

@@ -29,7 +29,7 @@ W system.soft_links%s	s-soflin.adb		s-soflin.ali
 W system.standard_library%s  s-stalib.adb	s-stalib.ali
 W system.storage_pools.subpools%s  s-stposu.adb	s-stposu.ali
 
-U afrl.cmasi.payloadconfiguration%s  afrl-cmasi-payloadconfiguration.ads  41050228 EE OO PF PK IL
+U afrl.cmasi.payloadconfiguration%s  afrl-cmasi-payloadconfiguration.ads  7c62973d EE OO PF PK IL
 W ada%s			ada.ads			ada.ali
 W ada.containers%s	a-contai.ads		a-contai.ali
 Z ada.containers.generic_array_sort%s
@@ -84,12 +84,12 @@ D a-uncdea.ads		20170725134137 eff36322 ada.unchecked_deallocation%s
 D afrl.ads		20181213155759 1b3a74c6 afrl%s
 D afrl-cmasi.ads	20181214183435 6d18f5d9 afrl.cmasi%s
 D afrl-cmasi-enumerations.ads  20181214215520 6179d503 afrl.cmasi.enumerations%s
-D afrl-cmasi-object.ads	20181214183044 fb022c40 afrl.cmasi.object%s
+D afrl-cmasi-object.ads	20181218143428 c665b955 afrl.cmasi.object%s
 D afrl-cmasi-payloadconfiguration.ads  20181214224040 beac59b1 afrl.cmasi.payloadconfiguration%s
 D afrl-cmasi-payloadconfiguration.adb  20181214200510 191a2cf4 afrl.cmasi.payloadconfiguration%b
 D avtas.ads		20181207210504 eb1fc8ab avtas%s
 D avtas-lmcp.ads	20181213155724 e3081ec7 avtas.lmcp%s
-D avtas-lmcp-object.ads	20181214182918 0047b6cc avtas.lmcp.object%s
+D avtas-lmcp-object.ads	20181218143215 f96815d3 avtas.lmcp.object%s
 D avtas-lmcp-types.ads	20181213194010 9a3efbee avtas.lmcp.types%s
 D interfac.ads		20170725134137 5ab55268 interfaces%s
 D system.ads		20170911102249 4635ec04 system%s
@@ -144,23 +144,23 @@ X 22 afrl-cmasi-enumerations.ads
 15E9*CmasiEnum 75e23 25|7r75
 19n23*PAYLOADCONFIGURATION_ENUM{15E9} 25|7r89
 X 23 afrl-cmasi-object.ads
-5K20*object 17e22 24|2w17 2r40 9r48 29r48
-7H9*Object<28|5R9> 15e64 24|9r55 29r55
-9V13*getSeriesVersion{29|6M9}
-10V13*getSeriesName{string}
-11V13*getSeriesNameAsLong{29|10I9}
+5K20*object 19e22 24|2w17 2r40 9r48 29r48
+7H9*Object<28|5R9> 17e64 24|9r55 29r55
+11V13*getSeriesVersion{29|6M9}
+12V13*getSeriesName{string}
+13V13*getSeriesNameAsLong{29|10I9}
 X 24 afrl-cmasi-payloadconfiguration.ads
 7K20*payloadConfiguration 21|4k14 24|29E9 35l16 35e36 25|1b25 25l16 25t36
-9R9*PayloadConfiguration<23|7R9> 23|9p13 10p13 11p13 24|10r48 11r54 18P13
+9R9*PayloadConfiguration<23|7R9> 23|11p13 12p13 13p13 24|10r48 11r54 18P13
 . 18r40 19P13 19r36 20p13 20r32 21r33 22r38 23r35 24r40 25r34 29c9 33e14
 . 25|3r41 5r37 7r33 9r34 11r38 16r35 18r40 23r34
 10P9*PayloadConfiguration_Acc(9R9)
 11P9*PayloadConfiguration_Class_Acc(9R9)
 13K12*Vect_Unbounded_String[8|46] 16r49 32r53
 16P9*Vect_Unbounded_String_Acc(8|57R9[13]) 25r69 32r20 25|23r69
-18V13*getFullLmcpTypeName{string}<28|14p13> 18>33 25|3b13
+18V13*getFullLmcpTypeName{string}<28|15p13> 18>33 25|3b13
 18r33 this{9R9}
-19V13*getLmcpTypeName{string}<28|12p13> 19>29 25|5b13
+19V13*getLmcpTypeName{string}<28|13p13> 19>29 25|5b13
 19r29 this{9R9}
 20V13*getLmcpType{29|7M9} 20>25 25|7b13
 20r25 this{9R9}

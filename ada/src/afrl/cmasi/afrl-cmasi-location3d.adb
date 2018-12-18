@@ -4,7 +4,7 @@ package body afrl.cmasi.location3D is
 
    function getLmcpTypeName(this : Location3D) return String is ("Location3D");
 
-   function getLmcpType(this : Location3D) return UInt32_t is (CMASIEnum'Pos(PAYLOADCONFIGURATION_ENUM));
+   function getLmcpType(this : Location3D) return UInt32_t is (CMASIEnum'Pos(LOCATION3D_ENUM));
 
    function getLatitude (this : Location3D'Class) return Double_t is (this.Latitude);
 

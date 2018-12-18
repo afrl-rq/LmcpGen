@@ -33,11 +33,11 @@ package body ada_main is
    E143 : Short_Integer; pragma Import (Ada, E143, "system__storage_pools__subpools_E");
    E135 : Short_Integer; pragma Import (Ada, E135, "ada__strings__unbounded_E");
    E099 : Short_Integer; pragma Import (Ada, E099, "ada__text_io_E");
-   E171 : Short_Integer; pragma Import (Ada, E171, "system__pool_global_E");
+   E163 : Short_Integer; pragma Import (Ada, E163, "system__pool_global_E");
    E160 : Short_Integer; pragma Import (Ada, E160, "avtas__lmcp__object_E");
-   E165 : Short_Integer; pragma Import (Ada, E165, "afrl__cmasi__object_E");
-   E163 : Short_Integer; pragma Import (Ada, E163, "afrl__cmasi__abstractgeometry_E");
-   E167 : Short_Integer; pragma Import (Ada, E167, "afrl__cmasi__abstractzone_E");
+   E169 : Short_Integer; pragma Import (Ada, E169, "afrl__cmasi__object_E");
+   E167 : Short_Integer; pragma Import (Ada, E167, "afrl__cmasi__abstractgeometry_E");
+   E171 : Short_Integer; pragma Import (Ada, E171, "afrl__cmasi__abstractzone_E");
    E203 : Short_Integer; pragma Import (Ada, E203, "afrl__cmasi__keepinzone_E");
    E199 : Short_Integer; pragma Import (Ada, E199, "afrl__cmasi__keyvaluepair_E");
    E195 : Short_Integer; pragma Import (Ada, E195, "afrl__cmasi__location3d_E");
@@ -112,14 +112,14 @@ package body ada_main is
       begin
          F8;
       end;
-      E167 := E167 - 1;
+      E171 := E171 - 1;
       declare
          procedure F9;
          pragma Import (Ada, F9, "afrl__cmasi__abstractzone__finalize_spec");
       begin
          F9;
       end;
-      E163 := E163 - 1;
+      E167 := E167 - 1;
       declare
          procedure F10;
          pragma Import (Ada, F10, "afrl__cmasi__abstractgeometry__finalize_spec");
@@ -130,7 +130,7 @@ package body ada_main is
          procedure F11;
          pragma Import (Ada, F11, "afrl__cmasi__object__finalize_spec");
       begin
-         E165 := E165 - 1;
+         E169 := E169 - 1;
          F11;
       end;
       declare
@@ -140,7 +140,7 @@ package body ada_main is
          E160 := E160 - 1;
          F12;
       end;
-      E171 := E171 - 1;
+      E163 := E163 - 1;
       declare
          procedure F13;
          pragma Import (Ada, F13, "system__pool_global__finalize_spec");
@@ -348,15 +348,15 @@ package body ada_main is
       Ada.Text_Io'Elab_Body;
       E099 := E099 + 1;
       System.Pool_Global'Elab_Spec;
-      E171 := E171 + 1;
+      E163 := E163 + 1;
       avtas.lmcp.object'elab_spec;
       E160 := E160 + 1;
       afrl.cmasi.object'elab_spec;
-      E165 := E165 + 1;
+      E169 := E169 + 1;
       afrl.cmasi.abstractgeometry'elab_spec;
-      E163 := E163 + 1;
-      afrl.cmasi.abstractzone'elab_spec;
       E167 := E167 + 1;
+      afrl.cmasi.abstractzone'elab_spec;
+      E171 := E171 + 1;
       afrl.cmasi.keepinzone'elab_spec;
       E203 := E203 + 1;
       afrl.cmasi.keyvaluepair'elab_spec;
@@ -408,27 +408,27 @@ package body ada_main is
    end;
 
 --  BEGIN Object file/option list
-   --   /home/snail/Documents/LmcpExperiments/Packages/obj/afrl.o
-   --   /home/snail/Documents/LmcpExperiments/Packages/obj/avtas.o
-   --   /home/snail/Documents/LmcpExperiments/Packages/obj/avtas-lmcp.o
-   --   /home/snail/Documents/LmcpExperiments/Packages/obj/avtas-lmcp-types.o
-   --   /home/snail/Documents/LmcpExperiments/Packages/obj/avtas-lmcp-object.o
-   --   /home/snail/Documents/LmcpExperiments/Packages/obj/afrl-cmasi.o
-   --   /home/snail/Documents/LmcpExperiments/Packages/obj/afrl-cmasi-enumerations.o
-   --   /home/snail/Documents/LmcpExperiments/Packages/obj/afrl-cmasi-object.o
-   --   /home/snail/Documents/LmcpExperiments/Packages/obj/afrl-cmasi-abstractgeometry.o
-   --   /home/snail/Documents/LmcpExperiments/Packages/obj/afrl-cmasi-abstractzone.o
-   --   /home/snail/Documents/LmcpExperiments/Packages/obj/afrl-cmasi-keepinzone.o
-   --   /home/snail/Documents/LmcpExperiments/Packages/obj/afrl-cmasi-keyvaluepair.o
-   --   /home/snail/Documents/LmcpExperiments/Packages/obj/afrl-cmasi-location3d.o
-   --   /home/snail/Documents/LmcpExperiments/Packages/obj/afrl-cmasi-circle.o
-   --   /home/snail/Documents/LmcpExperiments/Packages/obj/afrl-cmasi-payloadconfiguration.o
-   --   /home/snail/Documents/LmcpExperiments/Packages/obj/afrl-cmasi-cameraconfiguration.o
-   --   /home/snail/Documents/LmcpExperiments/Packages/obj/afrl-cmasi-entityconfiguration.o
-   --   /home/snail/Documents/LmcpExperiments/Packages/obj/afrl-cmasi-gimbalconfiguration.o
-   --   /home/snail/Documents/LmcpExperiments/Packages/obj/main.o
-   --   -L/home/snail/Documents/LmcpExperiments/Packages/obj/
-   --   -L/home/snail/Documents/LmcpExperiments/Packages/obj/
+   --   /home/snail/Documents/Git/LmcpGen/ada/obj/afrl.o
+   --   /home/snail/Documents/Git/LmcpGen/ada/obj/avtas.o
+   --   /home/snail/Documents/Git/LmcpGen/ada/obj/avtas-lmcp.o
+   --   /home/snail/Documents/Git/LmcpGen/ada/obj/avtas-lmcp-types.o
+   --   /home/snail/Documents/Git/LmcpGen/ada/obj/avtas-lmcp-object.o
+   --   /home/snail/Documents/Git/LmcpGen/ada/obj/afrl-cmasi.o
+   --   /home/snail/Documents/Git/LmcpGen/ada/obj/afrl-cmasi-enumerations.o
+   --   /home/snail/Documents/Git/LmcpGen/ada/obj/afrl-cmasi-object.o
+   --   /home/snail/Documents/Git/LmcpGen/ada/obj/afrl-cmasi-abstractgeometry.o
+   --   /home/snail/Documents/Git/LmcpGen/ada/obj/afrl-cmasi-abstractzone.o
+   --   /home/snail/Documents/Git/LmcpGen/ada/obj/afrl-cmasi-keepinzone.o
+   --   /home/snail/Documents/Git/LmcpGen/ada/obj/afrl-cmasi-keyvaluepair.o
+   --   /home/snail/Documents/Git/LmcpGen/ada/obj/afrl-cmasi-location3d.o
+   --   /home/snail/Documents/Git/LmcpGen/ada/obj/afrl-cmasi-circle.o
+   --   /home/snail/Documents/Git/LmcpGen/ada/obj/afrl-cmasi-payloadconfiguration.o
+   --   /home/snail/Documents/Git/LmcpGen/ada/obj/afrl-cmasi-cameraconfiguration.o
+   --   /home/snail/Documents/Git/LmcpGen/ada/obj/afrl-cmasi-entityconfiguration.o
+   --   /home/snail/Documents/Git/LmcpGen/ada/obj/afrl-cmasi-gimbalconfiguration.o
+   --   /home/snail/Documents/Git/LmcpGen/ada/obj/main.o
+   --   -L/home/snail/Documents/Git/LmcpGen/ada/obj/
+   --   -L/home/snail/Documents/Git/LmcpGen/ada/obj/
    --   -L/usr/gnat/lib/gcc/x86_64-pc-linux-gnu/6.4.1/adalib/
    --   -static
    --   -lgnat

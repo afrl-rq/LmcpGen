@@ -6,6 +6,7 @@ package afrl.cmasi.location3D is
 
    type Location3D is new afrl.cmasi.object.Object with private;
    type Location3D_Acc is access all Location3D;
+   type Location3D_Class_Acc is access all Location3D'Class;
    
    function getFullLmcpTypeName(this : Location3D) return String;
    function getLmcpTypeName(this : Location3D) return String;

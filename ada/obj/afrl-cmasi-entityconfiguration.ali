@@ -22,7 +22,7 @@ RV NO_IMPLEMENTATION_PRAGMAS
 RV NO_ELABORATION_CODE
 RV SPARK_05
 
-U afrl.cmasi.entityconfiguration%b  afrl-cmasi-entityconfiguration.adb  7817ae7b NE OO PK IL
+U afrl.cmasi.entityconfiguration%b  afrl-cmasi-entityconfiguration.adb  cc78ace2 NE OO PK IL
 W ada.tags%s		a-tags.adb		a-tags.ali
 W afrl.cmasi%s		afrl-cmasi.ads		afrl-cmasi.ali
 W system.secondary_stack%s  s-secsta.adb	s-secsta.ali
@@ -30,7 +30,7 @@ W system.soft_links%s	s-soflin.adb		s-soflin.ali
 W system.standard_library%s  s-stalib.adb	s-stalib.ali
 W system.storage_pools.subpools%s  s-stposu.adb	s-stposu.ali
 
-U afrl.cmasi.entityconfiguration%s  afrl-cmasi-entityconfiguration.ads  67067204 EE OO PF PK IL
+U afrl.cmasi.entityconfiguration%s  afrl-cmasi-entityconfiguration.ads  b4729242 EE OO PF PK IL
 W ada%s			ada.ads			ada.ali
 W ada.containers%s	a-contai.ads		a-contai.ali
 Z ada.containers.generic_array_sort%s
@@ -86,15 +86,15 @@ D a-unccon.ads		20170725134137 0e9b276f ada.unchecked_conversion%s
 D a-uncdea.ads		20170725134137 eff36322 ada.unchecked_deallocation%s
 D afrl.ads		20181213155759 1b3a74c6 afrl%s
 D afrl-cmasi.ads	20181214183435 6d18f5d9 afrl.cmasi%s
-D afrl-cmasi-entityconfiguration.ads  20181214224251 7d8f1861 afrl.cmasi.entityconfiguration%s
+D afrl-cmasi-entityconfiguration.ads  20181218144152 c9e01af8 afrl.cmasi.entityconfiguration%s
 D afrl-cmasi-entityconfiguration.adb  20181214224305 0598b61a afrl.cmasi.entityconfiguration%b
 D afrl-cmasi-enumerations.ads  20181214215520 6179d503 afrl.cmasi.enumerations%s
-D afrl-cmasi-keyvaluepair.ads  20181214184318 5b8c684d afrl.cmasi.keyvaluepair%s
-D afrl-cmasi-object.ads	20181214183044 fb022c40 afrl.cmasi.object%s
+D afrl-cmasi-keyvaluepair.ads  20181218144815 01f01f87 afrl.cmasi.keyvaluepair%s
+D afrl-cmasi-object.ads	20181218143428 c665b955 afrl.cmasi.object%s
 D afrl-cmasi-payloadconfiguration.ads  20181214224040 beac59b1 afrl.cmasi.payloadconfiguration%s
 D avtas.ads		20181207210504 eb1fc8ab avtas%s
 D avtas-lmcp.ads	20181213155724 e3081ec7 avtas.lmcp%s
-D avtas-lmcp-object.ads	20181214182918 0047b6cc avtas.lmcp.object%s
+D avtas-lmcp-object.ads	20181218143215 f96815d3 avtas.lmcp.object%s
 D avtas-lmcp-types.ads	20181213194010 9a3efbee avtas.lmcp.types%s
 D interfac.ads		20170725134137 5ab55268 interfaces%s
 D system.ads		20170911102249 4635ec04 system%s
@@ -121,14 +121,14 @@ D s-ststop.ads		20170725134137 5fbf1b38 system.strings.stream_ops%s
 D s-traent.ads		20170725134137 005bf670 system.traceback_entries%s
 D s-unstyp.ads		20170725134137 34867c83 system.unsigned_types%s
 X 1 ada.ads
-16K9*Ada 20e8 22|6r6 7r6 7r33 14r55 19r41
+16K9*Ada 20e8 22|6r6 7r6 7r33 15r55 20r41
 X 4 a-contai.ads
-16K13*Containers 24e19 22|6r10 14r59 19r45
+16K13*Containers 24e19 22|6r10 15r59 20r45
 X 8 a-convec.ads
-41I9 Index_Type 22|15r7 20r7
-42+9 Element_Type 22|16r7 21r7
-46k24*Vectors 518e27 22|6w21 14r70 19r56
-57R9*Vector<11|43R9> 22|17r99[14] 22r71[19] 54r117[14] 55r69[19]
+41I9 Index_Type 22|16r7 21r7
+42+9 Element_Type 22|17r7 22r7
+46k24*Vectors 518e27 22|6w21 15r70 20r56
+57R9*Vector<11|43R9> 22|18r99[15] 23r71[20] 55r117[15] 56r69[20]
 X 12 a-iteint.ads
 24h9 Forward_Iterator
 32h9 Reversible_Iterator<24R9[8|72]>
@@ -136,100 +136,101 @@ X 14 a-string.ads
 16K13*Strings 35e16 22|7r10 7r37
 X 16 a-strunb.ads
 76K21*Unbounded 490e26 22|7w18 7r45
-79R9*Unbounded_String<11|43R9> 474e14 22|29r69 30r84 31r68 32r82 33r63 34r72
-. 48r21 49r20 50r15 23|16r69 18r84 23r68 25r82 30r63 32r72
-94V13*To_Unbounded_String{79R9} 22|48s41
+79R9*Unbounded_String<11|43R9> 474e14 22|30r69 31r84 32r68 33r82 34r63 35r72
+. 49r21 50r20 51r15 23|16r69 18r84 23r68 25r82 30r63 32r72
+94V13*To_Unbounded_String{79R9} 22|49s41
 166V14*"="{boolean} 8|44i19
 X 20 afrl.ads
-1K9*afrl 3e9 22|1r6 1r29 2r6 2r35 4r6 4r43 5r6 5r35 9r9 11r36 46r36 58r5
+1K9*afrl 3e9 22|1r6 1r29 2r6 2r35 4r6 4r43 5r6 5r35 9r9 11r36 47r36 59r5
 . 23|1r14 62r5
 X 21 afrl-cmasi.ads
 4K14*cmasi 20|1k9 21|6e15 22|1r11 1r34 2r11 2r40 4r11 4r48 5r11 5r40 9r14
-. 11r41 46r41 58r10 23|1r19 62r10
+. 11r41 47r41 59r10 23|1r19 62r10
 X 22 afrl-cmasi-entityconfiguration.ads
-9K20*entityConfiguration 21|4k14 22|46E9 58l16 58e35 23|1b25 62l16 62t35
-11R9*EntityConfiguration<26|7R9> 12r47 24P13 24r40 25P13 25r36 26p13 26r32
-. 27r26 28r31 29r35 30r40 31r34 32r39 33r29 34r34 35r36 36r41 37r39 38r44
-. 39r43 40r48 41r48 42r28 46c9 56e14 23|3r41 5r37 7r33 9r27 11r32 16r35 18r40
-. 23r34 25r39 30r29 32r34 37r36 39r41 44r39 46r44 51r43 53r48 58r48 60r28
-. 26|9p13 10p13 11p13
+9K20*entityConfiguration 21|4k14 22|47E9 59l16 59e35 23|1b25 62l16 62t35
+11R9*EntityConfiguration<26|7R9> 12r47 13r53 25P13 25r40 26P13 26r36 27p13
+. 27r32 28r26 29r31 30r35 31r40 32r34 33r39 34r29 35r34 36r36 37r41 38r39
+. 39r44 40r43 41r48 42r48 43r28 47c9 57e14 23|3r41 5r37 7r33 9r27 11r32 16r35
+. 18r40 23r34 25r39 30r29 32r34 37r36 39r41 44r39 46r44 51r43 53r48 58r48
+. 60r28 26|11p13 12p13 13p13
 12P9*EntityConfiguration_Acc(11R9)
-14K12*Vect_PayloadConfiguration_Class_Acc[8|46] 17r63 54r81
-17P9*Vect_PayloadConfiguration_Class_Acc_Acc(8|57R9[14]) 41r82 54r34 23|58r82
-19K12*Vect_KeyValuePair_Acc[8|46] 22r49 55r47
-22P9*Vect_KeyValuePair_Acc_Acc(8|57R9[19]) 42r62 55r14 23|60r62
-24V13*getFullLmcpTypeName{string}<30|14p13> 24>33 23|3b13
-24r33 this{11R9}
-25V13*getLmcpTypeName{string}<30|12p13> 25>29 23|5b13
-25r29 this{11R9}
-26V13*getLmcpType{31|7M9} 26>25 23|7b13
-26r25 this{11R9}
-27V13*getID{31|10I9} 27>19 23|9b13
-27c19 this<11R9> 23|9r73
-28U14*setID 28<20 28>58 23|11b14 14l8 14t13
-28c20 this<11R9> 23|11b21 13m7
-28i58 ID{31|10I9} 23|11b59 13r18
-29V13*getAffiliation{16|79R9} 29>28 23|16b13
-29c28 this<11R9> 23|16r90
-30U14*setAffiliation 30<29 30>67 23|18b14 21l8 21t22
-30c29 this<11R9> 23|18b29 20m7
-30r67 Affiliation{16|79R9} 23|18b67 20r27
-31V13*getEntityType{16|79R9} 31>27 23|23b13
-31c27 this<11R9> 23|23r89
-32U14*setEntityType 32<28 32>66 23|25b14 28l8 28t21
-32c28 this<11R9> 23|25b28 27m7
-32r66 EntityType{16|79R9} 23|25b66 27r26
-33V13*getLabel{16|79R9} 33>22 23|30b13
-33c22 this<11R9> 23|30r84
-34U14*setLabel 34<23 34>61 23|32b14 35l8 35t16
-34c23 this<11R9> 23|32b23 34m7
-34r61 Label{16|79R9} 23|32b61 34r21
-35V13*getNominalSpeed{31|11F9} 35>29 23|37b13
-35c29 this<11R9> 23|37r82
-36U14*setNominalSpeed 36<30 36>68 23|39b14 42l8 42t23
-36c30 this<11R9> 23|39b30 41m7
-36f68 NominalSpeed{31|11F9} 23|39b68 41r28
-37V13*getNominalAltitude{31|11F9} 37>32 23|44b13
-37c32 this<11R9> 23|44r85
-38U14*setNominalAltitude 38<33 38>71 23|46b14 49l8 49t26
-38c33 this<11R9> 23|46b33 48m7
-38f71 NominalAltitude{31|11F9} 23|46b71 48r31
-39V13*getNominalAltitudeType{24|6E9} 39>36 23|51b13
-39c36 this<11R9> 23|51r98
-40U14*setNominalAltitudeType 40<37 40>75 23|53b14 56l8 56t30
-40c37 this<11R9> 23|53b37 55m7
-40e75 NominalAltitudeType{24|6E9} 23|53b75 55r35
-41V13*getPayloadConfigurationList{17P9} 41>41 23|58b13
-41c41 this<11R9> 23|58r126
-42V13*getInfo{22P9} 42>21 23|60b13
-42c21 this<11R9> 23|60r92
-47i7 ID{31|10I9} 23|9r78 13m12
-48r7 Affiliation{16|79R9} 23|16r95 20m12
-49r7 EntityType{16|79R9} 23|23r94 27m12
-50r7 Label{16|79R9} 23|30r89 34m12
-51f7 NominalSpeed{31|11F9} 23|37r87 41m12
-52f7 NominalAltitude{31|11F9} 23|44r90 48m12
-53e7 NominalAltitudeType{24|6E9} 23|51r103 55m12
-54p7 PayloadConfigurationList{17P9} 23|58r131
-55p7 Info{22P9} 23|60r97
+13P9*EntityConfiguration_Class_Acc(11R9)
+15K12*Vect_PayloadConfiguration_Class_Acc[8|46] 18r63 55r81
+18P9*Vect_PayloadConfiguration_Class_Acc_Acc(8|57R9[15]) 42r82 55r34 23|58r82
+20K12*Vect_KeyValuePair_Acc[8|46] 23r49 56r47
+23P9*Vect_KeyValuePair_Acc_Acc(8|57R9[20]) 43r62 56r14 23|60r62
+25V13*getFullLmcpTypeName{string}<30|15p13> 25>33 23|3b13
+25r33 this{11R9}
+26V13*getLmcpTypeName{string}<30|13p13> 26>29 23|5b13
+26r29 this{11R9}
+27V13*getLmcpType{31|7M9} 27>25 23|7b13
+27r25 this{11R9}
+28V13*getID{31|10I9} 28>19 23|9b13
+28c19 this<11R9> 23|9r73
+29U14*setID 29<20 29>58 23|11b14 14l8 14t13
+29c20 this<11R9> 23|11b21 13m7
+29i58 ID{31|10I9} 23|11b59 13r18
+30V13*getAffiliation{16|79R9} 30>28 23|16b13
+30c28 this<11R9> 23|16r90
+31U14*setAffiliation 31<29 31>67 23|18b14 21l8 21t22
+31c29 this<11R9> 23|18b29 20m7
+31r67 Affiliation{16|79R9} 23|18b67 20r27
+32V13*getEntityType{16|79R9} 32>27 23|23b13
+32c27 this<11R9> 23|23r89
+33U14*setEntityType 33<28 33>66 23|25b14 28l8 28t21
+33c28 this<11R9> 23|25b28 27m7
+33r66 EntityType{16|79R9} 23|25b66 27r26
+34V13*getLabel{16|79R9} 34>22 23|30b13
+34c22 this<11R9> 23|30r84
+35U14*setLabel 35<23 35>61 23|32b14 35l8 35t16
+35c23 this<11R9> 23|32b23 34m7
+35r61 Label{16|79R9} 23|32b61 34r21
+36V13*getNominalSpeed{31|11F9} 36>29 23|37b13
+36c29 this<11R9> 23|37r82
+37U14*setNominalSpeed 37<30 37>68 23|39b14 42l8 42t23
+37c30 this<11R9> 23|39b30 41m7
+37f68 NominalSpeed{31|11F9} 23|39b68 41r28
+38V13*getNominalAltitude{31|11F9} 38>32 23|44b13
+38c32 this<11R9> 23|44r85
+39U14*setNominalAltitude 39<33 39>71 23|46b14 49l8 49t26
+39c33 this<11R9> 23|46b33 48m7
+39f71 NominalAltitude{31|11F9} 23|46b71 48r31
+40V13*getNominalAltitudeType{24|6E9} 40>36 23|51b13
+40c36 this<11R9> 23|51r98
+41U14*setNominalAltitudeType 41<37 41>75 23|53b14 56l8 56t30
+41c37 this<11R9> 23|53b37 55m7
+41e75 NominalAltitudeType{24|6E9} 23|53b75 55r35
+42V13*getPayloadConfigurationList{18P9} 42>41 23|58b13
+42c41 this<11R9> 23|58r126
+43V13*getInfo{23P9} 43>21 23|60b13
+43c21 this<11R9> 23|60r92
+48i7 ID{31|10I9} 23|9r78 13m12
+49r7 Affiliation{16|79R9} 23|16r95 20m12
+50r7 EntityType{16|79R9} 23|23r94 27m12
+51r7 Label{16|79R9} 23|30r89 34m12
+52f7 NominalSpeed{31|11F9} 23|37r87 41m12
+53f7 NominalAltitude{31|11F9} 23|44r90 48m12
+54e7 NominalAltitudeType{24|6E9} 23|51r103 55m12
+55p7 PayloadConfigurationList{18P9} 23|58r131
+56p7 Info{23P9} 23|60r97
 X 24 afrl-cmasi-enumerations.ads
 1K20*enumerations 22|2w17 2r46 24|139e28
-6E9*AltitudeTypeEnum 22|39r77 40r100 53r29 23|51r77 53r100 24|6e39
-6n30*AGL{6E9} 22|53r49
+6E9*AltitudeTypeEnum 22|40r77 41r100 54r29 23|51r77 53r100 24|6e39
+6n30*AGL{6E9} 22|54r49
 15E9*CmasiEnum 23|7r74 24|75e23
 25n23*ENTITYCONFIGURATION_ENUM{15E9} 23|7r88
 X 25 afrl-cmasi-keyvaluepair.ads
-6K20*keyValuePair 22|5w17 5r46 25|26e28
-9P9*KeyValuePair_Acc(8R9) 22|21r23
+6K20*keyValuePair 22|5w17 5r46 25|28e28
+9P9*KeyValuePair_Acc(8R9) 22|22r23
 X 26 afrl-cmasi-object.ads
-5K20*object 22|1w17 1r40 11r47 46r47 26|17e22
-7H9*Object<30|5R9> 22|11r54 46r54 26|15e64
-9V13*getSeriesVersion{31|6M9}
-10V13*getSeriesName{string}
-11V13*getSeriesNameAsLong{31|10I9}
+5K20*object 22|1w17 1r40 11r47 47r47 26|19e22
+7H9*Object<30|5R9> 22|11r54 47r54 26|17e64
+11V13*getSeriesVersion{31|6M9}
+12V13*getSeriesName{string}
+13V13*getSeriesNameAsLong{31|10I9}
 X 27 afrl-cmasi-payloadconfiguration.ads
 7K20*payloadConfiguration 22|4w17 4r54 27|35e36
-11P9*PayloadConfiguration_Class_Acc(9R9) 22|16r23
+11P9*PayloadConfiguration_Class_Acc(9R9) 22|17r23
 X 28 avtas.ads
 1K9*avtas 22|3r6 3r28 28|3e10
 X 29 avtas-lmcp.ads
@@ -237,9 +238,9 @@ X 29 avtas-lmcp.ads
 X 31 avtas-lmcp-types.ads
 3K20*types 22|3w17 3r39 31|14e21
 6M9*UInt16_t<32|66M9>
-7M9*UInt32_t<32|74M9> 22|26r60 23|7r61
-10I9*Int64_t<32|55I9> 22|27r60 28r66 47r12 23|9r61 11r67
-11F9*Float_t<32|169F9> 22|35r70 36r86 37r73 38r92 51r22 52r25 23|37r70 39r86
+7M9*UInt32_t<32|74M9> 22|27r60 23|7r61
+10I9*Int64_t<32|55I9> 22|28r60 29r66 48r12 23|9r61 11r67
+11F9*Float_t<32|169F9> 22|36r70 37r86 38r73 39r92 52r22 53r25 23|37r70 39r86
 . 44r73 46r92
 X 32 interfac.ads
 55I9*Integer_64<long_long_integer>

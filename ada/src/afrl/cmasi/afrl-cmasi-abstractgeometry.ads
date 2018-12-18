@@ -6,6 +6,7 @@ package afrl.cmasi.abstractGeometry is
 
    type AbstractGeometry is new afrl.cmasi.object.Object with private;
    type AbstractGeometry_Acc is access all AbstractGeometry;
+   type AbstractGeometry_Class_Acc is access all AbstractGeometry'Class;
    
    function getFullLmcpTypeName(this : AbstractGeometry) return String;
    function getLmcpTypeName(this : AbstractGeometry) return String;

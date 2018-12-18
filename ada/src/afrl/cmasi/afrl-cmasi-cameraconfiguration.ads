@@ -8,6 +8,8 @@ package afrl.cmasi.cameraConfiguration is
 
    type CameraConfiguration is new afrl.cmasi.payloadConfiguration.PayloadConfiguration with private;
    type CameraConfiguration_Acc is access all CameraConfiguration;
+   -- Technically, nothing inherits from this, so we don't need a class access type
+   type CameraConfiguration_Class_Acc is access all CameraConfiguration;
    
    package Vect_Float_t is new Ada.Containers.Vectors
      (Index_Type   => Natural,

@@ -5,6 +5,8 @@ with afrl.cmasi.enumerations; use afrl.cmasi.enumerations;
 package afrl.cmasi.object is
    
    type Object is abstract new avtas.lmcp.object.Object with private;
+   type Object_Acc is access all Object;
+   type Object_Class_Acc is access all Object'Class;
    
    function getSeriesVersion(this : Object) return UInt16_t is (3);
    function getSeriesName(this : Object) return String is ("CMASI");

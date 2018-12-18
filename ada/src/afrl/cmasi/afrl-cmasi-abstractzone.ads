@@ -9,6 +9,7 @@ package afrl.cmasi.abstractZone is
    
    type AbstractZone is new afrl.cmasi.object.Object with private;
    type AbstractZone_Acc is access all AbstractZone;
+   type AbstractZone_Class_Acc is access all AbstractZone'Class;
    
    package Vect_Int64_t is new Ada.Containers.Vectors
      (Index_Type   => Natural,

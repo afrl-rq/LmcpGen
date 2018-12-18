@@ -21,7 +21,7 @@ RV NO_IMPLICIT_LOOPS
 RV NO_ELABORATION_CODE
 RV SPARK_05
 
-U afrl.cmasi.circle%b	afrl-cmasi-circle.adb	c9f980fa NE OO PK IL
+U afrl.cmasi.circle%b	afrl-cmasi-circle.adb	e8f47ed9 NE OO PK IL
 W ada%s			ada.ads			ada.ali
 W ada.characters%s	a-charac.ads		a-charac.ali
 W ada.characters.latin_1%s  a-chlat1.ads	a-chlat1.ali
@@ -33,7 +33,7 @@ W system.secondary_stack%s  s-secsta.adb	s-secsta.ali
 W system.soft_links%s	s-soflin.adb		s-soflin.ali
 W system.standard_library%s  s-stalib.adb	s-stalib.ali
 
-U afrl.cmasi.circle%s	afrl-cmasi-circle.ads	5bb260e0 EE OO PF PK IL
+U afrl.cmasi.circle%s	afrl-cmasi-circle.ads	3dedd1c0 EE OO PF PK IL
 W ada%s			ada.ads			ada.ali
 W ada.exceptions%s	a-except.adb		a-except.ali
 W ada.streams%s		a-stream.adb		a-stream.ali
@@ -50,7 +50,11 @@ W avtas%s		avtas.ads		avtas.ali
 W avtas.lmcp%s		avtas-lmcp.ads		avtas-lmcp.ali
 W avtas.lmcp.types%s	avtas-lmcp-types.ads	avtas-lmcp-types.ali
 W system%s		system.ads		system.ali
+W system.finalization_masters%s  s-finmas.adb	s-finmas.ali
+W system.pool_global%s	s-pooglo.adb		s-pooglo.ali
 W system.secondary_stack%s  s-secsta.adb	s-secsta.ali
+W system.soft_links%s	s-soflin.adb		s-soflin.ali
+W system.standard_library%s  s-stalib.adb	s-stalib.ali
 W system.storage_elements%s  s-stoele.adb	s-stoele.ali
 W system.stream_attributes%s  s-stratt.adb	s-stratt.ali
 
@@ -67,15 +71,15 @@ D a-tags.ads		20170911163219 491b781d ada.tags%s
 D a-unccon.ads		20170725134137 0e9b276f ada.unchecked_conversion%s
 D afrl.ads		20181213155759 1b3a74c6 afrl%s
 D afrl-cmasi.ads	20181214183435 6d18f5d9 afrl.cmasi%s
-D afrl-cmasi-abstractgeometry.ads  20181214183607 fe89a983 afrl.cmasi.abstractgeometry%s
-D afrl-cmasi-circle.ads	20181214205517 d6d67fe4 afrl.cmasi.circle%s
+D afrl-cmasi-abstractgeometry.ads  20181218144407 4842dee5 afrl.cmasi.abstractgeometry%s
+D afrl-cmasi-circle.ads	20181218144706 f7db81c7 afrl.cmasi.circle%s
 D afrl-cmasi-circle.adb	20181214205434 796a822f afrl.cmasi.circle%b
 D afrl-cmasi-enumerations.ads  20181214215520 6179d503 afrl.cmasi.enumerations%s
-D afrl-cmasi-location3d.ads  20181214205113 f26fe2c1 afrl.cmasi.location3d%s
-D afrl-cmasi-object.ads	20181214183044 fb022c40 afrl.cmasi.object%s
+D afrl-cmasi-location3d.ads  20181218143507 3e914fb1 afrl.cmasi.location3d%s
+D afrl-cmasi-object.ads	20181218143428 c665b955 afrl.cmasi.object%s
 D avtas.ads		20181207210504 eb1fc8ab avtas%s
 D avtas-lmcp.ads	20181213155724 e3081ec7 avtas.lmcp%s
-D avtas-lmcp-object.ads	20181214182918 0047b6cc avtas.lmcp.object%s
+D avtas-lmcp-object.ads	20181218143215 f96815d3 avtas.lmcp.object%s
 D avtas-lmcp-types.ads	20181213194010 9a3efbee avtas.lmcp.types%s
 D interfac.ads		20170725134137 5ab55268 interfaces%s
 D system.ads		20170911102249 4635ec04 system%s
@@ -86,6 +90,7 @@ D s-finroo.ads		20170725134137 4ff27390 system.finalization_root%s
 D s-imgrea.ads		20170725134137 c7a851e2 system.img_real%s
 D s-memory.ads		20170725134137 597d6634 system.memory%s
 D s-parame.ads		20171219171438 f896c45c system.parameters%s
+D s-pooglo.ads		20170725134137 ede33ef8 system.pool_global%s
 D s-secsta.ads		20170926153132 283dec34 system.secondary_stack%s
 D s-soflin.ads		20170928191508 a7318a92 system.soft_links%s
 D s-stache.ads		20170725134137 a37c21ec system.stack_checking%s
@@ -115,40 +120,41 @@ X 9 a-strunb.ads
 119V14*"&"{79R9} 16|34s21 34s54 37s21 41s21 42s21 42s52 42s93
 123V14*"&"{79R9} 16|34s30 37s30 39s24 42s30
 X 12 afrl.ads
-1K9*afrl 3e9 15|2r6 2r29 3r6 3r35 4r6 4r39 5r6 5r33 8r9 29r5 16|3r14 48r5
+1K9*afrl 3e9 15|2r6 2r29 3r6 3r35 4r6 4r39 5r6 5r33 8r9 31r5 16|3r14 48r5
 X 13 afrl-cmasi.ads
 4K14*cmasi 12|1k9 13|6e15 15|2r11 2r34 3r11 3r40 4r11 4r44 5r11 5r38 8r14
-. 29r10 16|3r19 48r10
+. 31r10 16|3r19 48r10
 X 14 afrl-cmasi-abstractgeometry.ads
-5K20*abstractGeometry 18e32 15|4w17 4r50 10r23 24r23
-7R9*AbstractGeometry<19|7R9> 16e74 15|10r40 24r40
+5K20*abstractGeometry 19e32 15|4w17 4r50 10r23 26r23
+7R9*AbstractGeometry<19|7R9> 17e74 15|10r40 26r40
 X 15 afrl-cmasi-circle.ads
-8K20*circle 13|4k14 15|24E9 29l16 29e22 16|3b25 48l16 48t22
-10R9*Circle<14|7R9> 11r34 13P13 13r40 14P13 14r36 15P13 15r32 16r30 17r35
-. 18r35 19r40 20r29 24c9 27e14 16|5r40 7r36 9r32 11r30 13r35 18r36 20r40
-. 25r29 19|9p13 10p13 11p13
+8K20*circle 13|4k14 15|26E9 31l16 31e22 16|3b25 48l16 48t22
+10R9*Circle<14|7R9> 11r34 13r40 15P13 15r40 16P13 16r36 17P13 17r32 18r30
+. 19r35 20r35 21r40 22r29 26c9 29e14 16|5r40 7r36 9r32 11r30 13r35 18r36
+. 20r40 25r29 19|11p13 12p13 13p13
 11P9*Circle_Acc(10R9)
-13V13*getFullLmcpTypeName{string}<14|10p13> 13>33 16|5b13
-13r33 this{10R9}
-14V13*getLmcpTypeName{string}<14|11p13> 14>29 16|7b13
-14r29 this{10R9}
-15V13*getLmcpType{23|7M9}<14|12p13> 15>25 16|9b13
-15r25 this{10R9}
-16V13*getRadius{23|11F9} 16>23 16|11b13
-16c23 this<10R9> 16|11r63
-17U14*setRadius 17<24 17>49 16|13b14 16l8 16t17
-17c24 this<10R9> 16|13b24 15m7
-17f49 Radius{23|11F9} 16|13b49 15r22
-18V13*getCenterPoint{18|8P9} 18>28 16|18b13
-18c28 this<10R9> 16|18r76
-19U14*setCenterPoint 19<29 19>54 16|20b14 23l8 23t22
-19c29 this<10R9> 16|20b29 22m7
-19p54 CenterPoint{18|8P9} 16|20b54 22r27
-20V13*toString{string} 20>22 20>43 16|25b13 46l8 46t16
-20c22 this<10R9> 16|25b22 38r13 42r74
-20i43 depth{integer} 16|25b43 28r34
-25f7 Radius{23|11F9} 16|11r68 15m12 42r79
-26p7 CenterPoint{18|8P9} 16|18r81 22m12 38r18
+13P9*Circle_Class_Acc(10R9)
+15V13*getFullLmcpTypeName{string}<14|11p13> 15>33 16|5b13
+15r33 this{10R9}
+16V13*getLmcpTypeName{string}<14|12p13> 16>29 16|7b13
+16r29 this{10R9}
+17V13*getLmcpType{23|7M9}<14|13p13> 17>25 16|9b13
+17r25 this{10R9}
+18V13*getRadius{23|11F9} 18>23 16|11b13
+18c23 this<10R9> 16|11r63
+19U14*setRadius 19<24 19>49 16|13b14 16l8 16t17
+19c24 this<10R9> 16|13b24 15m7
+19f49 Radius{23|11F9} 16|13b49 15r22
+20V13*getCenterPoint{18|8P9} 20>28 16|18b13
+20c28 this<10R9> 16|18r76
+21U14*setCenterPoint 21<29 21>54 16|20b14 23l8 23t22
+21c29 this<10R9> 16|20b29 22m7
+21p54 CenterPoint{18|8P9} 16|20b54 22r27
+22V13*toString{string} 22>22 22>43 16|25b13 46l8 46t16
+22c22 this<10R9> 16|25b22 38r13 42r74
+22i43 depth{integer} 16|25b43 28r34
+27f7 Radius{23|11F9} 16|11r68 15m12 42r79
+28p7 CenterPoint{18|8P9} 16|18r81 22m12 38r18
 X 16 afrl-cmasi-circle.adb
 28i10 depth_copy{integer} 33r53 35m10 35r24 36r53 43m10 43r24
 29r10 UBS{9|79R9} 34m10 34r17 37m10 37r17 39m13 39r20 41m10 41r17 42m10 42r17
@@ -160,13 +166,13 @@ X 17 afrl-cmasi-enumerations.ads
 15E9*CmasiEnum 16|9r60 17|75e23
 36n23*CIRCLE_ENUM{15E9} 16|9r74
 X 18 afrl-cmasi-location3d.ads
-5K20*location3D 15|5w17 5r44 18|31e26
-8P9*Location3D_Acc(7R9) 15|18r56 19r71 26r21 16|18r57 20r71
+5K20*location3D 15|5w17 5r44 18|32e26
+8P9*Location3D_Acc(7R9) 15|20r56 21r71 28r21 16|18r57 20r71
 X 19 afrl-cmasi-object.ads
-5K20*object 15|2w17 2r40 19|17e22
-9V13*getSeriesVersion{23|6M9}
-10V13*getSeriesName{string}
-11V13*getSeriesNameAsLong{23|10I9}
+5K20*object 15|2w17 2r40 19|19e22
+11V13*getSeriesVersion{23|6M9}
+12V13*getSeriesName{string}
+13V13*getSeriesNameAsLong{23|10I9}
 X 20 avtas.ads
 1K9*avtas 15|1r6 1r28 20|3e10
 X 21 avtas-lmcp.ads
@@ -174,9 +180,9 @@ X 21 avtas-lmcp.ads
 X 23 avtas-lmcp-types.ads
 3K20*types 15|1w17 1r39 23|14e21
 6M9*UInt16_t<24|66M9>
-7M9*UInt32_t<24|74M9> 15|15r47 16|9r47
+7M9*UInt32_t<24|74M9> 15|17r47 16|9r47
 10I9*Int64_t<24|55I9>
-11F9*Float_t<24|169F9> 15|16r51 17r61 25r16 16|11r51 13r61
+11F9*Float_t<24|169F9> 15|18r51 19r61 27r16 16|11r51 13r61
 X 24 interfac.ads
 55I9*Integer_64<long_long_integer>
 66M9*Unsigned_16
@@ -188,6 +194,6 @@ X 31 s-memory.ads
 53V13*Alloc{25|67M9} 103i<c,__gnat_malloc>22
 68U14*Free 104i<c,__gnat_free>22
 76V13*Realloc{25|67M9} 105i<c,__gnat_realloc>22
-X 37 s-stalib.adb
+X 38 s-stalib.adb
 93U14 Break_Start 94i<c,__gnat_break_start>22
 

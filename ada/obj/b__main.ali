@@ -18,12 +18,12 @@ RV NO_ELABORATION_CODE
 RV NO_OBSOLESCENT_FEATURES
 RV SPARK_05
 
-U ada_main%b		b__main.adb		5760f275 OO PK IL
+U ada_main%b		b__main.adb		d6861744 OO PK IL
 W ada%s			ada.ads			ada.ali
 W ada.exceptions%s	a-except.adb		a-except.ali
 W system%s		system.ads		system.ali
 
-U ada_main%s		b__main.ads		123658d8 EE NE OO PK IL
+U ada_main%s		b__main.ads		505fd69b EE NE OO PK IL
 W system%s		system.ads		system.ali
 W system.parameters%s	s-parame.adb		s-parame.ali
 W system.secondary_stack%s  s-secsta.adb	s-secsta.ali
@@ -31,8 +31,8 @@ W system.secondary_stack%s  s-secsta.adb	s-secsta.ali
 D ada.ads		20170727072659 76789da1 ada%s
 D a-except.ads		20170725134137 291912d5 ada.exceptions%s
 D a-unccon.ads		20170725134137 0e9b276f ada.unchecked_conversion%s
-D b__main.ads		20181214224802 84a89cb4 ada_main%s
-D b__main.adb		20181214224802 fad17c14 ada_main%b
+D b__main.ads		20181218145130 c6c112f7 ada_main%s
+D b__main.adb		20181218145130 395e1766 ada_main%b
 D system.ads		20170911102249 4635ec04 system%s
 D s-parame.ads		20171219171438 f896c45c system.parameters%s
 D s-secsta.ads		20170926153132 283dec34 system.secondary_stack%s
@@ -306,11 +306,11 @@ X 5 b__main.adb
 33i4 E143{short_integer} 33m46 33r46 164m7 164r15 344m7 344r15
 34i4 E135{short_integer} 34m46 34r46 157m7 157r15 346m7 346r15
 35i4 E099{short_integer} 35m46 35r46 150m7 150r15 349m7 349r15
-36i4 E171{short_integer} 36m46 36r46 143m7 143r15 351m7 351r15
+36i4 E163{short_integer} 36m46 36r46 143m7 143r15 351m7 351r15
 37i4 E160{short_integer} 37m46 37r46 140m10 140r18 353m7 353r15
-38i4 E165{short_integer} 38m46 38r46 133m10 133r18 355m7 355r15
-39i4 E163{short_integer} 39m46 39r46 122m7 122r15 357m7 357r15
-40i4 E167{short_integer} 40m46 40r46 115m7 115r15 359m7 359r15
+38i4 E169{short_integer} 38m46 38r46 133m10 133r18 355m7 355r15
+39i4 E167{short_integer} 39m46 39r46 122m7 122r15 357m7 357r15
+40i4 E171{short_integer} 40m46 40r46 115m7 115r15 359m7 359r15
 41i4 E203{short_integer} 41m46 41r46 108m7 108r15 361m7 361r15
 42i4 E199{short_integer} 42m46 42r46 101m7 101r15 363m7 363r15
 43i4 E195{short_integer} 43m46 43r46 94m7 94r15 365m7 365r15

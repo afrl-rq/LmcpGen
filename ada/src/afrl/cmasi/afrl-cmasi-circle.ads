@@ -9,6 +9,8 @@ package afrl.cmasi.circle is
    
    type Circle is new AbstractGeometry.AbstractGeometry with private;
    type Circle_Acc is access all Circle;
+   -- Technically, nothing inherits from this, so we don't need a class access type
+   type Circle_Class_Acc is access all Circle'Class;
 
    function getFullLmcpTypeName(this : Circle) return String;
    function getLmcpTypeName(this : Circle) return String;

@@ -22,7 +22,7 @@ RV NO_DEFAULT_INITIALIZATION
 RV NO_IMPLEMENTATION_PRAGMAS
 RV SPARK_05
 
-U main%b		main.adb		ce0211ec NE OO SU
+U main%b		main.adb		c525b06f NE OO SU
 W ada%s			ada.ads			ada.ali
 W ada.exceptions%s	a-except.adb		a-except.ali
 W ada.integer_text_io%s	a-inteio.ads		a-inteio.ali
@@ -78,25 +78,25 @@ D a-unccon.ads		20170725134137 0e9b276f ada.unchecked_conversion%s
 D a-uncdea.ads		20170725134137 eff36322 ada.unchecked_deallocation%s
 D afrl.ads		20181213155759 1b3a74c6 afrl%s
 D afrl-cmasi.ads	20181214183435 6d18f5d9 afrl.cmasi%s
-D afrl-cmasi-abstractgeometry.ads  20181214183607 fe89a983 afrl.cmasi.abstractgeometry%s
-D afrl-cmasi-abstractzone.ads  20181214184725 062b9c7a afrl.cmasi.abstractzone%s
-D afrl-cmasi-cameraconfiguration.ads  20181214223715 93187f4f afrl.cmasi.cameraconfiguration%s
-D afrl-cmasi-circle.ads	20181214205517 d6d67fe4 afrl.cmasi.circle%s
-D afrl-cmasi-entityconfiguration.ads  20181214224251 7d8f1861 afrl.cmasi.entityconfiguration%s
+D afrl-cmasi-abstractgeometry.ads  20181218144407 4842dee5 afrl.cmasi.abstractgeometry%s
+D afrl-cmasi-abstractzone.ads  20181218144355 dfe35d9a afrl.cmasi.abstractzone%s
+D afrl-cmasi-cameraconfiguration.ads  20181218144655 e24bc627 afrl.cmasi.cameraconfiguration%s
+D afrl-cmasi-circle.ads	20181218144706 f7db81c7 afrl.cmasi.circle%s
+D afrl-cmasi-entityconfiguration.ads  20181218144152 c9e01af8 afrl.cmasi.entityconfiguration%s
 D afrl-cmasi-enumerations.ads  20181214215520 6179d503 afrl.cmasi.enumerations%s
-D afrl-cmasi-gimbalconfiguration.ads  20181214223656 4552da64 afrl.cmasi.gimbalconfiguration%s
-D afrl-cmasi-keepinzone.ads  20181214184212 e93f8e90 afrl.cmasi.keepinzone%s
-D afrl-cmasi-keyvaluepair.ads  20181214184318 5b8c684d afrl.cmasi.keyvaluepair%s
-D afrl-cmasi-location3d.ads  20181214205113 f26fe2c1 afrl.cmasi.location3d%s
-D afrl-cmasi-object.ads	20181214183044 fb022c40 afrl.cmasi.object%s
+D afrl-cmasi-gimbalconfiguration.ads  20181218144736 6d4722fe afrl.cmasi.gimbalconfiguration%s
+D afrl-cmasi-keepinzone.ads  20181218144759 d7bdfe67 afrl.cmasi.keepinzone%s
+D afrl-cmasi-keyvaluepair.ads  20181218144815 01f01f87 afrl.cmasi.keyvaluepair%s
+D afrl-cmasi-location3d.ads  20181218143507 3e914fb1 afrl.cmasi.location3d%s
+D afrl-cmasi-object.ads	20181218143428 c665b955 afrl.cmasi.object%s
 D afrl-cmasi-payloadconfiguration.ads  20181214224040 beac59b1 afrl.cmasi.payloadconfiguration%s
 D avtas.ads		20181207210504 eb1fc8ab avtas%s
 D avtas-lmcp.ads	20181213155724 e3081ec7 avtas.lmcp%s
-D avtas-lmcp-object.ads	20181214182918 0047b6cc avtas.lmcp.object%s
+D avtas-lmcp-object.ads	20181218143215 f96815d3 avtas.lmcp.object%s
 D avtas-lmcp-types.ads	20181213194010 9a3efbee avtas.lmcp.types%s
 D interfac.ads		20170725134137 5ab55268 interfaces%s
 D i-cstrea.ads		20170725134137 e53d8b8e interfaces.c_streams%s
-D main.adb		20181214224754 8f75547e main%b
+D main.adb		20181218142735 8f75547e main%b
 D system.ads		20170911102249 4635ec04 system%s
 D s-atocou.ads		20170725134137 b45c2d8d system.atomic_counters%s
 D s-crtl.ads		20170725134137 0ebbdb71 system.crtl%s
@@ -127,8 +127,8 @@ X 1 ada.ads
 16K9*Ada 20e8 41|1r6 1r23 2r6 2r31 6r6 6r33
 X 6 a-convec.ads
 57R9*Vector<8|43R9>
-245U14*Append 41|106s27[24|13] 107s27[24|13] 108s27[24|13] 148s35[27|14]
-. 149s35[27|14]
+245U14*Append 41|106s27[24|14] 107s27[24|14] 108s27[24|14] 148s35[27|15]
+. 149s35[27|15]
 X 9 a-inteio.ads
 18K13*Integer_Text_IO[18|46] 41|2w10 2r35
 X 11 a-iteint.ads
@@ -153,56 +153,56 @@ X 22 afrl-cmasi.ads
 4K14*cmasi 6e15 41|5r11 5r40 7r11 7r40 8r11 8r38 9r11 9r44 10r11 10r40 11r11
 . 11r38 12r11 12r34 13r11 13r47 14r11 14r48 15r11 15r47 16r11 16r47
 X 23 afrl-cmasi-abstractgeometry.ads
-5K20*abstractGeometry 18e32 41|9w17 9r50
+5K20*abstractGeometry 19e32 41|9w17 9r50
 8P9*AbstractGeometry_Acc(7R9) 41|134r19
 X 24 afrl-cmasi-abstractzone.ads
-8K20*abstractZone 60e28 41|10w17 10r46
-10R9*AbstractZone<33|7R9> 58e14 41|75r9
-16P9*Vect_Int64_t_Acc(6|57R9[13])
-22U14*setZoneId 41|131s7
-24U14*setMinAltitude 41|132s7
-28U14*setMaxAltitude 41|133s7
-31V13*getAffectedAircraft{16P9} 41|106s7 107s7 108s7 114s16
-38V13*getLabel{15|79R9} 41|122s21
-39U14*setLabel 41|120s7
-41U14*setBoundary 41|134s7
+8K20*abstractZone 61e28 41|10w17 10r46
+10R9*AbstractZone<33|7R9> 59e14 41|75r9
+17P9*Vect_Int64_t_Acc(6|57R9[14])
+23U14*setZoneId 41|131s7
+25U14*setMinAltitude 41|132s7
+29U14*setMaxAltitude 41|133s7
+32V13*getAffectedAircraft{17P9} 41|106s7 107s7 108s7 114s16
+39V13*getLabel{15|79R9} 41|122s21
+40U14*setLabel 41|120s7
+42U14*setBoundary 41|134s7
 X 25 afrl-cmasi-cameraconfiguration.ads
-7K20*cameraConfiguration 46e35 41|15w17 15r53
-9R9*CameraConfiguration<34|9R9> 44e14 41|147r18
+7K20*cameraConfiguration 48e35 41|15w17 15r53
+9R9*CameraConfiguration<34|9R9> 46e14 41|147r18
 X 26 afrl-cmasi-circle.ads
-8K20*circle 29e22 41|12w17 12r40
-10R9*Circle<23|7R9> 27e14 41|72r26
+8K20*circle 31e22 41|12w17 12r40
+10R9*Circle<23|7R9> 29e14 41|72r26
 11P9*Circle_Acc(10R9) 41|72r8
-17U14*setRadius 41|96s6
-19U14*setCenterPoint 41|97s6
-20V13*toString{string} 41|103s10
+19U14*setRadius 41|96s6
+21U14*setCenterPoint 41|97s6
+22V13*toString{string} 41|103s10
 X 27 afrl-cmasi-entityconfiguration.ads
-9K20*entityConfiguration 58e35 41|13w17 13r53
-11R9*EntityConfiguration<33|7R9> 56e14 41|77r9
-17P9*Vect_PayloadConfiguration_Class_Acc_Acc(6|57R9[14])
-41V13*getPayloadConfigurationList{17P9} 41|148s7 149s7
+9K20*entityConfiguration 59e35 41|13w17 13r53
+11R9*EntityConfiguration<33|7R9> 57e14 41|77r9
+18P9*Vect_PayloadConfiguration_Class_Acc_Acc(6|57R9[15])
+42V13*getPayloadConfigurationList{18P9} 41|148s7 149s7
 X 28 afrl-cmasi-enumerations.ads
 1K20*enumerations 139e28 41|5w17 5r46
 6E9*AltitudeTypeEnum 6e39 41|86r24
 6n35*MSL{6E9} 41|86r42
 X 29 afrl-cmasi-gimbalconfiguration.ads
-7K20*gimbalconfiguration 87e35 41|16w17 16r53
-9R9*GimbalConfiguration<34|9R9> 85e14 41|146r18
+7K20*gimbalconfiguration 89e35 41|16w17 16r53
+9R9*GimbalConfiguration<34|9R9> 87e14 41|146r18
 X 30 afrl-cmasi-keepinzone.ads
-6K20*keepInZone 19e26 41|11w17 11r44
-8R9*KeepInZone<24|10R9> 17e69 41|71r9
+6K20*keepInZone 21e26 41|11w17 11r44
+8R9*KeepInZone<24|10R9> 19e69 41|71r9
 X 31 afrl-cmasi-keyvaluepair.ads
-6K20*keyValuePair 26e28 41|7w17 7r46
-8R9*KeyValuePair<33|7R9> 24e14 41|76r10
-11V13*getFullLmcpTypeName{string}<37|14p13> 41|126s12
+6K20*keyValuePair 28e28 41|7w17 7r46
+8R9*KeyValuePair<33|7R9> 26e14 41|76r10
+13V13*getFullLmcpTypeName{string}<37|15p13> 41|126s12
 X 32 afrl-cmasi-location3d.ads
-5K20*location3D 31e26 41|8w17 8r44
-7R9*Location3D<33|7R9> 29e14 41|73r10 88r19
+5K20*location3D 32e26 41|8w17 8r44
+7R9*Location3D<33|7R9> 30e14 41|73r10 88r19
 8P9*Location3D_Acc(7R9) 41|74r14
-14U14*setLatitude 41|83s8 89s12
-16U14*setLongitude 41|84s8 90s12
-18U14*setAltitude 41|85s8 91s12
-20U14*setAltitudeType 41|86s8
+15U14*setLatitude 41|83s8 89s12
+17U14*setLongitude 41|84s8 90s12
+19U14*setAltitude 41|85s8 91s12
+21U14*setAltitudeType 41|86s8
 X 34 afrl-cmasi-payloadconfiguration.ads
 7K20*payloadConfiguration 35e36 41|14w17 14r54
 11P9*PayloadConfiguration_Class_Acc(9R9) 41|78r13 79r13
