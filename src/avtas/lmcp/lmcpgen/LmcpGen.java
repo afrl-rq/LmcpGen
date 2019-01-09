@@ -325,6 +325,11 @@ public class LmcpGen {
                 methodClassName = "avtas.lmcp.lmcpgen.RustMethods";
                 i -= 1;
             }
+            else if (args[i].equalsIgnoreCase("-ada")) {
+                template = LmcpGen.class.getResource("/templates/ada.tl");
+                methodClassName = "avtas.lmcp.lmcpgen.AdaMethods";
+                i -= 1;
+            }
             else if (args[i].equalsIgnoreCase("-xsd")) {
                 template = LmcpGen.class.getResource("/templates/xsd.tl");
                 methodClassName = "avtas.lmcp.lmcpgen.XsdMethods";

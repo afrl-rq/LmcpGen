@@ -19,6 +19,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.Vector;
+import java.util.HashSet;
+import java.util.Set;
 
 public class AdaMethods {
 
@@ -39,7 +41,7 @@ public class AdaMethods {
     }
 
     public static AdaTypeCategory getAdaTypeCategory(MDMInfo[] infos, FieldInfo fieldinfo) throws Exception {
-        // single
+        // single variables
         if(!fieldinfo.isArray) {
             if(!fieldinfo.isStruct && !fieldinfo.isEnum) {
                 return AdaTypeCategory.SINGLE_PRIMITIVE;
@@ -52,7 +54,7 @@ public class AdaMethods {
             }
             return AdaTypeCategory.SINGLE_LEAF_STRUCT;
         }
-        // array of variable length 
+        // vectors (variable length) 
         if(fieldinfo.length == -1) {
             if(!fieldinfo.isStruct && !fieldinfo.isEnum) {
                 return AdaTypeCategory.VECTOR_PRIMITIVE;
@@ -65,7 +67,7 @@ public class AdaMethods {
             }
             return AdaTypeCategory.VECTOR_LEAF_STRUCT;
         }
-        // fixed length array
+        // arrays (fixed length)
         if(!fieldinfo.isStruct && !fieldinfo.isEnum) {
             return AdaTypeCategory.FIXED_ARRAY_PRIMITIVE;
         }
@@ -76,6 +78,12 @@ public class AdaMethods {
             return AdaTypeCategory.FIXED_ARRAY_NODE_STRUCT;
         }
         return AdaTypeCategory.FIXED_ARRAY_LEAF_STRUCT;
+    }
+
+    public static final Set<String> adaReservedWords = new HashSet<String>(Arrays.asList("loop", "task"));
+
+    private static String getDeconflictedName(String name) {
+        return (adaReservedWords.contains(name.toLowerCase()) ? "Lmcp" + name : name );
     }
 
     public static String series_name(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
@@ -106,11 +114,15 @@ public class AdaMethods {
     }
 
     public static String full_datatype_name_dashes(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
-        return getSeriesNamespaceDashes(infos, st.seriesName) + st.name;
+        return getSeriesNamespaceDashes(infos, st.seriesName) + getDeconflictedName(st.name);
+    }
+
+    public static String full_datatype_name_dashes_lowercase(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        return getSeriesNamespaceDashes(infos, st.seriesName).toLowerCase() + getDeconflictedName(st.name).toLowerCase();
     }
 
     public static String full_datatype_name_dots(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
-        return getSeriesNamespaceDots(infos, st.seriesName) + st.name;
+        return getSeriesNamespaceDots(infos, st.seriesName) + getDeconflictedName(st.name);
     }
 
     public static String datatype_id(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
@@ -118,11 +130,11 @@ public class AdaMethods {
     }
 
     public static String datatype_name(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
-        return ws + st.name;
+        return ws + getDeconflictedName(st.name);
     }
 
     public static String datatype_name_caps(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
-        return ws + st.name.toUpperCase();
+        return ws + getDeconflictedName(st.name).toUpperCase();
     }
 
     private static String getSeriesNamespaceDots(MDMInfo[] infos, String series_name) {
@@ -141,8 +153,12 @@ public class AdaMethods {
         return "";
     }
 
+    public static String full_parent_datatype_package(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        return ws + (st.extends_name.length() == 0 ? info.namespace.replaceAll("/", ".") + ".object" : getSeriesNamespaceDots(infos, st.extends_series) + getDeconflictedName(st.extends_name));
+    }
+
     public static String full_parent_datatype(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
-        return ws + (st.extends_name.length() == 0 ? info.namespace.replaceAll("/", ".") + ".object.Object" : getSeriesNamespaceDots(infos, st.extends_series) + st.extends_name);
+        return ws + (st.extends_name.length() == 0 ? info.namespace.replaceAll("/", ".") + ".object.Object" : ws + getSeriesNamespaceDots(infos, st.extends_series) + getDeconflictedName(st.extends_name) + "." + getDeconflictedName(st.extends_name));
     }
     
     public static String enum_name(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
@@ -157,7 +173,7 @@ public class AdaMethods {
         String str = "";
         // list names with ids
         for (int i = 0; i < info.structs.length; i++) {
-            str += ws + info.structs[i].name.toUpperCase() + "_ENUM => " + info.structs[i].id + ",\n";
+            str += ws + getDeconflictedName(info.structs[i].name).toUpperCase() + "_ENUM => " + info.structs[i].id + ",\n";
         }
         return str.replaceAll(",\n$", "\n");
     }
@@ -166,7 +182,7 @@ public class AdaMethods {
         String str = "";
         // list names as enum
         for (int i = 0; i < info.structs.length; i++) {
-            str += ws + info.structs[i].name.toUpperCase() + "_ENUM,\n";
+            str += ws + getDeconflictedName(info.structs[i].name).toUpperCase() + "_ENUM,\n";
         }
         return str.replaceAll(",\n$", "\n");
     }
@@ -176,7 +192,7 @@ public class AdaMethods {
         int len = en.entries.size();
         for (int i = 0; i < len; i++) {
             EnumInfo.EnumEntry entry = en.entries.get(i);
-            buf.append(entry.name);
+            buf.append(getDeconflictedName(entry.name));
             if (i != len - 1) {
                 buf.append(",");
             }
@@ -189,7 +205,7 @@ public class AdaMethods {
         int len = en.entries.size();
         for (int i = 0; i < len; i++) {
             EnumInfo.EnumEntry entry = en.entries.get(i);
-            buf.append(entry.name + "=>" + entry.value);
+            buf.append(getDeconflictedName(entry.name) + "=>" + entry.value);
             if (i != len - 1) {
                 buf.append(",");
             }
@@ -202,11 +218,11 @@ public class AdaMethods {
         
         // loop through all enumerations in the MDM
         for (int i = 0; i < info.enums.length; i++) {
-            str += ws + "type " + info.enums[i].name + "Enum is (";
+            str += ws + "type " + getDeconflictedName(info.enums[i].name) + "Enum is (";
             str += gen_enum_names(info.enums[i]);
             str += ");\n";
 
-            str += ws + "for " + info.enums[i].name + "Enum use (";
+            str += ws + "for " + getDeconflictedName(info.enums[i].name) + "Enum use (";
             str += gen_enum_ids(info.enums[i]);
             str += ");\n\n";
         }
@@ -214,7 +230,7 @@ public class AdaMethods {
     }
 
     private static String getResolvedTypeName(MDMInfo[] infos, FieldInfo field) {
-        return getSeriesNamespaceDots(infos, field.seriesName) + field.type;
+        return getSeriesNamespaceDots(infos, field.seriesName) + getDeconflictedName(field.type);
     }
 
     public static String with_all_field_types(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
@@ -250,16 +266,17 @@ public class AdaMethods {
 
     public static String descending_namespace_spec(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
 
+        // For <namespace_1>/<namespace_2>/ ... <namespace_n>, create files with empty package definitions for 
+        // <namespace_1>, <namespace_1>.<namespace_2>, through <namespace_1>.<namespace_2> ... .<namespace_n-1>
+        // and return basic package definition for <namespace_1>.<namespace_2> ... .<namespace_n>
+
         String str = "";
         String[] words = info.namespace.split("/");
         File packageFileDir = outfile.getParentFile();
 
-        // all packages before the lowest-level package, working backward
+        // Packages before the lowest-level package, starting at n-1
         for(int i = words.length - 2; i >= 0 ; i--) {
             
-            packageFileDir = packageFileDir.getParentFile();
-            packageFileDir.mkdirs();
-
             String packageName = "";
             for(int j = 0; j < i; j++) {
                 packageName += words[j] + "."; 
@@ -267,12 +284,14 @@ public class AdaMethods {
             packageName += words[i];
             str = "package " + packageName + " is\n\nend " + packageName + ";\n"; 
 
+            packageFileDir = packageFileDir.getParentFile();
+            packageFileDir.mkdirs();
             File packageFile = new File(packageFileDir, packageName + ".ads");
             packageFile.createNewFile();
             Files.write(packageFile.toPath(), str.getBytes());
         }
 
-        // lowest level package, filled in with return str by LmcpGen
+        // Lowest level package definition text, returned as str
         String packageName = "";
         packageName = info.namespace.replaceAll("/", "\\.");  ;
         str = "with avtas.lmcp.object; use avtas.lmcp.object;\n";
@@ -338,22 +357,22 @@ public class AdaMethods {
                     str += ws + "type Vect_" + typename + "_Acc is access all Vect_" + typename + ".Vector;\n";
                     break;
                 case VECTOR_ENUM:
-                    str += ws + "package Vect_" + st.fields[i].type + "Enum is new Ada.Containers.Vectors\n";
+                    str += ws + "package Vect_" + getDeconflictedName(st.fields[i].type) + "Enum is new Ada.Containers.Vectors\n";
                     str += ws + "  (Index_Type   => Natural,\n";
-                    str += ws + "  Element_Type => " + st.fields[i].type + "Enum);\n";
-                    str += ws + "type Vect_" + st.fields[i].type + "Enum_Acc is access all Vect_" + st.fields[i].type + "Enum.Vector;\n";
+                    str += ws + "  Element_Type => " + getDeconflictedName(st.fields[i].type) + "Enum);\n";
+                    str += ws + "type Vect_" + getDeconflictedName(st.fields[i].type) + "Enum_Acc is access all Vect_" + getDeconflictedName(st.fields[i].type) + "Enum.Vector;\n";
                     break;
                 case VECTOR_NODE_STRUCT:
-                    str += ws + "package Vect_" + st.fields[i].type + "_Any is new Ada.Containers.Vectors\n";
+                    str += ws + "package Vect_" + getDeconflictedName(st.fields[i].type) + "_Any is new Ada.Containers.Vectors\n";
                     str += ws + "  (Index_Type   => Natural,\n";
-                    str += ws + "  Element_Type => " + st.fields[i].type + "_Any);\n";
-                    str += ws + "type Vect_" + st.fields[i].type + "_Any_Acc is access all Vect_" + st.fields[i].type + "_Any.Vector;\n";
+                    str += ws + "  Element_Type => " + getDeconflictedName(st.fields[i].type) + "_Any);\n";
+                    str += ws + "type Vect_" + getDeconflictedName(st.fields[i].type) + "_Any_Acc is access all Vect_" + getDeconflictedName(st.fields[i].type) + "_Any.Vector;\n";
                     break;
                 case VECTOR_LEAF_STRUCT:
-                    str += ws + "package Vect_" + st.fields[i].type + "_Acc is new Ada.Containers.Vectors\n";
+                    str += ws + "package Vect_" + getDeconflictedName(st.fields[i].type) + "_Acc is new Ada.Containers.Vectors\n";
                     str += ws + "  (Index_Type   => Natural,\n";
-                    str += ws + "  Element_Type => " + st.fields[i].type + "_Acc);\n";
-                    str += ws + "type Vect_" + st.fields[i].type + "_Acc_Acc is access all Vect_" + st.fields[i].type + "_Acc.Vector;\n";                
+                    str += ws + "  Element_Type => " + getDeconflictedName(st.fields[i].type) + "_Acc);\n";
+                    str += ws + "type Vect_" + getDeconflictedName(st.fields[i].type) + "_Acc_Acc is access all Vect_" + getDeconflictedName(st.fields[i].type) + "_Acc.Vector;\n";                
                     break;
                 case FIXED_ARRAY_PRIMITIVE:
                 case FIXED_ARRAY_ENUM:
@@ -368,48 +387,50 @@ public class AdaMethods {
 
     public static String get_and_set_methods_spec(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         String str = "";
-        String thisRecordName = st.name + (has_descendants(infos, st.name, st.seriesName) ? "'Class" : "");
+        String thisRecordName = getDeconflictedName(st.name) + (has_descendants(infos, st.name, st.seriesName) ? "'Class" : "");
         for (int i = 0; i < st.fields.length; i++) {
+            String fieldname = getDeconflictedName(st.fields[i].name);
+            String type = getDeconflictedName(st.fields[i].type);
             switch (getAdaTypeCategory(infos,st.fields[i])) {
                 case SINGLE_PRIMITIVE:
-                    str += ws + "function get" + st.fields[i].name + "(this : " + thisRecordName + ") return " + getAdaPrimativeType(infos, st.fields[i]) + ";\n";
-                    str += ws + "procedure set" + st.fields[i].name + "(this : out " + thisRecordName + "; " + st.fields[i].name + " : in " + getAdaPrimativeType(infos, st.fields[i]) + ");\n";
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return " + getAdaPrimativeType(infos, st.fields[i]) + ";\n";
+                    str += ws + "procedure set" + fieldname + "(this : out " + thisRecordName + "; " + fieldname + " : in " + getAdaPrimativeType(infos, st.fields[i]) + ");\n";
                     break;  
                 case SINGLE_ENUM:
-                    str += ws + "function get" + st.fields[i].name + "(this : " + thisRecordName + ") return " + st.fields[i].type + "Enum;\n";
-                    str += ws + "procedure set" + st.fields[i].name + "(this : out " + thisRecordName + "; " + st.fields[i].name + " : in " + st.fields[i].type + "Enum);\n";
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return " + type + "Enum;\n";
+                    str += ws + "procedure set" + fieldname + "(this : out " + thisRecordName + "; " + fieldname + " : in " + type + "Enum);\n";
                     break;
                 case SINGLE_NODE_STRUCT:
-                    str += ws + "function get" + st.fields[i].name + "(this : " + thisRecordName + ") return " + st.fields[i].type + "_Any;\n";
-                    str += ws + "procedure set" + st.fields[i].name + "(this : out " + thisRecordName + "; " + st.fields[i].name + " : in " + st.fields[i].type + "_Any);\n";
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return " + type + "_Any;\n";
+                    str += ws + "procedure set" + fieldname + "(this : out " + thisRecordName + "; " + fieldname + " : in " + type + "_Any);\n";
                     break;
                 case SINGLE_LEAF_STRUCT:
-                    str += ws + "function get" + st.fields[i].name + "(this : " + thisRecordName + ") return " + st.fields[i].type + "_Acc;\n";
-                    str += ws + "procedure set" + st.fields[i].name + "(this : out " + thisRecordName + "; " + st.fields[i].name + " : in " + st.fields[i].type + "_Acc);\n";        
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return " + type + "_Acc;\n";
+                    str += ws + "procedure set" + fieldname + "(this : out " + thisRecordName + "; " + fieldname + " : in " + type + "_Acc);\n";        
                     break;
                 case VECTOR_PRIMITIVE:
-                    str += ws + "function get" + st.fields[i].name + "(this : " + thisRecordName + ") return Vect_" + getAdaPrimativeType(infos, st.fields[i]) + "_Acc;\n";
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return Vect_" + getAdaPrimativeType(infos, st.fields[i]) + "_Acc;\n";
                     break;
                 case VECTOR_ENUM:
-                    str += ws + "function get" + st.fields[i].name + "(this : " + thisRecordName + ") return Vect_" + st.fields[i].type + "Enum_Acc;\n";
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return Vect_" + type + "Enum_Acc;\n";
                     break;
                 case VECTOR_NODE_STRUCT:
-                    str += ws + "function get" + st.fields[i].name + "(this : " + thisRecordName + ") return Vect_" + st.fields[i].type + "_Any_Acc;\n";
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return Vect_" + type + "_Any_Acc;\n";
                     break;
                 case VECTOR_LEAF_STRUCT:
-                    str += ws + "function get" + st.fields[i].name + "(this : " + thisRecordName + ") return Vect_" + st.fields[i].type + "_Acc_Acc;\n";
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return Vect_" + type + "_Acc_Acc;\n";
                     break;    
                 case FIXED_ARRAY_PRIMITIVE:
-                    str += ws + "function get" + st.fields[i].name + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + getAdaPrimativeType(infos, st.fields[i]) + ";\n";
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + getAdaPrimativeType(infos, st.fields[i]) + ";\n";
                     break;
                 case FIXED_ARRAY_ENUM:
-                    str += ws + "function get" + st.fields[i].name + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + st.fields[i].type + "Enum;\n";
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + type + "Enum;\n";
                     break;
                 case FIXED_ARRAY_NODE_STRUCT:
-                    str += ws + "function get" + st.fields[i].name + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + st.fields[i].type + "_Any;\n";
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + type + "_Any;\n";
                     break;
                 case FIXED_ARRAY_LEAF_STRUCT:
-                    str += ws + "function get" + st.fields[i].name + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + st.fields[i].type + "_Acc;\n";
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + type + "_Acc;\n";
                     break;
                 default:
                     break;
@@ -422,54 +443,56 @@ public class AdaMethods {
         String str = "";
         String thisRecordName = st.name + (has_descendants(infos, st.name, st.seriesName) ? "'Class" : "");
         for (int i = 0; i < st.fields.length; i++) {
+            String fieldname = getDeconflictedName(st.fields[i].name);
+            String type = getDeconflictedName(st.fields[i].type);
             switch (getAdaTypeCategory(infos,st.fields[i])) {
                 case SINGLE_PRIMITIVE:
-                    str += ws + "function get" + st.fields[i].name + "(this : " + thisRecordName + ") return " + getAdaPrimativeType(infos, st.fields[i]) + " is (this." + st.fields[i].name + ");\n";
-                    str += ws + "procedure set" + st.fields[i].name + "(this : out " + thisRecordName + "; " + st.fields[i].name + " : in " + getAdaPrimativeType(infos, st.fields[i]) + ") is\n";
-                    str += ws + "   this." + st.fields[i].name + " := " + st.fields[i].name + ";\n";
-                    str += ws + "end get" + st.fields[i].name + ";\n\n";
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return " + getAdaPrimativeType(infos, st.fields[i]) + " is (this." + fieldname + ");\n";
+                    str += ws + "procedure set" + fieldname + "(this : out " + thisRecordName + "; " + fieldname + " : in " + getAdaPrimativeType(infos, st.fields[i]) + ") is\n" + ws + "begin\n";
+                    str += ws + "   this." + fieldname + " := " + fieldname + ";\n";
+                    str += ws + "end set" + fieldname + ";\n\n";
                     break;  
                 case SINGLE_ENUM:
-                    str += ws + "function get" + st.fields[i].name + "(this : " + thisRecordName + ") return " + st.fields[i].type + "Enum is (this." + st.fields[i].name + ");\n";
-                    str += ws + "procedure set" + st.fields[i].name + "(this : out " + thisRecordName + "; " + st.fields[i].name + " : in " + st.fields[i].type + "Enum) is\n";
-                    str += ws + "   this." + st.fields[i].name + " := " + st.fields[i].name + ";\n";
-                    str += ws + "end get" + st.fields[i].name + ";\n\n";
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return " + type + "Enum is (this." + fieldname + ");\n";
+                    str += ws + "procedure set" + fieldname + "(this : out " + thisRecordName + "; " + fieldname + " : in " + type + "Enum) is\n" + ws + "begin\n";
+                    str += ws + "   this." + fieldname + " := " + fieldname + ";\n";
+                    str += ws + "end set" + fieldname + ";\n\n";
                     break;
                 case SINGLE_NODE_STRUCT:
-                    str += ws + "function get" + st.fields[i].name + "(this : " + thisRecordName + ") return " + st.fields[i].type + "_Any is (this." + st.fields[i].name + ");\n";
-                    str += ws + "procedure set" + st.fields[i].name + "(this : out " + thisRecordName + "; " + st.fields[i].name + " : in " + st.fields[i].type + "_Any) is\n";
-                    str += ws + "   this." + st.fields[i].name + " := " + st.fields[i].name + ";\n";
-                    str += ws + "end get" + st.fields[i].name + ";\n\n";
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return " + type + "_Any is (this." + fieldname + ");\n";
+                    str += ws + "procedure set" + fieldname + "(this : out " + thisRecordName + "; " + fieldname + " : in " + type + "_Any) is\n" + ws + "begin\n";
+                    str += ws + "   this." + fieldname + " := " + fieldname + ";\n";
+                    str += ws + "end set" + fieldname + ";\n\n";
                     break;
                 case SINGLE_LEAF_STRUCT:
-                    str += ws + "function get" + st.fields[i].name + "(this : " + thisRecordName + ") return " + st.fields[i].type + "_Acc is (this." + st.fields[i].name + ");\n";
-                    str += ws + "procedure set" + st.fields[i].name + "(this : out " + thisRecordName + "; " + st.fields[i].name + " : in " + st.fields[i].type + "_Acc) is\n";
-                    str += ws + "   this." + st.fields[i].name + " := " + st.fields[i].name + ";\n";
-                    str += ws + "end get" + st.fields[i].name + ";\n\n";
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return " + type + "_Acc is (this." + fieldname + ");\n";
+                    str += ws + "procedure set" + fieldname + "(this : out " + thisRecordName + "; " + fieldname + " : in " + type + "_Acc) is\n" + ws + "begin\n";
+                    str += ws + "   this." + fieldname + " := " + fieldname + ";\n";
+                    str += ws + "end set" + fieldname + ";\n\n";
                     break;
                 case VECTOR_PRIMITIVE:
-                    str += ws + "function get" + st.fields[i].name + "(this : " + thisRecordName + ") return Vect_" + getAdaPrimativeType(infos, st.fields[i]) + "_Acc is (this." + st.fields[i].name + ");\n";
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return Vect_" + getAdaPrimativeType(infos, st.fields[i]) + "_Acc is (this." + fieldname + ");\n";
                     break;
                 case VECTOR_ENUM:
-                    str += ws + "function get" + st.fields[i].name + "(this : " + thisRecordName + ") return Vect_" + st.fields[i].type + "Enum_Acc;\n";
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return Vect_" + type + "Enum_Acc is (this." + fieldname + ");\n";
                     break;
                 case VECTOR_NODE_STRUCT:
-                    str += ws + "function get" + st.fields[i].name + "(this : " + thisRecordName + ") return Vect_" + st.fields[i].type + "_Any_Acc;\n";
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return Vect_" + type + "_Any_Acc is (this." + fieldname + ");\n";
                     break;
                 case VECTOR_LEAF_STRUCT:
-                    str += ws + "function get" + st.fields[i].name + "(this : " + thisRecordName + ") return Vect_" + st.fields[i].type + "_Acc_Acc;\n";
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return Vect_" + type + "_Acc_Acc is (this." + fieldname + ");\n";
                     break;    
                 case FIXED_ARRAY_PRIMITIVE:
-                    str += ws + "function get" + st.fields[i].name + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + getAdaPrimativeType(infos, st.fields[i]) + " is (this." + st.fields[i].name +");\n";
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + getAdaPrimativeType(infos, st.fields[i]) + " is (this." + fieldname +");\n";
                     break;
                 case FIXED_ARRAY_ENUM:
-                    str += ws + "function get" + st.fields[i].name + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + st.fields[i].type + "Enum is (this." + st.fields[i].name + ");\n";
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + type + "Enum is (this." + fieldname + ");\n";
                     break;
                 case FIXED_ARRAY_NODE_STRUCT:
-                    str += ws + "function get" + st.fields[i].name + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + st.fields[i].type + "_Any is (this." + st.fields[i].name + ");\n";
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + type + "_Any is (this." + fieldname + ");\n";
                     break;
                 case FIXED_ARRAY_LEAF_STRUCT:
-                    str += ws + "function get" + st.fields[i].name + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + st.fields[i].type + "_Acc is (this." + st.fields[i].name + ");\n";
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + type + "_Acc is (this." + fieldname + ");\n";
                     break;
                 default:
                     break;
@@ -479,69 +502,55 @@ public class AdaMethods {
     }
 
     public static String record_fields(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        if (st.fields.length == 0) {
+            return ws + "null;";
+        }
         String str = "";
-        //return str;
         for (int i = 0; i < st.fields.length; i++) {
-            String name = st.fields[i].name;
-            String type = getResolvedTypeName(infos, st.fields[i]);
+            String fieldname = getDeconflictedName(st.fields[i].name);
+            String type = getDeconflictedName(st.fields[i].type);
             // Add field comment
             str += ws + "--" + st.fields[i].comment.replaceAll("\\s+", " ").replaceAll("<br", "\n" + ws + "*<br") + "\n";
-            // Scalars
-            if (!st.fields[i].isArray) {
-                // Primatives and enums
-                if(!st.fields[i].isStruct) {
-                    str += ws + name + " : " + getAdaPrimativeType(infos, st.fields[i]) + " := " + getAdaDefaultVal(infos, st.fields[i]) + ";\n";
-                }
-                else {
-                    // Struct with descendents
-                    if(has_descendants(infos, st.fields[i].type, st.fields[i].seriesName)) {
-                        str += ws + name + " : " + getResolvedTypeName(infos, st.fields[i]) + "_Any" + " := " + getAdaDefaultVal(infos, st.fields[i]) + ";\n";
-                    }
-                    // Struct without descendents
-                    else {
-                        str += ws + name + " : " + getResolvedTypeName(infos, st.fields[i]) + "_Acc" + " := " + getAdaDefaultVal(infos, st.fields[i]) + ";\n";;
-                    }
-                }
+            switch (getAdaTypeCategory(infos,st.fields[i])) {
+                case SINGLE_PRIMITIVE:
+                    str += ws + fieldname + " : " + getAdaPrimativeType(infos, st.fields[i]) + " := " + getAdaDefaultVal(infos, st.fields[i]) + ";\n";
+                    break;  
+                case SINGLE_ENUM:
+                    str += ws + fieldname + " : " + getSeriesNamespaceDots(infos, st.fields[i].seriesName) + "enumerations." + type + "Enum := " + getAdaDefaultVal(infos, st.fields[i]) + ";\n";
+                    break;
+                case SINGLE_NODE_STRUCT:
+                    str += ws + fieldname + " : " + getResolvedTypeName(infos, st.fields[i]) + "." + type + "_Any" + " := " + getAdaDefaultVal(infos, st.fields[i]) + ";\n";
+                    break;
+                case SINGLE_LEAF_STRUCT:
+                    str += ws + fieldname + " : " + getResolvedTypeName(infos, st.fields[i]) + "." + type + "_Acc" + " := " + getAdaDefaultVal(infos, st.fields[i]) + ";\n";
+                    break;
+                case VECTOR_PRIMITIVE:
+                    str += ws + fieldname + " : Vect_" + getAdaPrimativeType(infos, st.fields[i]) + "_Acc := new Vect_" + getAdaPrimativeType(infos, st.fields[i]) + ".Vector;\n";
+                    break;
+                case VECTOR_ENUM:
+                    str += ws + fieldname + " : Vect_" + type + "Enum_Acc" + " := new Vect_" + type + "Enum.Vector;\n";
+                    break;
+                case VECTOR_NODE_STRUCT:
+                    str += ws + fieldname + " : Vect_" + type + "_Any_Acc" + " := new Vect_" + type + "_Any.Vector;\n";
+                    break;
+                case VECTOR_LEAF_STRUCT:
+                    str += ws + fieldname + " : Vect_" + type + "_Acc_Acc := new Vect_" + type + "_Acc.Vector;\n";
+                    break;    
+                case FIXED_ARRAY_PRIMITIVE:
+                    str += ws + fieldname + " : array (Integer range 1 .. " + st.fields[i].length + ") of " + getAdaPrimativeType(infos, st.fields[i]) + " := (others => " + getAdaDefaultVal(infos, st.fields[i]) + ");\n";
+                    break;
+                case FIXED_ARRAY_ENUM:
+                    str += ws + fieldname + " : array (Integer range 1 .. " + st.fields[i].length + ") of " + getResolvedTypeName(infos, st.fields[i]) + "Enum := (others => " + getAdaDefaultVal(infos, st.fields[i]) + ");\n";
+                    break;
+                case FIXED_ARRAY_NODE_STRUCT:
+                    str += ws + fieldname + " : access all array (Integer range 1 .. " + st.fields[i].length + ") of " + getResolvedTypeName(infos, st.fields[i]) + "_Any := (others => " + getAdaDefaultVal(infos, st.fields[i]) + ");\n";
+                    break;
+                case FIXED_ARRAY_LEAF_STRUCT:
+                    str += ws + fieldname + " : access all array (Integer range 1 .. " + st.fields[i].length + ") of " + getResolvedTypeName(infos, st.fields[i]) + "_Acc := (others => " + getAdaDefaultVal(infos, st.fields[i]) + ");\n";
+                    break;
+                default:
+                    break;
             } 
-            // Arrays
-            else {
-                if(st.fields[i].length != -1) {
-                    if(!st.fields[i].isStruct && !st.fields[i].isEnum) {
-                        str += ws + name + " : array (Integer range 1 .. " + st.fields[i].length + ") of " + getAdaPrimativeType(infos, st.fields[i]) + " := (others => " + getAdaDefaultVal(infos, st.fields[i]) + ");\n";
-                    }
-                    else if(st.fields[i].isEnum) {
-                        str += ws + name + " : array (Integer range 1 .. " + st.fields[i].length + ") of " + getResolvedTypeName(infos, st.fields[i]) + "Enum := (others => " + getAdaDefaultVal(infos, st.fields[i]) + ");\n";
-                    }
-                    else {
-                        if(has_descendants(infos, st.fields[i].type, st.fields[i].seriesName)) {
-                            str += ws + name + " : access all array (Integer range 1 .. " + st.fields[i].length + ") of " + getResolvedTypeName(infos, st.fields[i]) + "_Any := (others => " + getAdaDefaultVal(infos, st.fields[i]) + ");\n";
-                        }
-                        else {
-                            str += ws + name + " : access all array (Integer range 1 .. " + st.fields[i].length + ") of " + getResolvedTypeName(infos, st.fields[i]) + "_Acc := (others => " + getAdaDefaultVal(infos, st.fields[i]) + ");\n";
-                        }
-                    }
-                }
-                else {
-                    // Primatives
-                    if(!st.fields[i].isStruct && !st.fields[i].isEnum) {
-                        str += ws + name + " : Vect_" + getAdaPrimativeType(infos, st.fields[i]) + "_Acc := new Vect_" + getAdaPrimativeType(infos, st.fields[i]) + ".Vector;\n";
-                    } 
-                    // Enumerations
-                    else if(st.fields[i].isEnum) {
-                        str += ws + name + " : Vect_" + st.fields[i].type + "Enum_Acc" + " := new Vect_" + st.fields[i].type + "Enum.Vector;\n";
-                    }
-                    else {
-                        // Structs with descendents
-                        if(has_descendants(infos, st.fields[i].type, st.fields[i].seriesName)) {
-                            str += ws + name + " : Vect_" + st.fields[i].type + "_Any_Acc" + " := new Vect_" + st.fields[i].type + "_Any.Vector;\n";
-                        }
-                        // Structs without descendents
-                        else {
-                            str += ws + name + " : Vect_" + st.fields[i].type + "_Acc_Acc := new Vect_" + st.fields[i].type + "_Acc.Vector;\n";
-                        }
-                    }
-                }
-            }
         }
         return str;
     }
@@ -559,6 +568,12 @@ public class AdaMethods {
                 return field.defaultVal;
             }
             else if (type.equals("real32")) {
+                if (field.defaultVal.contains("."))
+                    return field.defaultVal;
+                else 
+                    return field.defaultVal + ".0";
+            }
+            else if (type.equals("real64")) {
                 if (field.defaultVal.contains("."))
                     return field.defaultVal;
                 else 
@@ -612,13 +627,13 @@ public class AdaMethods {
         if (field.isEnum) {
             return MDMInfo.getEnumByName(infos, field).entries.get(0).name;
         }
-        return "new " + getResolvedTypeName(infos, field); // for objects
+        return "new " + getResolvedTypeName(infos, field) + "." + getDeconflictedName(type); // for objects
     }
 
     public static boolean has_descendants(MDMInfo[] infos, String stname, String stseries) throws Exception {
         List<String> descendants = new ArrayList<String>();
         add_descendants(infos, stname, stseries, descendants);
-        if( descendants.size() > 0) {
+        if(descendants.size() > 0) {
             return true;
         }
         return false;

@@ -3,6 +3,7 @@ with Interfaces; use Interfaces;
 package avtas.lmcp.types is
    
    -- C/C++ compatible integer types
+   type Byte is new Interfaces.Unsigned_8;
    type UInt16_t is new Interfaces.Unsigned_16;
    type UInt32_t is new Interfaces.Unsigned_32;
    type Int16_t is new Interfaces.Integer_16;

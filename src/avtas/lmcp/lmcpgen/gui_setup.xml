@@ -5,6 +5,7 @@
         <Package DisplayName="C#" TemplateListing="/templates/cs.tl" MethodsClass="avtas.lmcp.lmcpgen.CsMethods" SubFolder="cs"/>
         <Package DisplayName="Python" TemplateListing="/templates/python.tl" MethodsClass="avtas.lmcp.lmcpgen.PythonMethods" SubFolder="py"/>
         <Package DisplayName="Rust" TemplateListing="/templates/rust.tl" MethodsClass="avtas.lmcp.lmcpgen.RustMethods" SubFolder="rust"/>
+        <Package DisplayName="Ada" TemplateListing="/templates/ada.tl" MethodsClass="avtas.lmcp.lmcpgen.AdaMethods" SubFolder="ada"/>
         <Package DisplayName="Docs" TemplateListing="/templates/doc.tl" MethodsClass="avtas.lmcp.lmcpgen.DocMethods" SubFolder="doc"/>
         <Package DisplayName="XML Schema" TemplateListing="/templates/xsd.tl" MethodsClass="avtas.lmcp.lmcpgen.XsdMethods" SubFolder="xsd"/>
     </PackageList>

@@ -83,6 +83,7 @@ public class LmcpGenGUI {
     JCheckBox csBox = new JCheckBox("C#");
     JCheckBox htmlBox = new JCheckBox("Docs");
     JCheckBox pythonBox = new JCheckBox("Python");
+    JCheckBox adaBox = new JCheckBox("Ada");
     JCheckBox customBox = new JCheckBox("Custom Language");
     MDMInfo[] infos = null;
     File outputDir = null;

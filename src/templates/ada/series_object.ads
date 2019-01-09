@@ -1,4 +1,4 @@
-with -<full_parent_datatype>-; use -<full_parent_datatype>-;
+with -<full_parent_datatype_package>-; use -<full_parent_datatype_package>-;
 with -<full_series_name_dots>-.enumerations; use -<full_series_name_dots>-.enumerations;
 with avtas.lmcp.types; use avtas.lmcp.types;
 
@@ -12,9 +12,11 @@ package -<full_series_name_dots>-.-<datatype_name>- is
    
    -<vector_package_import>-
 
-   function getFullLmcpTypeName(this : -<datatype_name>-) return String ("-<full_datatype_name_dots>-");
-   function getLmcpTypeName(this : -<datatype_name>-) return String ("-<datatype_name>-");
-   function getLmcpType(this : -<datatype_name>-) return UInt32_t (-<series_name>-Enum'Pos(-<datatype_name_caps>-_ENUM));
+   function dummy return Integer;
+
+   function getFullLmcpTypeName(this : -<datatype_name>-) return String is ("-<full_datatype_name_dots>-");
+   function getLmcpTypeName(this : -<datatype_name>-) return String is ("-<datatype_name>-");
+   function getLmcpType(this : -<datatype_name>-) return UInt32_t is (-<series_name>-Enum'Pos(-<datatype_name_caps>-_ENUM));
 
    -<get_and_set_methods_spec>-
 
