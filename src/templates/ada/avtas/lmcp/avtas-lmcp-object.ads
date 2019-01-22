@@ -4,7 +4,7 @@ package avtas.lmcp.object is
    
    type Object is tagged null record;
    type Object_Acc is access Object;
-   type Object_Class_Acc is access Object'Class;
+   type Object_Any is access Object'Class;
    
    function clone(this, that: Object_Acc) return Object_Acc is abstract;
    
@@ -14,12 +14,12 @@ package avtas.lmcp.object is
    
    function getFullLmcpTypeName(this : Object) return String is ("avtas.lmcp.object.Object");
    
-   function getLmcpType(this : Object'Class) return Int32_t is abstract;
+   function getLmcpType(this : Object'Class) return UInt32_t is (0);
    
-   function getSeriesName(this : Object'Class) return String is abstract;
+   function getSeriesName(this : Object'Class) return String is ("");
    
-   function getSeriesNameAsLong(this : Object'Class) return Int64_t is abstract;
+   function getSeriesNameAsLong(this : Object'Class) return Int64_t is (0);
    
-   function getSeriesVersion(this : Object'Class) return UInt16_t is abstract;
+   function getSeriesVersion(this : Object'Class) return UInt16_t is (0);
    
 end avtas.lmcp.object;

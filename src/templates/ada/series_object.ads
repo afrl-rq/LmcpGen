@@ -1,6 +1,8 @@
 with -<full_parent_datatype_package>-; use -<full_parent_datatype_package>-;
 with -<full_series_name_dots>-.enumerations; use -<full_series_name_dots>-.enumerations;
 with avtas.lmcp.types; use avtas.lmcp.types;
+with avtas.lmcp.byteBuffers; use avtas.lmcp.byteBuffers;
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
 -<with_all_field_types>-
 
@@ -19,6 +21,11 @@ package -<full_series_name_dots>-.-<datatype_name>- is
    function getLmcpType(this : -<datatype_name>-) return UInt32_t is (-<series_name>-Enum'Pos(-<datatype_name_caps>-_ENUM));
 
    -<get_and_set_methods_spec>-
+
+   procedure pack(this: in -<datatype_name>-; buf: in out ByteBuffer);
+   procedure unpack(this: in out -<datatype_name>-; buf: in out ByteBuffer);
+
+   function toString(this : -<datatype_name>-; depth : Integer) return String;
 
 private
    
