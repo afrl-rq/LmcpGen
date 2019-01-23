@@ -67,15 +67,15 @@ package avtas.lmcp.byteBuffers is
 --     function To_FloatArray(this : ByteBuffer; numBytes : UInt32_t) return FloatArray;
 --     function To_DoubleArray(this : ByteBuffer; numBytes : UInt32_t) return DoubleArray;
 
-   procedure Get_BooleanArray(this : in out ByteBuffer; output: out BooleanArray; isLarge : in Boolean);
-   procedure Get_StringArray(this : in out ByteBuffer; output: out StringArray; isLarge : in Boolean);
-   procedure Get_Int16Array(this : in out ByteBuffer; output: out Int16Array; isLarge : in Boolean);
-   procedure Get_Int32Array(this : in out ByteBuffer; output : out Int32Array; isLarge : in Boolean);
-   procedure Get_Int64Array(this : in out ByteBuffer; output : out Int64Array; isLarge : in Boolean);
-   procedure Get_UInt16Array(this : in out ByteBuffer; output : out UInt16Array; isLarge : in Boolean);
-   procedure Get_UInt32Array(this : in out ByteBuffer; output : out UInt32Array; isLarge : in Boolean);
-   procedure Get_FloatArray(this : in out ByteBuffer; output : out FloatArray; isLarge : in Boolean);
-   procedure Get_DoubleArray(this : in out ByteBuffer; output : out DoubleArray; isLarge : in Boolean);
+--   procedure Get_BooleanArray(this : in out ByteBuffer; output: out BooleanArray; isLarge : in Boolean);
+--   procedure Get_StringArray(this : in out ByteBuffer; output: out StringArray; isLarge : in Boolean);
+--   procedure Get_Int16Array(this : in out ByteBuffer; output: out Int16Array; isLarge : in Boolean);
+--   procedure Get_Int32Array(this : in out ByteBuffer; output : out Int32Array; isLarge : in Boolean);
+--   procedure Get_Int64Array(this : in out ByteBuffer; output : out Int64Array; isLarge : in Boolean);
+--   procedure Get_UInt16Array(this : in out ByteBuffer; output : out UInt16Array; isLarge : in Boolean);
+--   procedure Get_UInt32Array(this : in out ByteBuffer; output : out UInt32Array; isLarge : in Boolean);
+--   procedure Get_FloatArray(this : in out ByteBuffer; output : out FloatArray; isLarge : in Boolean);
+--   procedure Get_DoubleArray(this : in out ByteBuffer; output : out DoubleArray; isLarge : in Boolean);
    
    -- Turns out LMCP assumes big endian, whereas these unchecked conversions assume
    -- little endian. So it is necessary to swap bytes first before doing the unchecked conversion.

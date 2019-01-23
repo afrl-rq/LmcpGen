@@ -347,137 +347,136 @@ package body avtas.lmcp.byteBuffers is
 --        return output;
 --     end To_StringArray;
 
-   function Get_BooleanArray (this : in out ByteBuffer; output : out BooleanArray; isLarge : in Boolean) is
-
-      subtype sourceType is ByteArray(1 .. numBytes);
-      subtype targetType is BooleanArray(1 .. numBytes);
-      function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
-   begin
-      return Convert(this.Buf(this.Pos .. this.Pos + numBytes - 1));
-   end To_BooleanArray;
-
-   function To_Int16Array (this : ByteBuffer; numBytes : UInt32_t) return Int16Array is
-      subtype sourceType is ByteArray(1 .. numBytes);
-      subtype targetType is Int16Array(1 .. numBytes/2);
-      function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
-      subtype swapType is ByteArray(1 .. 2);
-      function SwapBytes is new GNAT.Byte_Swapping.Swapped2 (swapType);
-      tempArray : ByteArray := this.Buf(this.Pos .. this.Pos + numBytes - 1);
-   begin
-      for i in 1 .. tempArray'Length/2 loop
-         tempArray(Nat(2*i - 1) .. Nat(2*i)) := SwapBytes(tempArray(Nat(2*i - 1) .. Nat(2*i)));
-      end loop;
-      return convert(tempArray);
-   end To_Int16Array;
-
-   function To_Int32Array (this : ByteBuffer; numBytes : UInt32_t) return Int32Array is
-      subtype sourceType is ByteArray(1 .. numBytes);
-      subtype targetType is Int32Array(1 .. numBytes/4);
-      function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
-      subtype swapType is ByteArray(1 .. 4);
-      function SwapBytes is new GNAT.Byte_Swapping.Swapped4 (swapType);
-      tempArray : ByteArray := this.Buf(this.Pos .. this.Pos + numBytes - 1);
-   begin
-      for i in 1 .. tempArray'Length/4 loop
-         tempArray(Nat(4*i - 3) .. Nat(4*i)) := SwapBytes(tempArray(Nat(4*i - 3) .. Nat(4*i)));
-      end loop;
-      return convert(tempArray);
-   end To_Int32Array;
-
-   function To_Int64Array (this : ByteBuffer; numBytes : UInt32_t) return Int64Array is
-      subtype sourceType is ByteArray(1 .. numBytes);
-      subtype targetType is Int64Array(1 .. numBytes/8);
-      function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
-      subtype swapType is ByteArray(1 .. 8);
-      function SwapBytes is new GNAT.Byte_Swapping.Swapped8 (swapType);
-      tempArray : ByteArray := this.Buf(this.Pos .. this.Pos + numBytes - 1);
-   begin
-      for i in 1 .. tempArray'Length/8 loop
-         tempArray(Nat(8*i - 7) .. Nat(8*i)) := SwapBytes(tempArray(Nat(8*i - 7) .. Nat(8*i)));
-      end loop;
-      return convert(tempArray);
-   end To_Int64Array;
-
-   function To_UInt16Array (this : ByteBuffer; numBytes : UInt32_t) return UInt16Array is
-      subtype sourceType is ByteArray(1 .. numBytes);
-      subtype targetType is UInt16Array(1 .. numBytes/2);
-      function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
-      subtype swapType is ByteArray(1 .. 2);
-      function SwapBytes is new GNAT.Byte_Swapping.Swapped2 (swapType);
-      tempArray : ByteArray := this.Buf(this.Pos .. this.Pos + numBytes - 1);
-   begin
-      for i in 1 .. tempArray'Length/2 loop
-         tempArray(Nat(2*i - 1) .. Nat(2*i)) := SwapBytes(tempArray(Nat(2*i - 1) .. Nat(2*i)));
-      end loop;
-      return convert(tempArray);
-   end To_UInt16Array;
-
-   function To_UInt32Array (this : ByteBuffer; numBytes : UInt32_t) return UInt32Array is
-      subtype sourceType is ByteArray(1 .. numBytes);
-      subtype targetType is UInt32Array(1 .. numBytes/4);
-      function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
-      subtype swapType is ByteArray(1 .. 4);
-      function SwapBytes is new GNAT.Byte_Swapping.Swapped4 (swapType);
-      tempArray : ByteArray := this.Buf(this.Pos .. this.Pos + numBytes - 1);
-   begin
-      for i in 1 .. tempArray'Length/4 loop
-         tempArray(Nat(4*i - 3) .. Nat(4*i)) := SwapBytes(tempArray(Nat(4*i - 3) .. Nat(4*i)));
-      end loop;
-      return convert(tempArray);
-   end To_UInt32Array;
-
-   function To_FloatArray(this : ByteBuffer; numBytes : UInt32_t) return FloatArray is
-      subtype sourceType is ByteArray(1 .. numBytes);
-      subtype targetType is FloatArray(1 .. numBytes/4);
-      function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
-      subtype swapType is ByteArray(1 .. 4);
-      function SwapBytes is new GNAT.Byte_Swapping.Swapped4 (swapType);
-      tempArray : ByteArray := this.Buf(this.Pos .. this.Pos + numBytes - 1);
-   begin
-      for i in 1 .. tempArray'Length/4 loop
-         tempArray(Nat(4*i - 3) .. Nat(4*i)) := SwapBytes(tempArray(Nat(4*i - 3) .. Nat(4*i)));
-      end loop;
-      return convert(tempArray);
-   end To_FloatArray;
-
-   function To_DoubleArray(this : ByteBuffer; numBytes : UInt32_t) return DoubleArray is
-      subtype sourceType is ByteArray(1 .. numBytes);
-      subtype targetType is DoubleArray(1 .. numBytes/8);
-      function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
-      subtype swapType is ByteArray(1 .. 8);
-      function SwapBytes is new GNAT.Byte_Swapping.Swapped8 (swapType);
-      tempArray : ByteArray := this.Buf(this.Pos .. this.Pos + numBytes - 1);
-   begin
-      for i in 1 .. tempArray'Length/8 loop
-         tempArray(Nat(8*i - 7) .. Nat(8*i)) := SwapBytes(tempArray(Nat(8*i - 7) .. Nat(8*i)));
-      end loop;
-      return convert(tempArray);
-   end To_DoubleArray;
-
-   function To_StringArray(Input : ByteArray) return StringArray is
-      arrayElements : UInt16_t := To_UInt16(ByteArray2(Input(1 .. 2)));
-      position : UInt32_t := 3;
-      stringLength : UInt16_t;
-      tempString : Unbounded_String;
-      output : StringArray(Nat(1) .. Nat(arrayElements));
-      function convert is new Ada.Unchecked_Conversion(Source => Byte, Target => Character);
-   begin
-      Put(arrayElements'Image);
-      New_Line;
-      for i in 1 .. arrayElements loop
-         stringLength := To_UInt16(ByteArray2(Input(Nat(position) .. Nat(position + 1))));
-         Put(stringLength'Image);
-         New_Line;
-         tempString := To_Unbounded_String("");
-         position := position + 2;
-         for j in 1 .. stringLength loop
-            tempString := tempString & convert(Input(Nat(position) + Nat(j) - Nat(1)));
-         end loop;
-         position := position + UInt32_t(stringLength);
-         output(Nat(i)) := tempString;
-      end loop;
-      return output;
-   end To_StringArray;
+--     function To_BooleanArray (this : in out ByteBuffer; output : out BooleanArray; isLarge : in Boolean) return BooleanArray is
+--        subtype sourceType is ByteArray(1 .. numBytes);
+--        subtype targetType is BooleanArray(1 .. numBytes);
+--        function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
+--     begin
+--        return Convert(this.Buf(this.Pos .. this.Pos + numBytes - 1));
+--     end To_BooleanArray;
+--  
+--     function To_Int16Array (this : ByteBuffer; numBytes : UInt32_t) return Int16Array is
+--        subtype sourceType is ByteArray(1 .. numBytes);
+--        subtype targetType is Int16Array(1 .. numBytes/2);
+--        function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
+--        subtype swapType is ByteArray(1 .. 2);
+--        function SwapBytes is new GNAT.Byte_Swapping.Swapped2 (swapType);
+--        tempArray : ByteArray := this.Buf(this.Pos .. this.Pos + numBytes - 1);
+--     begin
+--        for i in 1 .. tempArray'Length/2 loop
+--           tempArray(Nat(2*i - 1) .. Nat(2*i)) := SwapBytes(tempArray(Nat(2*i - 1) .. Nat(2*i)));
+--        end loop;
+--        return convert(tempArray);
+--     end To_Int16Array;
+--  
+--     function To_Int32Array (this : ByteBuffer; numBytes : UInt32_t) return Int32Array is
+--        subtype sourceType is ByteArray(1 .. numBytes);
+--        subtype targetType is Int32Array(1 .. numBytes/4);
+--        function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
+--        subtype swapType is ByteArray(1 .. 4);
+--        function SwapBytes is new GNAT.Byte_Swapping.Swapped4 (swapType);
+--        tempArray : ByteArray := this.Buf(this.Pos .. this.Pos + numBytes - 1);
+--     begin
+--        for i in 1 .. tempArray'Length/4 loop
+--           tempArray(Nat(4*i - 3) .. Nat(4*i)) := SwapBytes(tempArray(Nat(4*i - 3) .. Nat(4*i)));
+--        end loop;
+--        return convert(tempArray);
+--     end To_Int32Array;
+--  
+--     function To_Int64Array (this : ByteBuffer; numBytes : UInt32_t) return Int64Array is
+--        subtype sourceType is ByteArray(1 .. numBytes);
+--        subtype targetType is Int64Array(1 .. numBytes/8);
+--        function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
+--        subtype swapType is ByteArray(1 .. 8);
+--        function SwapBytes is new GNAT.Byte_Swapping.Swapped8 (swapType);
+--        tempArray : ByteArray := this.Buf(this.Pos .. this.Pos + numBytes - 1);
+--     begin
+--        for i in 1 .. tempArray'Length/8 loop
+--           tempArray(Nat(8*i - 7) .. Nat(8*i)) := SwapBytes(tempArray(Nat(8*i - 7) .. Nat(8*i)));
+--        end loop;
+--        return convert(tempArray);
+--     end To_Int64Array;
+--  
+--     function To_UInt16Array (this : ByteBuffer; numBytes : UInt32_t) return UInt16Array is
+--        subtype sourceType is ByteArray(1 .. numBytes);
+--        subtype targetType is UInt16Array(1 .. numBytes/2);
+--        function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
+--        subtype swapType is ByteArray(1 .. 2);
+--        function SwapBytes is new GNAT.Byte_Swapping.Swapped2 (swapType);
+--        tempArray : ByteArray := this.Buf(this.Pos .. this.Pos + numBytes - 1);
+--     begin
+--        for i in 1 .. tempArray'Length/2 loop
+--           tempArray(Nat(2*i - 1) .. Nat(2*i)) := SwapBytes(tempArray(Nat(2*i - 1) .. Nat(2*i)));
+--        end loop;
+--        return convert(tempArray);
+--     end To_UInt16Array;
+--  
+--     function To_UInt32Array (this : ByteBuffer; numBytes : UInt32_t) return UInt32Array is
+--        subtype sourceType is ByteArray(1 .. numBytes);
+--        subtype targetType is UInt32Array(1 .. numBytes/4);
+--        function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
+--        subtype swapType is ByteArray(1 .. 4);
+--        function SwapBytes is new GNAT.Byte_Swapping.Swapped4 (swapType);
+--        tempArray : ByteArray := this.Buf(this.Pos .. this.Pos + numBytes - 1);
+--     begin
+--        for i in 1 .. tempArray'Length/4 loop
+--           tempArray(Nat(4*i - 3) .. Nat(4*i)) := SwapBytes(tempArray(Nat(4*i - 3) .. Nat(4*i)));
+--        end loop;
+--        return convert(tempArray);
+--     end To_UInt32Array;
+--  
+--     function To_FloatArray(this : ByteBuffer; numBytes : UInt32_t) return FloatArray is
+--        subtype sourceType is ByteArray(1 .. numBytes);
+--        subtype targetType is FloatArray(1 .. numBytes/4);
+--        function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
+--        subtype swapType is ByteArray(1 .. 4);
+--        function SwapBytes is new GNAT.Byte_Swapping.Swapped4 (swapType);
+--        tempArray : ByteArray := this.Buf(this.Pos .. this.Pos + numBytes - 1);
+--     begin
+--        for i in 1 .. tempArray'Length/4 loop
+--           tempArray(Nat(4*i - 3) .. Nat(4*i)) := SwapBytes(tempArray(Nat(4*i - 3) .. Nat(4*i)));
+--        end loop;
+--        return convert(tempArray);
+--     end To_FloatArray;
+--  
+--     function To_DoubleArray(this : ByteBuffer; numBytes : UInt32_t) return DoubleArray is
+--        subtype sourceType is ByteArray(1 .. numBytes);
+--        subtype targetType is DoubleArray(1 .. numBytes/8);
+--        function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
+--        subtype swapType is ByteArray(1 .. 8);
+--        function SwapBytes is new GNAT.Byte_Swapping.Swapped8 (swapType);
+--        tempArray : ByteArray := this.Buf(this.Pos .. this.Pos + numBytes - 1);
+--     begin
+--        for i in 1 .. tempArray'Length/8 loop
+--           tempArray(Nat(8*i - 7) .. Nat(8*i)) := SwapBytes(tempArray(Nat(8*i - 7) .. Nat(8*i)));
+--        end loop;
+--        return convert(tempArray);
+--     end To_DoubleArray;
+--  
+--     function To_StringArray(Input : ByteArray) return StringArray is
+--        arrayElements : UInt16_t := To_UInt16(ByteArray2(Input(1 .. 2)));
+--        position : UInt32_t := 3;
+--        stringLength : UInt16_t;
+--        tempString : Unbounded_String;
+--        output : StringArray(Nat(1) .. Nat(arrayElements));
+--        function convert is new Ada.Unchecked_Conversion(Source => Byte, Target => Character);
+--     begin
+--        Put(arrayElements'Image);
+--        New_Line;
+--        for i in 1 .. arrayElements loop
+--           stringLength := To_UInt16(ByteArray2(Input(Nat(position) .. Nat(position + 1))));
+--           Put(stringLength'Image);
+--           New_Line;
+--           tempString := To_Unbounded_String("");
+--           position := position + 2;
+--           for j in 1 .. stringLength loop
+--              tempString := tempString & convert(Input(Nat(position) + Nat(j) - Nat(1)));
+--           end loop;
+--           position := position + UInt32_t(stringLength);
+--           output(Nat(i)) := tempString;
+--        end loop;
+--        return output;
+--     end To_StringArray;
 
    procedure setPosition(this : in out ByteBuffer; position : in Nat) is
    begin

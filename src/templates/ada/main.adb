@@ -75,8 +75,8 @@ procedure Main is
    az : AbstractZone;
    kvp : KeyValuePair;
    ec : EntityConfiguration;
-   cc_Acc : PayloadConfiguration_Class_Acc;
-   gc_Acc : PayloadConfiguration_Class_Acc;
+   cc_Acc : PayloadConfiguration_Any;
+   gc_Acc : PayloadConfiguration_Any;
 
 begin
 
@@ -94,13 +94,13 @@ begin
    -- How is it different here, since both l3d_Acc and c.getCenterPoint
    -- refer to the same thing?
    c.setRadius(100.0);
-   c.setCenterPoint(l3d_Acc);
+   c.setCenterPoint(Location3D_Any(l3d_Acc));
    New_Line;
    -- How to control how many digits are output for a float? See toString code
    -- in afrl.cmasi.circle adb.
    Put("Print an afrl.cmasi.Circle:");
    New_Line;
-   Put(c.toString(3));
+   -- Put(c.toString(3));
    New_Line;
 
    az.getAffectedAircraft.Append(10);
@@ -131,7 +131,7 @@ begin
    kz.setZoneId(10);
    kz.setMinAltitude(100.0);
    kz.setMaxAltitude(750.0);
-   kz.setBoundary(AbstractGeometry_Acc(c));
+   kz.setBoundary(AbstractGeometry_Any(c));
 
    -- Experiment with vectors of tagged types. EntityConfiguration has a vector
    -- PayloadConfigurationList with several types. Implemented

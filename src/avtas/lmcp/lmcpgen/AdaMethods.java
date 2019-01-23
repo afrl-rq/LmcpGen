@@ -341,7 +341,8 @@ public class AdaMethods {
 
     public static String vector_package_import(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         String str = "";
-        // if there are any vectors, include vector package
+        // if there are any vectors, include vector package, keeping track to avoid duplicates
+        Set<String> vectTypes = new HashSet<String>();
         for (int i = 0; i < st.fields.length; i++) {
             switch (getAdaTypeCategory(infos,st.fields[i])) {
                 case SINGLE_PRIMITIVE:
@@ -350,29 +351,42 @@ public class AdaMethods {
                 case SINGLE_LEAF_STRUCT:
                     break;
                 case VECTOR_PRIMITIVE:
+                    // Primitives might have duplicates
                     String typename = getAdaPrimativeType(infos, st.fields[i]);
-                    str += ws + "package Vect_" + typename + " is new Ada.Containers.Vectors\n";
-                    str += ws + "  (Index_Type   => Natural,\n";
-                    str += ws + "  Element_Type => " + typename + ");\n";
-                    str += ws + "type Vect_" + typename + "_Acc is access all Vect_" + typename + ".Vector;\n";
+                    if(!vectTypes.contains(typename)) {
+                        vectTypes.add(typename);
+                        str += ws + "package Vect_" + typename + " is new Ada.Containers.Vectors\n";
+                        str += ws + "  (Index_Type   => Natural,\n";
+                        str += ws + "  Element_Type => " + typename + ");\n";
+                        str += ws + "type Vect_" + typename + "_Acc is access all Vect_" + typename + ".Vector;\n";
+                    }
                     break;
                 case VECTOR_ENUM:
-                    str += ws + "package Vect_" + getDeconflictedName(st.fields[i].type) + "Enum is new Ada.Containers.Vectors\n";
-                    str += ws + "  (Index_Type   => Natural,\n";
-                    str += ws + "  Element_Type => " + getDeconflictedName(st.fields[i].type) + "Enum);\n";
-                    str += ws + "type Vect_" + getDeconflictedName(st.fields[i].type) + "Enum_Acc is access all Vect_" + getDeconflictedName(st.fields[i].type) + "Enum.Vector;\n";
+                    if(!vectTypes.contains(getDeconflictedName(st.fields[i].type))) {
+                        vectTypes.add(getDeconflictedName(st.fields[i].type));
+                        str += ws + "package Vect_" + getDeconflictedName(st.fields[i].type) + "Enum is new Ada.Containers.Vectors\n";
+                        str += ws + "  (Index_Type   => Natural,\n";
+                        str += ws + "  Element_Type => " + getDeconflictedName(st.fields[i].type) + "Enum);\n";
+                        str += ws + "type Vect_" + getDeconflictedName(st.fields[i].type) + "Enum_Acc is access all Vect_" + getDeconflictedName(st.fields[i].type) + "Enum.Vector;\n";
+                    }
                     break;
                 case VECTOR_NODE_STRUCT:
-                    str += ws + "package Vect_" + getDeconflictedName(st.fields[i].type) + "_Any is new Ada.Containers.Vectors\n";
-                    str += ws + "  (Index_Type   => Natural,\n";
-                    str += ws + "  Element_Type => " + getDeconflictedName(st.fields[i].type) + "_Any);\n";
-                    str += ws + "type Vect_" + getDeconflictedName(st.fields[i].type) + "_Any_Acc is access all Vect_" + getDeconflictedName(st.fields[i].type) + "_Any.Vector;\n";
+                    if(!vectTypes.contains(getDeconflictedName(st.fields[i].type))) {
+                        vectTypes.add(getDeconflictedName(st.fields[i].type));
+                        str += ws + "package Vect_" + getDeconflictedName(st.fields[i].type) + "_Any is new Ada.Containers.Vectors\n";
+                        str += ws + "  (Index_Type   => Natural,\n";
+                        str += ws + "  Element_Type => " + getDeconflictedName(st.fields[i].type) + "_Any);\n";
+                        str += ws + "type Vect_" + getDeconflictedName(st.fields[i].type) + "_Any_Acc is access all Vect_" + getDeconflictedName(st.fields[i].type) + "_Any.Vector;\n";
+                    }
                     break;
                 case VECTOR_LEAF_STRUCT:
-                    str += ws + "package Vect_" + getDeconflictedName(st.fields[i].type) + "_Acc is new Ada.Containers.Vectors\n";
-                    str += ws + "  (Index_Type   => Natural,\n";
-                    str += ws + "  Element_Type => " + getDeconflictedName(st.fields[i].type) + "_Acc);\n";
-                    str += ws + "type Vect_" + getDeconflictedName(st.fields[i].type) + "_Acc_Acc is access all Vect_" + getDeconflictedName(st.fields[i].type) + "_Acc.Vector;\n";                
+                    if(!vectTypes.contains(getDeconflictedName(st.fields[i].type))) {
+                        vectTypes.add(getDeconflictedName(st.fields[i].type));
+                        str += ws + "package Vect_" + getDeconflictedName(st.fields[i].type) + "_Acc is new Ada.Containers.Vectors\n";
+                        str += ws + "  (Index_Type   => Natural,\n";
+                        str += ws + "  Element_Type => " + getDeconflictedName(st.fields[i].type) + "_Acc);\n";
+                        str += ws + "type Vect_" + getDeconflictedName(st.fields[i].type) + "_Acc_Acc is access all Vect_" + getDeconflictedName(st.fields[i].type) + "_Acc.Vector;\n";                
+                    }
                     break;
                 case FIXED_ARRAY_PRIMITIVE:
                 case FIXED_ARRAY_ENUM:
@@ -510,7 +524,7 @@ public class AdaMethods {
             String fieldname = getDeconflictedName(st.fields[i].name);
             String type = getDeconflictedName(st.fields[i].type);
             // Add field comment
-            str += ws + "--" + st.fields[i].comment.replaceAll("\\s+", " ").replaceAll("<br", "\n" + ws + "*<br") + "\n";
+            str += ws + "--" + st.fields[i].comment.replaceAll("\\s+", " ").replaceAll("<br/>", "\n" + ws + "--") + "\n";
             switch (getAdaTypeCategory(infos,st.fields[i])) {
                 case SINGLE_PRIMITIVE:
                     str += ws + fieldname + " : " + getAdaPrimativeType(infos, st.fields[i]) + " := " + getAdaDefaultVal(infos, st.fields[i]) + ";\n";
@@ -653,4 +667,130 @@ public class AdaMethods {
         }
     }
 
+    public static String global_factory_switch(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        StringBuffer buf = new StringBuffer();
+        buf.append(ws + "case seriesId is\n");
+        for (MDMInfo i : infos) {
+            if(i.seriesNameAsLong == 0)
+            {
+                continue;
+            }
+            buf.append(ws + "   when " + i.seriesNameAsLong + " => return " + i.namespace.replaceAll("/", ".") + ".factory.createObject(seriesId, msgType, version);\n");
+        }
+        buf.append(ws + "   when others => return null;\n");
+        buf.append(ws + "end case;");
+        return buf.toString();
+    }
+
+    public static String series_factory_switch(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        StringBuffer buf = new StringBuffer();
+        
+        buf.append(ws + "if seriesId = " + info.seriesNameAsLong + " and then version = " + info.version + " then\n");
+        buf.append(ws + "   case msgType is\n");
+        for (int j = 0; j < info.structs.length; j++) {
+            buf.append(ws + "      when " + info.structs[j].id + " => return new " + info.namespace.replaceAll("/", ".") + "."
+                    + getDeconflictedName(info.structs[j].name) + "." + getDeconflictedName(info.structs[j].name) + "; \n");
+        }
+        buf.append(ws + "      when others => return null;\n");
+        buf.append(ws + "   end case;\n");
+        buf.append(ws + "else\n");
+        buf.append(ws + "   return null;\n");
+        buf.append(ws + "end if;");
+        
+        return buf.toString();
+    }
+
+    public static String include_all_factories(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        StringBuffer buf = new StringBuffer();
+        for (MDMInfo i : infos) {
+            if(i.seriesNameAsLong == 0)
+            {
+                continue;
+            }
+            buf.append(ws + "with " + i.namespace.replaceAll("/", ".") + "." + "factory;\n");
+        }
+        return buf.toString();
+    }
+
+    public static String include_all_series_headers(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        String str = "";
+        str += ws + "with " + info.namespace.replaceAll("/", ".") + ".enumerations;\n";
+        str += ws + "with " + info.namespace.replaceAll("/", ".") + ".object;\n";
+        for (int i = 0; i < info.structs.length; i++) {
+            str += ws + "with " + info.namespace.replaceAll("/", ".") + "." + getDeconflictedName(info.structs[i].name) + ";\n";
+        }
+        return str;
+    }
+
+    public static String pack_body(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        String str = "";
+        str += ws + "procedure pack(this: in " + getDeconflictedName(st.name) + "; buf: in out ByteBuffer) is\n";
+        str += ws + "begin\n";
+        str += ws + "   null;\n";
+        str += ws + "end pack;";
+        return str;
+    };
+
+    public static String unpack_body(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        String str = "";
+        str += ws + "procedure unpack(this: in out " + getDeconflictedName(st.name) + "; buf: in out ByteBuffer) is\n";
+        str += ws + "begin\n";
+        str += ws + "   null;\n";
+        str += ws + "end unpack;";
+        return str;
+    };
+
+    /* public static String get_and_set_methods_spec(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        String str = "";
+        String thisRecordName = getDeconflictedName(st.name) + (has_descendants(infos, st.name, st.seriesName) ? "'Class" : "");
+        for (int i = 0; i < st.fields.length; i++) {
+            String fieldname = getDeconflictedName(st.fields[i].name);
+            String type = getDeconflictedName(st.fields[i].type);
+            switch (getAdaTypeCategory(infos,st.fields[i])) {
+                case SINGLE_PRIMITIVE:
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return " + getAdaPrimativeType(infos, st.fields[i]) + ";\n";
+                    str += ws + "procedure set" + fieldname + "(this : out " + thisRecordName + "; " + fieldname + " : in " + getAdaPrimativeType(infos, st.fields[i]) + ");\n";
+                    break;  
+                case SINGLE_ENUM:
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return " + type + "Enum;\n";
+                    str += ws + "procedure set" + fieldname + "(this : out " + thisRecordName + "; " + fieldname + " : in " + type + "Enum);\n";
+                    break;
+                case SINGLE_NODE_STRUCT:
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return " + type + "_Any;\n";
+                    str += ws + "procedure set" + fieldname + "(this : out " + thisRecordName + "; " + fieldname + " : in " + type + "_Any);\n";
+                    break;
+                case SINGLE_LEAF_STRUCT:
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return " + type + "_Acc;\n";
+                    str += ws + "procedure set" + fieldname + "(this : out " + thisRecordName + "; " + fieldname + " : in " + type + "_Acc);\n";        
+                    break;
+                case VECTOR_PRIMITIVE:
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return Vect_" + getAdaPrimativeType(infos, st.fields[i]) + "_Acc;\n";
+                    break;
+                case VECTOR_ENUM:
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return Vect_" + type + "Enum_Acc;\n";
+                    break;
+                case VECTOR_NODE_STRUCT:
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return Vect_" + type + "_Any_Acc;\n";
+                    break;
+                case VECTOR_LEAF_STRUCT:
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return Vect_" + type + "_Acc_Acc;\n";
+                    break;    
+                case FIXED_ARRAY_PRIMITIVE:
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + getAdaPrimativeType(infos, st.fields[i]) + ";\n";
+                    break;
+                case FIXED_ARRAY_ENUM:
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + type + "Enum;\n";
+                    break;
+                case FIXED_ARRAY_NODE_STRUCT:
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + type + "_Any;\n";
+                    break;
+                case FIXED_ARRAY_LEAF_STRUCT:
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + type + "_Acc;\n";
+                    break;
+                default:
+                    break;
+            }
+        }
+        return str;
+    } */
 };

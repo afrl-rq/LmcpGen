@@ -25,7 +25,7 @@ package -<full_series_name_dots>-.-<datatype_name>- is
    procedure pack(this: in -<datatype_name>-; buf: in out ByteBuffer);
    procedure unpack(this: in out -<datatype_name>-; buf: in out ByteBuffer);
 
-   function toString(this : -<datatype_name>-; depth : Integer) return String;
+   --function toString(this : -<datatype_name>-; depth : Integer) return String;
 
 private
    

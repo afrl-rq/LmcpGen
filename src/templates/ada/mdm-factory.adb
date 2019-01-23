@@ -1,8 +1,8 @@
--<include_all_factories>-
+-<include_all_series_headers>-
 with Ada.Unchecked_Conversion;
 with GNAT.Byte_Swapping;
 
-package body avtas.lmcp.factory is
+package body -<full_series_name_dots>-.factory is
 
    function packMessage(rootObject : in avtas.lmcp.object.Object_Any; enableChecksum : in Boolean) return ByteBuffer is
       msgSize : UInt32_t;
@@ -73,9 +73,9 @@ package body avtas.lmcp.factory is
       end if;
    end getObject;
 
-   function createObject(seriesId : in Int64_t; msgType : in UInt32_t; version: in Int16_t) return avtas.lmcp.object.Object_Any is
+   function createObject(seriesId : in Int64_t; msgType : in UInt32_t; version: in UInt16_t) return avtas.lmcp.object.Object_Any is
    begin
-      -<global_factory_switch>-
+      -<series_factory_switch>-
    end createObject;
 
    function calculateChecksum (buffer : in ByteBuffer) return UInt32_t is
@@ -109,4 +109,4 @@ package body avtas.lmcp.factory is
       return sum = 0 or else sum = ByteArrayToInt(SwapBytes(buffer.Buf(buffer.Buf'Last - 3 .. buffer.Buf'Last)));
    end validate;
 
-end avtas.lmcp.factory;
+end -<full_series_name_dots>-.factory;
