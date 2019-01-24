@@ -213,18 +213,48 @@ public class AdaMethods {
         return buf.toString();
     }
 
+    public static String gen_enum_to_int(EnumInfo en) throws Exception {
+        StringBuffer buf = new StringBuffer();
+        int len = en.entries.size();
+        for (int i = 0; i < len; i++) {
+            EnumInfo.EnumEntry entry = en.entries.get(i);
+            buf.append("when " + getDeconflictedName(entry.name) + " => " + entry.value);
+            if (i != len - 1) {
+                buf.append(", ");
+            }
+        }
+        return buf.toString();
+    }
+
+    public static String gen_int_to_enum(EnumInfo en) throws Exception {
+        StringBuffer buf = new StringBuffer();
+        int len = en.entries.size();
+        for (int i = 0; i < len; i++) {
+            EnumInfo.EnumEntry entry = en.entries.get(i);
+            buf.append("when " + entry.value + " => " + getDeconflictedName(entry.name) + ", ");
+        }
+        buf.append("when others => raise Constraint_Error");
+        return buf.toString();
+    }
+
     public static String list_all_enumeration_types(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         String str = "";
         
         // loop through all enumerations in the MDM
         for (int i = 0; i < info.enums.length; i++) {
-            str += ws + "type " + getDeconflictedName(info.enums[i].name) + "Enum is (";
+            str += "\n" + ws + "type " + getDeconflictedName(info.enums[i].name) + "Enum is (";
             str += gen_enum_names(info.enums[i]);
             str += ");\n";
 
-            str += ws + "for " + getDeconflictedName(info.enums[i].name) + "Enum use (";
+            str += ws + "function toInt32(enum : " + getDeconflictedName(info.enums[i].name) + "Enum) return Int32_t is\n";
+            str += ws + "   (case enum is " + gen_enum_to_int(info.enums[i]) + ");\n";
+
+            str += ws + "function toEnum(val : Int32_t) return " + getDeconflictedName(info.enums[i].name) + "Enum is\n";
+            str += ws + "   (case val is " + gen_int_to_enum(info.enums[i]) + ");\n";
+
+            /* str += ws + "for " + getDeconflictedName(info.enums[i].name) + "Enum use (";
             str += gen_enum_ids(info.enums[i]);
-            str += ");\n\n";
+            str += ");\n\n"; */
         }
         return str;
     }
@@ -737,6 +767,32 @@ public class AdaMethods {
         str += ws + "begin\n";
         str += ws + "   null;\n";
         str += ws + "end unpack;";
+        return str;
+    };
+
+    public static String calculate_packed_size_body(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        String str = "";
+        str += ws + "function calculatePackedSize(this: in " + getDeconflictedName(st.name) + ") is\n";
+        str += ws + "  size : UInt32_t := 0;\n";
+        str += ws + "begin\n";
+        for (int i = 0; i < st.fields.length; i++) {
+            /* switch (getAdaTypeCategory(infos,st.fields[i])) {
+                case SINGLE_PRIMITIVE:
+                     if(st.fields[i]).type.equalsIgnoreCase("string")) {
+
+                    }
+                    else {
+                        if (type.equalsIgnoreCase("string")) {
+                            return "Unbounded_String";
+                    )
+                    str += ws + "   size := size + " + getAdaPrimativeType(infos, st.fields[i]) + "\'Size/8;\n";
+                    break;
+                case SINGLE_ENUM:
+                    str += ws + "size := size + Int32_t\'Size/8;"
+                    break; 
+            } */
+        }
+        str += ws + "end calculatePackedSize;";
         return str;
     };
 
