@@ -14,14 +14,14 @@ package avtas.lmcp.object is
    
    function getFullLmcpTypeName(this : Object) return String is ("avtas.lmcp.object.Object");
    
-   function getLmcpType(this : Object'Class) return UInt32_t is (0);
+   function getLmcpType(this : Object) return UInt32_t is (0);
    
-   function getSeriesName(this : Object'Class) return String is ("");
+   function getSeriesName(this : Object) return String is ("");
    
-   function getSeriesNameAsLong(this : Object'Class) return Int64_t is (0);
+   function getSeriesNameAsLong(this : Object) return Int64_t is (0);
    
-   function getSeriesVersion(this : Object'Class) return UInt16_t is (0);
+   function getSeriesVersion(this : Object) return UInt16_t is (0);
 
-   function calculatePackedSize(this : Object'Class) return UInt32_t is (0);
+   function calculatePackedSize(this : Object) return UInt32_t is (0);
    
 end avtas.lmcp.object;
