@@ -757,7 +757,7 @@ public class AdaMethods {
 
     public static String pack_body(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         String str = "";
-        str += ws + "procedure pack(this: in " + getDeconflictedName(st.name) + "; buf: in out ByteBuffer) is\n";
+        str += ws + "procedure pack(this : in " + getDeconflictedName(st.name) + "_Acc; buf : in out ByteBuffer) is\n";
         str += ws + "begin\n";
         str += ws + "   null;\n";
         str += ws + "end pack;";
@@ -766,7 +766,7 @@ public class AdaMethods {
 
     public static String unpack_body(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         String str = "";
-        str += ws + "procedure unpack(this: in out " + getDeconflictedName(st.name) + "; buf: in out ByteBuffer) is\n";
+        str += ws + "procedure unpack(this : in out " + getDeconflictedName(st.name) + "_Acc; buf : in out ByteBuffer) is\n";
         str += ws + "begin\n";
         str += ws + "   null;\n";
         str += ws + "end unpack;";
@@ -793,17 +793,21 @@ public class AdaMethods {
                     break; 
                 case SINGLE_NODE_STRUCT:
                 case SINGLE_LEAF_STRUCT:
-                    str += ws + "   size := size + calculatePackedSize(this." + getDeconflictedName(st.fields[i].name) + ".all);\n";
+                    str += "   if this." + getDeconflictedName(st.fields[i].name) + " = null then\n";
+                    str += "      size := size + 1;\n";
+                    str += "   else\n";
+                    str += "      size := size + 15 + calculatePackedSize(this." + getDeconflictedName(st.fields[i].name) + ".all);\n";
+                    str += "   end if;\n";
                     break;
                 case VECTOR_PRIMITIVE:
                     if (st.fields[i].isLargeArray) {
-                        str += ws + "   size := size + 2;\n";
-                    }
-                    else {
                         str += ws + "   size := size + 4;\n";
                     }
+                    else {
+                        str += ws + "   size := size + 2;\n";
+                    }
                     if(st.fields[i].type.equalsIgnoreCase("string")) {
-                        str += ws + "   for i of this." + getDeconflictedName(st.fields[i].name) + ".all loop\n";
+                        str += ws + "   for i of this." + getDeconflictedName(st.fields[i].name) + " loop\n";
                         str += ws + "      size := size + 2 + UInt32_t(Length(i))*Character\'Size/8;\n";
                         str += ws + "   end loop;\n";
                     }
@@ -813,23 +817,27 @@ public class AdaMethods {
                     break;
                 case VECTOR_ENUM:
                     if (st.fields[i].isLargeArray) {
-                        str += ws + "   size := size + 2;\n";
+                        str += ws + "   size := size + 4;\n";
                     }
                     else {
-                        str += ws + "   size := size + 4;\n";
+                        str += ws + "   size := size + 2;\n";
                     }
                     str += ws + "   size := size + UInt32_t(this." + getDeconflictedName(st.fields[i].name) + ".Length)*Int32_t\'Size/8;\n";
                     break;
                 case VECTOR_NODE_STRUCT:
                 case VECTOR_LEAF_STRUCT:
                     if (st.fields[i].isLargeArray) {
-                    str += ws + "   size := size + 2;\n";
+                    str += ws + "   size := size + 4;\n";
                     }
                     else {
-                        str += ws + "   size := size + 4;\n";
+                        str += ws + "   size := size + 2;\n";
                     }
                     str += ws + "   for i of this." + getDeconflictedName(st.fields[i].name) + ".all loop\n";
-                    str += ws + "      size := size + calculatePackedSize(i.all);\n";
+                    str += ws + "      if i = null then\n";
+                    str += ws + "         size := size + 1;\n";
+                    str += ws + "      else\n";
+                    str += ws + "         size := size + 15 + calculatePackedSize(i.all);\n";
+                    str += ws + "      end if;\n";
                     str += ws + "   end loop;\n";
                     break;
                 case FIXED_ARRAY_PRIMITIVE:
@@ -851,7 +859,11 @@ public class AdaMethods {
                 case FIXED_ARRAY_LEAF_STRUCT:
                     str += ws + "   size := size + 2;\n";
                     str += ws + "   for i of this." + getDeconflictedName(st.fields[i].name) + ".all loop\n";
-                    str += ws + "      size := size + calculatePackedSize(i);\n";
+                    str += ws + "      if i = null then\n";
+                    str += ws + "         size := size + 1;\n";
+                    str += ws + "      else\n";
+                    str += ws + "         size := size + 15 + calculatePackedSize(i);\n";
+                    str += ws + "      end if;\n";
                     str += ws + "   end loop;\n";
                 break;
                 default:
