@@ -38,24 +38,24 @@ package avtas.lmcp.byteBuffers is
 --     function To_String(this : ByteBuffer; numBytes : UInt32_t) return Unbounded_String;
    
    procedure Get_Boolean(this : in out ByteBuffer; output : out Boolean);
-   procedure Get_Int16(this : in out ByteBuffer; output : out Int16_t);
-   procedure Get_Int32(this : in out ByteBuffer; output : out Int32_t);
-   procedure Get_Int64(this : in out ByteBuffer; output : out Int64_t);
-   procedure Get_UInt16(this : in out ByteBuffer; output : out UInt16_t);
-   procedure Get_UInt32(this : in out ByteBuffer; output : out UInt32_t);
-   procedure Get_Float(this : in out ByteBuffer; output : out Float_t);
-   procedure Get_Double(this : in out ByteBuffer; output : out Double_t);
-   procedure Get_String(this : in out ByteBuffer; output : out Unbounded_String);
+   procedure Get_Int16_t(this : in out ByteBuffer; output : out Int16_t);
+   procedure Get_Int32_t(this : in out ByteBuffer; output : out Int32_t);
+   procedure Get_Int64_t(this : in out ByteBuffer; output : out Int64_t);
+   procedure Get_UInt16_t(this : in out ByteBuffer; output : out UInt16_t);
+   procedure Get_UInt32_t(this : in out ByteBuffer; output : out UInt32_t);
+   procedure Get_Float_t(this : in out ByteBuffer; output : out Float_t);
+   procedure Get_Double_t(this : in out ByteBuffer; output : out Double_t);
+   procedure Get_Unbounded_String(this : in out ByteBuffer; output : out Unbounded_String);
    
-   procedure Put_Boolean(this : in out ByteBuffer; input : in Boolean);
-   procedure Put_Int16(this :  in out ByteBuffer; input : in Int16_t);
-   procedure Put_Int32(this :  in out ByteBuffer; input : in Int32_t);
-   procedure Put_Int64(this :  in out ByteBuffer; input : in Int64_t);
-   procedure Put_UInt16(this :  in out ByteBuffer; input : in UInt16_t);
-   procedure Put_UInt32(this :  in out ByteBuffer; input : in UInt32_t);
-   procedure Put_Float(this :  in out ByteBuffer; input : in Float_t);
-   procedure Put_Double(this :  in out ByteBuffer; input : in Double_t);
-   procedure Put_String(this :  in out ByteBuffer; input : in Unbounded_String);
+   procedure Put_Boolean(input : in Boolean; this : in out ByteBuffer);
+   procedure Put_Int16_t(input : in Int16_t; this :  in out ByteBuffer);
+   procedure Put_Int32_t(input : in Int32_t; this :  in out ByteBuffer);
+   procedure Put_Int64_t(input : in Int64_t; this :  in out ByteBuffer);
+   procedure Put_UInt16_t(input : in UInt16_t; this :  in out ByteBuffer);
+   procedure Put_UInt32_t(input : in UInt32_t; this :  in out ByteBuffer);
+   procedure Put_Float_t(input : in Float_t; this :  in out ByteBuffer);
+   procedure Put_Double_t(input : in Double_t; this :  in out ByteBuffer);
+   procedure Put_Unbounded_String(input : in Unbounded_String; this : in out ByteBuffer);
    
 --     function To_BooleanArray(this : ByteBuffer; numBytes : UInt32_t) return BooleanArray;
 --     function To_StringArray(this : ByteBuffer; numBytes : UInt32_t) return StringArray;

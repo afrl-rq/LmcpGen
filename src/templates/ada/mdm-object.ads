@@ -11,6 +11,9 @@ package -<full_series_name_dots>-.object is
    function getSeriesVersion(this : Object) return UInt16_t is (-<series_version>-);
    function getSeriesName(this : Object) return String is ("-<series_name>-");
    function getSeriesNameAsLong(this : Object) return Int64_t is (-<series_id>-);
+
+   procedure pack(this: in Object; buf: in out ByteBuffer);
+   procedure unpack(this: in out Object; buf: in out ByteBuffer);
    
 private
    

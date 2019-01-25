@@ -14,25 +14,31 @@ package body avtas.lmcp.factory is
          buffer : ByteBuffer(HEADER_SIZE + msgSize + CHECKSUM_SIZE);
       begin
          -- add header values
-         Put_Int32(buffer, LMCP_CONTROL_STR);
-         Put_UInt32(buffer, msgSize);
+         Put_Int32_t(LMCP_CONTROL_STR, buffer);
+         Put_UInt32_t(msgSize, buffer);
 
-         -- If root object is null, pack a 0; otherwise, add root object
-         if(rootObject = null) then
-            Put_Boolean(buffer, False);
-         else
-            Put_Boolean(buffer, True);
-            Put_Int64(buffer, rootObject.getSeriesNameAsLong);
-            Put_UInt32(buffer, rootObject.getLmcpType);
-            Put_UInt16(buffer, rootObject.getSeriesVersion);
-            pack(rootObject, buffer);
-         end if;
-
+         -- add root object
+         putObject(rootObject, buffer);
+           
          -- add checksum if enabled
-         Put_UInt32(buffer, (if enableChecksum then calculateChecksum(buffer) else 0));
+         Put_UInt32_t((if enableChecksum then calculateChecksum(buffer) else 0), buffer);
          return buffer;
       end;
    end packMessage;
+   
+   procedure putObject(object : in avtas.lmcp.object.Object_Any; buffer : in out ByteBuffer) is
+   begin
+         -- If object is null, pack a 0; otherwise, add root object
+         if(object = null) then
+            Put_Boolean(False, buffer);
+         else
+            Put_Boolean(True, buffer);
+            Put_Int64_t(object.getSeriesNameAsLong, buffer);
+            Put_UInt32_t(object.getLmcpType, buffer);
+            Put_UInt16_t(object.getSeriesVersion, buffer);
+            object.pack(buffer);
+         end if;
+   end putObject;
 
    procedure getObject(buffer : in out ByteBuffer; output : out avtas.lmcp.object.Object_Any) is
       ctrlStr : Int32_t;
@@ -46,11 +52,11 @@ package body avtas.lmcp.factory is
       if buffer.Capacity < HEADER_SIZE + CHECKSUM_SIZE then
          output := null;
       else
-         Get_Int32(buffer, ctrlStr);
+         Get_Int32_t(buffer, ctrlStr);
          if ctrlStr /= LMCP_CONTROL_STR then
             output := null;
          else
-            Get_UInt32(buffer, msgSize);
+            Get_UInt32_t(buffer, msgSize);
             if buffer.Capacity < msgSize then
                output := null;
             elsif(validate(buffer) = False) then
@@ -60,12 +66,12 @@ package body avtas.lmcp.factory is
                if(msgExists = False) then
                   output := null;
                else
-                  Get_Int64(buffer, seriesId);
-                  Get_UInt32(buffer, msgType);
-                  Get_UInt16(buffer, version);
+                  Get_Int64_t(buffer, seriesId);
+                  Get_UInt32_t(buffer, msgType);
+                  Get_UInt16_t(buffer, version);
                   output := createObject(seriesId, msgType, version);
                   if (output /= null) then
-                     unpack(output, buffer);
+                     output.unpack(buffer);
                   end if;
                end if;
             end if;
@@ -73,9 +79,12 @@ package body avtas.lmcp.factory is
       end if;
    end getObject;
 
-   function createObject(seriesId : in Int64_t; msgType : in UInt32_t; version: in Int16_t) return avtas.lmcp.object.Object_Any is
+   function createObject(seriesId : in Int64_t; msgType : in UInt32_t; version: in UInt16_t) return avtas.lmcp.object.Object_Any is
    begin
-      -<global_factory_switch>-
+      case seriesId is
+         when 4849604199710720000 => return afrl.cmasi.factory.createObject(seriesId, msgType, version);
+         when others => return null;
+      end case;
    end createObject;
 
    function calculateChecksum (buffer : in ByteBuffer) return UInt32_t is
