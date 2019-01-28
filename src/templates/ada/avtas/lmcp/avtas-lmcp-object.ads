@@ -1,10 +1,11 @@
 with avtas.lmcp.types; use avtas.lmcp.types;
+with avtas.lmcp.byteBuffers; use avtas.lmcp.byteBuffers;
 
 package avtas.lmcp.object is
    
    type Object is tagged null record;
-   type Object_Acc is access Object;
-   type Object_Any is access Object'Class;
+   type Object_Acc is access all Object;
+   type Object_Any is access all Object'Class;
    
    function clone(this, that: Object_Acc) return Object_Acc is abstract;
    
@@ -23,5 +24,8 @@ package avtas.lmcp.object is
    function getSeriesVersion(this : Object) return UInt16_t is (0);
 
    function calculatePackedSize(this : Object) return UInt32_t is (0);
+
+   procedure pack(this: in Object_Any; buf: in out ByteBuffer);
+   procedure unpack(this: in out Object_Any; buf: in out ByteBuffer);
    
 end avtas.lmcp.object;

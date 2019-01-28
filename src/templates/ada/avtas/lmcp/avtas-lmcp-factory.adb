@@ -36,7 +36,7 @@ package body avtas.lmcp.factory is
             Put_Int64_t(object.getSeriesNameAsLong, buffer);
             Put_UInt32_t(object.getLmcpType, buffer);
             Put_UInt16_t(object.getSeriesVersion, buffer);
-            object.pack(buffer);
+            pack(object, buffer);
          end if;
    end putObject;
 
@@ -71,7 +71,7 @@ package body avtas.lmcp.factory is
                   Get_UInt16_t(buffer, version);
                   output := createObject(seriesId, msgType, version);
                   if (output /= null) then
-                     output.unpack(buffer);
+                     unpack(output, buffer);
                   end if;
                end if;
             end if;
@@ -89,16 +89,16 @@ package body avtas.lmcp.factory is
 
    function calculateChecksum (buffer : in ByteBuffer) return UInt32_t is
       sum : UInt32_t := 0;
-      subtype ByteArray32 is ByteArray(1 .. 32);
-      function IntToByteArray is new Ada.Unchecked_Conversion(Source => UInt32_t, Target => ByteArray32);
-      function ByteArrayToInt is new Ada.Unchecked_Conversion(Source => ByteArray32, Target => UInt32_t);
+      function IntToByteArray is new Ada.Unchecked_Conversion(Source => UInt32_t, Target => ByteArray4);
+      function ByteArrayToInt is new Ada.Unchecked_Conversion(Source => ByteArray4, Target => UInt32_t);
    begin
       for i in 1 .. buffer.Capacity - CHECKSUM_SIZE loop
          sum := sum + UInt32_t(buffer.Buf(i));
       end loop;
       -- The C++ code does the following, but why? It seems like a no-op to me
       -- Can't we just return sum?
-      return (ByteArrayToInt(IntToByteArray(sum) & IntToByteArray(UInt32_t(16#FFFFFFFF#))));
+      -- return (ByteArrayToInt(IntToByteArray(sum) & IntToByteArray(UInt32_t(16#FFFFFFFF#))));
+      return sum;
    end calculateChecksum;
 
    function getObjectSize (buffer : in ByteBuffer) return UInt32_t is
@@ -108,8 +108,7 @@ package body avtas.lmcp.factory is
    end getObjectSize;
 
    function validate(buffer : in ByteBuffer) return Boolean is
-      subtype ByteArray32 is ByteArray(1 .. 32);
-      function ByteArrayToInt is new Ada.Unchecked_Conversion(Source => ByteArray32, Target => UInt32_t);
+      function ByteArrayToInt is new Ada.Unchecked_Conversion(Source => ByteArray4, Target => UInt32_t);
       subtype SwapType is ByteArray4;
       function SwapBytes is new GNAT.Byte_Swapping.Swapped4 (swapType);
       sum : UInt32_t;

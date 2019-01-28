@@ -31,6 +31,12 @@ package body avtas.lmcp.byteBuffers is
       output := (if this.Buf(this.Pos) = 0 then False else True);
       this.Pos := this.Pos + 1;
    end Get_Boolean;
+   
+   procedure Get_Byte(this : in out ByteBuffer; output : out Byte) is
+   begin
+      output := this.Buf(this.Pos);
+      this.Pos := this.Pos + 1;
+   end Get_Byte;
 
    procedure Get_Int16_t(this : in out ByteBuffer; output : out Int16_t) is
       subtype sourceType is ByteArray2;
@@ -128,6 +134,12 @@ package body avtas.lmcp.byteBuffers is
       this.Buf(this.Pos) := (if input = False then 0 else 1);
       this.Pos := this.Pos + 1;
    end Put_Boolean;
+   
+   procedure Put_Byte(input : in Byte; this : in out ByteBuffer) is
+   begin
+      this.Buf(this.Pos) := input;
+      this.Pos := this.Pos + 1;
+   end Put_Byte;
 
    procedure Put_Int16_t(input : in Int16_t; this :  in out ByteBuffer) is
       subtype sourceType is Int16_t;

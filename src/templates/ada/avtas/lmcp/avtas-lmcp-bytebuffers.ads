@@ -38,6 +38,7 @@ package avtas.lmcp.byteBuffers is
 --     function To_String(this : ByteBuffer; numBytes : UInt32_t) return Unbounded_String;
    
    procedure Get_Boolean(this : in out ByteBuffer; output : out Boolean);
+   procedure Get_Byte(this : in out ByteBuffer; output : out Byte);
    procedure Get_Int16_t(this : in out ByteBuffer; output : out Int16_t);
    procedure Get_Int32_t(this : in out ByteBuffer; output : out Int32_t);
    procedure Get_Int64_t(this : in out ByteBuffer; output : out Int64_t);
@@ -48,6 +49,7 @@ package avtas.lmcp.byteBuffers is
    procedure Get_Unbounded_String(this : in out ByteBuffer; output : out Unbounded_String);
    
    procedure Put_Boolean(input : in Boolean; this : in out ByteBuffer);
+   procedure Put_Byte(input : in Byte; this : in out ByteBuffer);
    procedure Put_Int16_t(input : in Int16_t; this :  in out ByteBuffer);
    procedure Put_Int32_t(input : in Int32_t; this :  in out ByteBuffer);
    procedure Put_Int64_t(input : in Int64_t; this :  in out ByteBuffer);

@@ -160,6 +160,10 @@ public class AdaMethods {
     public static String full_parent_datatype(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         return ws + (st.extends_name.length() == 0 ? info.namespace.replaceAll("/", ".") + ".object.Object" : ws + getSeriesNamespaceDots(infos, st.extends_series) + getDeconflictedName(st.extends_name) + "." + getDeconflictedName(st.extends_name));
     }
+
+    public static String getFullParentDatatype(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        return (st.extends_name.length() == 0 ? info.namespace.replaceAll("/", ".") + ".object.Object" : ws + getSeriesNamespaceDots(infos, st.extends_series) + getDeconflictedName(st.extends_name) + "." + getDeconflictedName(st.extends_name));
+    }
     
     public static String enum_name(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         return ws + en.name;
@@ -757,16 +761,95 @@ public class AdaMethods {
 
     public static String pack_body(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         String str = "";
-        str += ws + "procedure pack(this : in " + getDeconflictedName(st.name) + "_Acc; buf : in out ByteBuffer) is\n";
+        String parentDatatype = getFullParentDatatype(infos, info, outfile, st, en, ws);
+        // TODO: Change spec and body to be more precise with Acc and Any
+        if(has_descendants(infos, st.name, st.seriesName)) {
+            str += ws + "procedure pack(this : in " + getDeconflictedName(st.name) + "_Any; buf : in out ByteBuffer) is\n";
+        }
+        else {
+            str += ws + "procedure pack(this : in " + getDeconflictedName(st.name) + "_Any; buf : in out ByteBuffer) is\n";
+        }
         str += ws + "begin\n";
-        str += ws + "   null;\n";
+        str += ws + "   pack(" + parentDatatype +"_Any(this), buf);\n";
+        for (int i = 0; i < st.fields.length; i++) {
+            String fieldname = getDeconflictedName(st.fields[i].name);
+            switch (getAdaTypeCategory(infos,st.fields[i])) {
+                case SINGLE_PRIMITIVE:
+                        str += ws + "   Put_" + getAdaPrimativeType(infos, st.fields[i]) + "(this." + fieldname + ", buf);\n";
+                    break;
+                case SINGLE_ENUM:
+                    str += ws + "   Put_Int32_t(toInt32(this." + fieldname + "), buf);\n";
+                    break; 
+                case SINGLE_NODE_STRUCT:
+                case SINGLE_LEAF_STRUCT:
+                    str += ws + "   avtas.lmcp.factory.putObject(avtas.lmcp.object.Object_Any(this." + fieldname + "), buf);\n";
+                    break;
+                case VECTOR_PRIMITIVE:
+                    if (st.fields[i].isLargeArray) {
+                        str += ws + "   Put_UInt64_t(UInt64_t(this." + fieldname + ".Length), buf);\n";
+                    }
+                    else {
+                        str += ws + "   Put_UInt32_t(UInt32_t(this." + fieldname + ".Length), buf);\n";
+                    }
+                    str += ws + "   for i of this." + fieldname + ".all loop\n";
+                    str += ws + "      Put_" + getAdaPrimativeType(infos, st.fields[i]) + "(i, buf);\n";
+                    str += ws + "   end loop;\n";
+                    break;
+                case VECTOR_ENUM:
+                    if (st.fields[i].isLargeArray) {
+                        str += ws + "   Put_UInt64_t(UInt64_t(this." + fieldname + ".Length), buf);\n";
+                    }
+                    else {
+                        str += ws + "   Put_UInt32_t(UInt32_t(this." + fieldname + ".Length), buf);\n";
+                    }
+                    str += ws + "   for i of this." + fieldname + ".all loop\n";
+                    str += ws + "      Put_Int32_t(toInt32(i), buf);\n";
+                    str += ws + "   end loop;\n";
+                    break;
+                case VECTOR_NODE_STRUCT:
+                case VECTOR_LEAF_STRUCT:
+                    if (st.fields[i].isLargeArray) {
+                        str += ws + "   Put_UInt64_t(UInt_64_t(this." + fieldname + ".Length), buf);\n";
+                    }
+                    else {
+                        str += ws + "   Put_UInt32_t(UInt32_t(this." + fieldname + ".Length), buf);\n";
+                    }
+                    str += ws + "   for i of this." + fieldname + ".all loop\n";
+                    str += ws + "      avtas.lmcp.factory.putObject(avtas.lmcp.object.Object_Any(i), buf);\n";
+                    str += ws + "   end loop;\n";
+                    break;
+                case FIXED_ARRAY_PRIMITIVE:
+                    str += ws + "   Put_UInt32_t(UInt32_t(this." + fieldname + "'Length), buf);\n";
+                    str += ws + "   for i of this." + fieldname + ".all loop\n";
+                    str += ws + "      Put_" + getAdaPrimativeType(infos, st.fields[i]) + "(i, buf);\n";
+                    str += ws + "   end loop;\n";
+                    break;
+                case FIXED_ARRAY_ENUM:
+                    str += ws + "   Put_UInt32_t(UInt32_t(this." + fieldname + "'Length), buf);\n";
+                    str += ws + "   for i of this." + fieldname + ".all loop\n";
+                    str += ws + "      Put_Int32_t(toInt32(i), buf);\n";
+                    str += ws + "   end loop;\n";
+                    break;
+                case FIXED_ARRAY_NODE_STRUCT:
+                case FIXED_ARRAY_LEAF_STRUCT:
+                    str += ws + "   Put_UInt32_t(UInt32_t(this." + fieldname + "'Length), buf);\n";
+                    str += ws + "   for i of this." + fieldname + ".all loop\n";
+                    str += ws + "      avtas.lmcp.factory.putObject(avtas.lmcp.object.Object_Any(i), buf);\n";
+                    str += ws + "   end loop;\n";
+                    break;
+                default:
+                    break;
+            }
+        
+        }   
         str += ws + "end pack;";
         return str;
     };
 
     public static String unpack_body(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         String str = "";
-        str += ws + "procedure unpack(this : in out " + getDeconflictedName(st.name) + "_Acc; buf : in out ByteBuffer) is\n";
+        // TODO : be precise between Acc and Any in body and spec
+        str += ws + "procedure unpack(this : in out " + getDeconflictedName(st.name) + "_Any; buf : in out ByteBuffer) is\n";
         str += ws + "begin\n";
         str += ws + "   null;\n";
         str += ws + "end unpack;";
