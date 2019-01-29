@@ -14,7 +14,7 @@ package -<full_series_name_dots>-.object is
    function getSeriesNameAsLong(this : Object) return Int64_t is (-<series_id>-);
 
    procedure pack(this: in Object_Any; buf: in out ByteBuffer);
-   procedure unpack(this: in out Object_Any; buf: in out ByteBuffer);
+   procedure unpack(buf: in out ByteBuffer; this: in out Object_Any);
    
 private
    

@@ -25,7 +25,7 @@ package avtas.lmcp.object is
 
    function calculatePackedSize(this : Object) return UInt32_t is (0);
 
-   procedure pack(this: in Object_Any; buf: in out ByteBuffer);
-   procedure unpack(this: in out Object_Any; buf: in out ByteBuffer);
+   procedure pack(object_acc : in Object_Any; buf : in out ByteBuffer);
+   procedure unpack(buf : in out ByteBuffer; object_acc : in out Object_Any);
    
 end avtas.lmcp.object;
