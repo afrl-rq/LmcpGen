@@ -23,8 +23,8 @@ package -<full_series_name_dots>-.-<datatype_name>- is
    -<get_and_set_methods_spec>-
    function calculatePackedSize(this: -<datatype_name>-) return UInt32_t;
 
-   procedure pack(object_acc : in -<datatype_name>-_Any; buf : in out ByteBuffer);
-   procedure unpack(buf : in out ByteBuffer; object_acc : in out -<datatype_name>-_Any);
+   procedure pack(object_acc : in -<datatype_name>-_-<access_suffix>-; buf : in out ByteBuffer);
+   procedure unpack(buf : in out ByteBuffer; object_acc : in out -<datatype_name>-_-<access_suffix>-);
 
    --function toString(this : -<datatype_name>-; depth : Integer) return String;
 

@@ -137,6 +137,10 @@ public class AdaMethods {
         return ws + getDeconflictedName(st.name).toUpperCase();
     }
 
+    public static String access_suffix(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        return ws + (has_descendants(infos, st.name, st.seriesName) ? "Any" : "Acc");
+    }
+
     private static String getSeriesNamespaceDots(MDMInfo[] infos, String series_name) {
         MDMInfo i = MDMReader.getMDM(series_name, infos);
         if (i != null) {
@@ -762,12 +766,11 @@ public class AdaMethods {
     public static String pack_body(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         String str = "";
         String parentDatatype = getFullParentDatatype(infos, info, outfile, st, en, ws);
-        // TODO: Change spec and body to be more precise with Acc and Any
         if(has_descendants(infos, st.name, st.seriesName)) {
             str += ws + "procedure pack(object_acc : in " + getDeconflictedName(st.name) + "_Any; buf : in out ByteBuffer) is\n";
         }
         else {
-            str += ws + "procedure pack(object_acc : in " + getDeconflictedName(st.name) + "_Any; buf : in out ByteBuffer) is\n";
+            str += ws + "procedure pack(object_acc : in " + getDeconflictedName(st.name) + "_Acc; buf : in out ByteBuffer) is\n";
         }
         str += ws + "begin\n";
         str += ws + "   pack(" + parentDatatype +"_Any(object_acc), buf);\n";
@@ -819,20 +822,20 @@ public class AdaMethods {
                     str += ws + "   end loop;\n";
                     break;
                 case FIXED_ARRAY_PRIMITIVE:
-                    str += ws + "   Put_UInt32_t(UInt32_t(object_acc." + fieldname + "'Length), buf);\n";
+                    //str += ws + "   Put_UInt32_t(UInt32_t(object_acc." + fieldname + "'Length), buf);\n";
                     str += ws + "   for i of object_acc." + fieldname + ".all loop\n";
                     str += ws + "      Put_" + getAdaPrimativeType(infos, st.fields[i]) + "(i, buf);\n";
                     str += ws + "   end loop;\n";
                     break;
                 case FIXED_ARRAY_ENUM:
-                    str += ws + "   Put_UInt32_t(UInt32_t(object_acc." + fieldname + "'Length), buf);\n";
+                    //str += ws + "   Put_UInt32_t(UInt32_t(object_acc." + fieldname + "'Length), buf);\n";
                     str += ws + "   for i of object_acc." + fieldname + ".all loop\n";
                     str += ws + "      Put_Int32_t(toInt32(i), buf);\n";
                     str += ws + "   end loop;\n";
                     break;
                 case FIXED_ARRAY_NODE_STRUCT:
                 case FIXED_ARRAY_LEAF_STRUCT:
-                    str += ws + "   Put_UInt32_t(UInt32_t(object_acc." + fieldname + "'Length), buf);\n";
+                    // str += ws + "   Put_UInt32_t(UInt32_t(object_acc." + fieldname + "'Length), buf);\n";
                     str += ws + "   for i of object_acc." + fieldname + ".all loop\n";
                     str += ws + "      avtas.lmcp.factory.putObject(avtas.lmcp.object.Object_Any(i), buf);\n";
                     str += ws + "   end loop;\n";
@@ -850,7 +853,12 @@ public class AdaMethods {
         String str = "";
         String parentDatatype = getFullParentDatatype(infos, info, outfile, st, en, ws);
         // TODO : be precise between Acc and Any in body and spec
-        str += ws + "procedure unpack(buf : in out ByteBuffer; object_acc : in out " + getDeconflictedName(st.name) + "_Any) is\n";
+        if(has_descendants(infos, st.name, st.seriesName)) {
+            str += ws + "procedure unpack(buf : in out ByteBuffer; object_acc : in out " + getDeconflictedName(st.name) + "_Any) is\n";
+        }
+        else {
+            str += ws + "procedure unpack(buf : in out ByteBuffer; object_acc : in out " + getDeconflictedName(st.name) + "_Acc) is\n";
+        }
         str += ws + "begin\n";
         str += ws + "   unpack(buf, "+ parentDatatype +"_Any(object_acc));\n";
         for (int i = 0; i < st.fields.length; i++) {
@@ -869,8 +877,8 @@ public class AdaMethods {
                     break; 
                 case SINGLE_NODE_STRUCT:
                 case SINGLE_LEAF_STRUCT:
-                    //TODO : Make Acc versus Any precise
-                    String fieldtype = getSeriesNamespaceDots(infos, st.fields[i].seriesName) + getDeconflictedName(st.fields[i].type) + "." + getDeconflictedName(st.fields[i].type) + "_Any";
+                    String accessSuffix = (has_descendants(infos, st.fields[i].type, st.fields[i].seriesName) ? "_Any" : "_Acc");
+                    String fieldtype = getSeriesNamespaceDots(infos, st.fields[i].seriesName) + getDeconflictedName(st.fields[i].type) + "." + getDeconflictedName(st.fields[i].type) + accessSuffix;
                     str += ws + "   declare\n";
                     str += ws + "      fieldExists : Boolean;\n";
                     str += ws + "      seriesId : Int64_t;\n";
@@ -930,34 +938,77 @@ public class AdaMethods {
                     break;
                 case VECTOR_NODE_STRUCT:
                 case VECTOR_LEAF_STRUCT:
-                    if (st.fields[i].isLargeArray) {
-                        str += ws + "   Put_UInt64_t(UInt_64_t(object_acc." + fieldname + ".Length), buf);\n";
-                    }
-                    else {
-                        str += ws + "   Put_UInt32_t(UInt32_t(object_acc." + fieldname + ".Length), buf);\n";
-                    }
-                    str += ws + "   for i of object_acc." + fieldname + ".all loop\n";
-                    str += ws + "      avtas.lmcp.factory.putObject(avtas.lmcp.object.Object_Any(i), buf);\n";
-                    str += ws + "   end loop;\n";
+                    accessSuffix = (has_descendants(infos, st.fields[i].type, st.fields[i].seriesName) ? "_Any" : "_Acc");
+                    String fieldType = getSeriesNamespaceDots(infos, st.fields[i].seriesName) + getDeconflictedName(st.fields[i].type) + "." + getDeconflictedName(st.fields[i].type) + accessSuffix;
+                    String lengthType = (st.fields[i].isLargeArray ? "UInt64_t" : "UInt32_t");
+                    str += ws + "   declare\n";
+                    str += ws + "      fieldExists : Boolean;\n";
+                    str += ws + "      seriesId : Int64_t;\n";
+                    str += ws + "      msgType : UInt32_t;\n";
+                    str += ws + "      version : UInt16_t;\n";
+                    str += ws + "      item : " + fieldType + " := null;\n";
+                    str += ws + "      length : " + lengthType + ";\n";
+                    str += ws + "   begin\n";
+                    str += ws + "      Get_" + lengthType + "(buf, length);\n";
+                    // TODO: delete any old content from vector
+                    str += ws + "      for i in 1 .. length loop\n";
+                    str += ws + "         Get_Boolean(buf, fieldExists);\n";
+                    str += ws + "         if fieldExists = True then\n";
+                    str += ws + "            Get_Int64_t(buf, seriesId);\n";
+                    str += ws + "            Get_UInt32_t(buf, msgType);\n";
+                    str += ws + "            Get_UInt16_t(buf, version);\n";
+                    str += ws + "            item := " + fieldType + "(avtas.lmcp.factory.createObject(seriesId, msgType, version));\n";
+                    str += ws + "            unpack(buf, item);\n";       
+                    str += ws + "         end if;\n";
+                    str += ws + "         object_acc.get" + fieldname + ".Append(item);\n";
+                    str += ws + "      end loop;\n";
+                    str += ws + "   end;\n";
                     break;
                 case FIXED_ARRAY_PRIMITIVE:
-                    str += ws + "   Put_UInt32_t(UInt32_t(object_acc." + fieldname + "'Length), buf);\n";
-                    str += ws + "   for i of object_acc." + fieldname + ".all loop\n";
-                    str += ws + "      Put_" + getAdaPrimativeType(infos, st.fields[i]) + "(i, buf);\n";
-                    str += ws + "   end loop;\n";
+                    str += ws + "   declare\n";
+                    str += ws + "      item : " + getAdaPrimativeType(infos, st.fields[i]) + ";\n";
+                    str += ws + "   begin\n";
+                    str += ws + "      for i in object_acc.get" + fieldname + "\'Range loop\n";
+                    str += ws + "         Get_" + getAdaPrimativeType(infos, st.fields[i]) + "(buf, item);\n";
+                    str += ws + "         object_acc.get" + fieldname + "(i) := item;\n";
+                    str += ws + "      end loop;\n";
+                    str += ws + "   end;\n";
                     break;
                 case FIXED_ARRAY_ENUM:
-                    str += ws + "   Put_UInt32_t(UInt32_t(object_acc." + fieldname + "'Length), buf);\n";
-                    str += ws + "   for i of object_acc." + fieldname + ".all loop\n";
-                    str += ws + "      Put_Int32_t(toInt32(i), buf);\n";
-                    str += ws + "   end loop;\n";
+                    str += ws + "   declare\n";
+                    str += ws + "      item : Int32_t;\n";
+                    str += ws + "   begin\n";
+                    str += ws + "      for i in object_acc.get" + fieldname + "\'Range loop\n";
+                    str += ws + "         Get_Int32_t(buf, item);\n";
+                    str += ws + "         object_acc.get" + fieldname + "(i) := toEnum(item);\n";
+                    str += ws + "      end loop;\n";
+                    str += ws + "   end;\n";
                     break;
                 case FIXED_ARRAY_NODE_STRUCT:
                 case FIXED_ARRAY_LEAF_STRUCT:
-                    str += ws + "   Put_UInt32_t(UInt32_t(object_acc." + fieldname + "'Length), buf);\n";
-                    str += ws + "   for i of object_acc." + fieldname + ".all loop\n";
-                    str += ws + "      avtas.lmcp.factory.putObject(avtas.lmcp.object.Object_Any(i), buf);\n";
-                    str += ws + "   end loop;\n";
+                    accessSuffix = (has_descendants(infos, st.fields[i].type, st.fields[i].seriesName) ? "_Any" : "_Acc");
+                    fieldType = getSeriesNamespaceDots(infos, st.fields[i].seriesName) + getDeconflictedName(st.fields[i].type) + "." + getDeconflictedName(st.fields[i].type) + accessSuffix;
+                    str += ws + "   declare\n";
+                    str += ws + "      fieldExists : Boolean;\n";
+                    str += ws + "      seriesId : Int64_t;\n";
+                    str += ws + "      msgType : UInt32_t;\n";
+                    str += ws + "      version : UInt16_t;\n";
+                    str += ws + "      item : " + fieldType + ";\n";
+                    str += ws + "   begin\n";
+                    str += ws + "      for i in object_acc.get" + fieldname + "\'Range loop\n";
+                    str += ws + "         Get_Boolean(buf, fieldExists);\n";
+                    str += ws + "         if fieldExists = True then\n";
+                    str += ws + "            Get_Int64_t(buf, seriesId);\n";
+                    str += ws + "            Get_UInt32_t(buf, msgType);\n";
+                    str += ws + "            Get_UInt16_t(buf, version);\n";
+                    str += ws + "            item := " + fieldType + "(avtas.lmcp.factory.createObject(seriesId, msgType, version));\n";
+                    str += ws + "            unpack(buf, item);\n"; 
+                    str += ws + "         else\n";
+                    str += ws + "            item := null;\n";
+                    str += ws + "         end if;\n";
+                    str += ws + "         object_acc.get" + fieldname + "(i) := item;\n";
+                    str += ws + "      end loop;\n";
+                    str += ws + "   end;\n";
                     break;
                 default:
                     break;

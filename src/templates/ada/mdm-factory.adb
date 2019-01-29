@@ -65,7 +65,7 @@ package body -<full_series_name_dots>-.factory is
                   Get_UInt16_t(buffer, version);
                   output := createObject(seriesId, msgType, version);
                   if (output /= null) then
-                     unpack(output, buffer);
+                     unpack(buffer, output);
                   end if;
                end if;
             end if;
