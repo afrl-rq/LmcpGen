@@ -18,10 +18,10 @@ package -<full_series_name_dots>-.-<datatype_name>- is
 
    function getFullLmcpTypeName(this : -<datatype_name>-) return String is ("-<full_datatype_name_dots>-");
    function getLmcpTypeName(this : -<datatype_name>-) return String is ("-<datatype_name>-");
-   function getLmcpType(this : -<datatype_name>-) return UInt32_t is (-<series_name>-Enum'Pos(-<datatype_name_caps>-_ENUM)+1);
+   function getLmcpType(this : -<datatype_name>-) return UInt32 is (-<series_name>-Enum'Pos(-<datatype_name_caps>-_ENUM)+1);
 
    -<get_and_set_methods_spec>-
-   function calculatePackedSize(this: -<datatype_name>-) return UInt32_t;
+   function calculatePackedSize(this: -<datatype_name>-) return UInt32;
 
    procedure pack(object_acc : in -<datatype_name>-_-<access_suffix>-; buf : in out ByteBuffer);
    procedure unpack(buf : in out ByteBuffer; object_acc : in out -<datatype_name>-_-<access_suffix>-);

@@ -9,9 +9,9 @@ package -<full_series_name_dots>-.object is
    type Object_Acc is access all Object;
    type Object_Any is access all Object'Class;
    
-   function getSeriesVersion(this : Object) return UInt16_t is (-<series_version>-);
+   function getSeriesVersion(this : Object) return UInt16 is (-<series_version>-);
    function getSeriesName(this : Object) return String is ("-<series_name>-");
-   function getSeriesNameAsLong(this : Object) return Int64_t is (-<series_id>-);
+   function getSeriesNameAsLong(this : Object) return Int64 is (-<series_id>-);
 
    procedure pack(this: in Object_Any; buf: in out ByteBuffer);
    procedure unpack(buf: in out ByteBuffer; this: in out Object_Any);
