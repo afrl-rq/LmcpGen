@@ -1,4 +1,5 @@
 with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Text_IO.Text_Streams;
 with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
 with avtas.lmcp; use avtas.lmcp;
 with avtas.lmcp.types; use avtas.lmcp.types;
@@ -14,6 +15,7 @@ with afrl.cmasi.entityConfiguration; use afrl.cmasi.entityConfiguration;
 with afrl.cmasi.payloadConfiguration; use afrl.cmasi.payloadConfiguration;
 with afrl.cmasi.cameraConfiguration; use afrl.cmasi.cameraConfiguration;
 with afrl.cmasi.gimbalconfiguration; use afrl.cmasi.gimbalconfiguration;
+with afrl.cmasi.AirVehicleConfiguration; use afrl.cmasi.AirVehicleConfiguration;
 
 -- Notes (LRH, 14 Dec):
 --
@@ -77,6 +79,9 @@ procedure Main is
    ec : EntityConfiguration;
    cc_Acc : PayloadConfiguration_Any;
    gc_Acc : PayloadConfiguration_Any;
+   avc : AirVehicleConfiguration;
+
+   Stdout : Ada.Text_IO.Text_Streams.Stream_Access;
 
 begin
 
@@ -148,4 +153,22 @@ begin
    ec.getPayloadConfigurationList.Append(gc_Acc);
    ec.getPayloadConfigurationList.Append(cc_Acc);
 
+   -- testing XML output
+   Stdout := Ada.Text_IO.Text_Streams.Stream (File => Ada.Text_IO.Standard_Output);
+
+   -- KeepInZone covers {SINGLE_PRIMITIVE, SINGLE_ENUM, SINGLE_NODE_STRUCT, SINGLE_LEAF_STRUCT, VECTOR/FIXED_ARRAY _PRIMITIVE}
+   kz.getAffectedAircraft.Append (400);
+   kz.getAffectedAircraft.Append (500);
+   kz.XML_Output (Stdout);
+   New_Line;
+
+   -- AirVehicleConfiguration covers {VECTOR/FIXED_ARRAY _ENUM}
+   avc.getAvailableTurnTypes.Append (TurnShort);
+   avc.getAvailableTurnTypes.Append (FlyOver);
+   avc.XML_Output (Stdout);
+   New_Line;
+
+   -- EntityConfiguration covers {VECTOR/FIXED _NODE/LEAF _STRUCT}
+   ec.XML_Output (Stdout);
+   New_Line;
 end Main;
