@@ -299,6 +299,7 @@ public class AdaMethods {
         // if there are any vectors, include vector package
         for (int i = 0; i < st.fields.length; i++) {
             if (st.fields[i].isArray && st.fields[i].length == -1) {
+                str += ws + "with Ada.Containers; use Ada.Containers;\n";
                 str += ws + "with Ada.Containers.Vectors;\n";
                 break;
             }
@@ -1133,4 +1134,83 @@ public class AdaMethods {
         str += ws + "end calculatePackedSize;";
         return str;
     };
+
+    public static String xml_write_body(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        String str = ws + "procedure XML_Write (this  : " + getDeconflictedName(st.name) + ";\n";
+        str += ws + "                     S     : access Ada.Streams.Root_Stream_Type'Class;\n";
+        str += ws + "                     Level : Natural) is\n";
+        str += ws + "begin\n";
+        str += ws + "   XML_Write (" + getFullParentDatatype(infos, info, outfile, st, en, ws) + "(this), S, Level);\n";
+
+        // TODO: mixed-case To_String subprogram for verbatim printing of enum values?
+        //       - LMCP standard doesn't explicitly mention case-sensitivity
+        //       - Ada is case insensitive so 'Image can only be used to produce all lower/upper case
+        // TODO: consider shorter tags (or absent) when payload is empty or default value
+        for (int i = 0; i < st.fields.length; i++) {
+            switch (getAdaTypeCategory(infos, st.fields[i])) {
+                case SINGLE_PRIMITIVE:
+                    str += ws + "   String'Write (S, LeftPad (\"<" + st.fields[i].name + ">\" & ";
+
+                    if (st.fields[i].type.equalsIgnoreCase("string")) {
+                        str += "To_String (";
+                    }
+                    else {
+                        str += getAdaPrimativeType(infos, st.fields[i]) + "'Image (";
+                    }
+
+                    str += "this." + getDeconflictedName(st.fields[i].name) + ") & \"</" + st.fields[i].name
+                            + ">\" & ASCII.LF, Level));\n";
+                    break;
+                case SINGLE_ENUM:
+                    str += ws + "   String'Write (S, LeftPad (\"<" + st.fields[i].name + ">\" & this."
+                            + st.fields[i].name + "'Image & \"</" + st.fields[i].name + ">\" & ASCII.LF, Level));\n";
+                    break;
+                case SINGLE_NODE_STRUCT:
+                case SINGLE_LEAF_STRUCT:
+                    str += "\n";
+                    str += ws + "   String'Write (S, LeftPad (\"<" + st.fields[i].name + ">\" & ASCII.LF, Level));\n";
+                    str += ws + "   XML_Output (this." + getDeconflictedName(st.fields[i].name) + ".all, S, Level + 1);\n";
+                    str += ws + "   String'Write (S, LeftPad (\"</" + st.fields[i].name + ">\" & ASCII.LF, Level));\n\n";
+                    break;
+                case VECTOR_PRIMITIVE:
+                case FIXED_ARRAY_PRIMITIVE:
+                    str += "\n";
+                    str += ws + "   String'Write (S, LeftPad (\"<" + st.fields[i].name + ">\" & ASCII.LF, Level));\n";
+                    str += ws + "   for element of this." + getDeconflictedName(st.fields[i].name) + ".all loop\n";
+                    str += ws + "      String'Write (S, LeftPad (\"<" + st.fields[i].type + ">\" & "
+                            + getAdaPrimativeType(infos, st.fields[i]) + "'Image (element) & \"</" + st.fields[i].type
+                            + ">\" & ASCII.LF, Level + 1));\n";
+                    str += ws + "   end loop;\n";
+                    str += ws + "   String'Write (S, LeftPad (\"</" + st.fields[i].name + ">\" & ASCII.LF, Level));\n\n";
+                    break;
+                case VECTOR_ENUM:
+                case FIXED_ARRAY_ENUM:
+                    str += "\n";
+                    str += ws + "   String'Write (S, LeftPad (\"<" + st.fields[i].name + ">\" & ASCII.LF, Level));\n";
+                    str += ws + "   for element of this." + getDeconflictedName(st.fields[i].name) + ".all loop\n";
+                    str += ws + "      String'Write (S, LeftPad (\"<" + st.fields[i].type + ">\" & element'Image & \"</"
+                            + st.fields[i].type + ">\" & ASCII.LF, Level + 1));\n";
+                    str += ws + "   end loop;\n";
+                    str += ws + "   String'Write (S, LeftPad (\"</" + st.fields[i].name + ">\" & ASCII.LF, Level));\n\n";
+                    break;
+                case VECTOR_NODE_STRUCT:
+                case VECTOR_LEAF_STRUCT:
+                case FIXED_ARRAY_NODE_STRUCT:
+                case FIXED_ARRAY_LEAF_STRUCT:
+                    str += "\n";
+                    str += ws + "   String'Write (S, LeftPad (\"<" + st.fields[i].name + ">\" & ASCII.LF, Level));\n";
+                    str += ws + "   for element of this." + getDeconflictedName(st.fields[i].name) + ".all loop\n";
+                    str += ws + "      XML_Output (element.all, S, Level + 1);\n";
+                    str += ws + "   end loop;\n";
+                    str += ws + "   String'Write (S, LeftPad (\"</" + st.fields[i].name + ">\" & ASCII.LF, Level));\n\n";
+                    break;
+                default:
+                    str += "pragma Compile_Time_Warning (Standard.True, \"XML write unimplemented for type\");\n";
+                    break;
+            }
+        }
+
+        str += ws + "end XML_Write;\n";
+        return str;
+    }
 };

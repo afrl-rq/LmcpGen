@@ -12,4 +12,6 @@ package body -<full_series_name_dots>-.-<datatype_name>- is
 
    -<unpack_body>-
 
+   -<xml_write_body>-
+
 end -<full_series_name_dots>-.-<datatype_name>-;

@@ -3,6 +3,7 @@ with -<full_series_name_dots>-.enumerations; use -<full_series_name_dots>-.enume
 with avtas.lmcp.types; use avtas.lmcp.types;
 with avtas.lmcp.byteBuffers; use avtas.lmcp.byteBuffers;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with Ada.Streams;
 
 -<with_all_field_types>-
 
@@ -33,5 +34,9 @@ private
    type -<datatype_name>- is new -<full_parent_datatype>- with record
       -<record_fields>-
    end record;
+
+   procedure XML_Write (this  : -<datatype_name>-;
+                        S     : access Ada.Streams.Root_Stream_Type'Class;
+                        Level : Natural);
 
 end -<full_series_name_dots>-.-<datatype_name>-;
