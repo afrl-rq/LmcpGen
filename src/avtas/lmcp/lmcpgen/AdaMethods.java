@@ -80,7 +80,7 @@ public class AdaMethods {
         return AdaTypeCategory.FIXED_ARRAY_LEAF_STRUCT;
     }
 
-    public static final Set<String> adaReservedWords = new HashSet<String>(Arrays.asList("loop", "task"));
+    public static final Set<String> adaReservedWords = new HashSet<String>(Arrays.asList("loop", "record", "task"));
 
     private static String getDeconflictedName(String name) {
         return (adaReservedWords.contains(name.toLowerCase()) ? "Lmcp" + name : name );
@@ -102,15 +102,15 @@ public class AdaMethods {
     }
 
     public static String series_dir(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
-        return ws + info.namespace;
+        return ws + info.namespace;  // do we want to use deconflicted name for this too???
     }
 
     public static String full_series_name_dashes(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
-        return ws + info.namespace.replaceAll("/", "-");
+        return ws + getDeconflictedNamespace(info.namespace).replaceAll("/", "-");
     }
 
     public static String full_series_name_dots(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
-        return ws + info.namespace.replaceAll("/", ".");
+        return ws + getDeconflictedNamespace(info.namespace).replaceAll("/", ".");
     }
 
     public static String full_datatype_name_dashes(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
@@ -141,10 +141,22 @@ public class AdaMethods {
         return ws + (has_descendants(infos, st.name, st.seriesName) ? "Any" : "Acc");
     }
 
+    private static String getDeconflictedNamespace (String input) {
+        String [] Parts = input.split ("/");
+        StringBuffer buffer = new StringBuffer();
+        for (int k = 0; k < Parts.length; k++) {
+           buffer.append (getDeconflictedName (Parts [k]));
+           if (k < Parts.length - 1) {
+              buffer.append ("/");  // put the delimiter back in; we only change the names
+           }
+        }
+        return buffer.toString();
+    }
+
     private static String getSeriesNamespaceDots(MDMInfo[] infos, String series_name) {
         MDMInfo i = MDMReader.getMDM(series_name, infos);
         if (i != null) {
-            return i.namespace.replaceAll("/", ".") + ".";
+            return getDeconflictedNamespace(i.namespace).replaceAll("/", ".") + ".";
         }
         return "";
     }
@@ -152,21 +164,21 @@ public class AdaMethods {
     private static String getSeriesNamespaceDashes(MDMInfo[] infos, String series_name) {
         MDMInfo i = MDMReader.getMDM(series_name, infos);
         if (i != null) {
-            return i.namespace.replaceAll("/", "-") + "-";
+            return getDeconflictedNamespace(i.namespace).replaceAll("/", "-") + "-";
         }
         return "";
     }
 
     public static String full_parent_datatype_package(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
-        return ws + (st.extends_name.length() == 0 ? info.namespace.replaceAll("/", ".") + ".object" : getSeriesNamespaceDots(infos, st.extends_series) + getDeconflictedName(st.extends_name));
+        return ws + (st.extends_name.length() == 0 ? getDeconflictedNamespace (info.namespace).replaceAll("/", ".") + ".object" : getSeriesNamespaceDots(infos, st.extends_series) + getDeconflictedName(st.extends_name));
     }
 
     public static String full_parent_datatype(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
-        return ws + (st.extends_name.length() == 0 ? info.namespace.replaceAll("/", ".") + ".object.Object" : ws + getSeriesNamespaceDots(infos, st.extends_series) + getDeconflictedName(st.extends_name) + "." + getDeconflictedName(st.extends_name));
+        return ws + (st.extends_name.length() == 0 ? getDeconflictedNamespace (info.namespace).replaceAll("/", ".") + ".object.Object" : ws + getSeriesNamespaceDots(infos, st.extends_series) + getDeconflictedName(st.extends_name) + "." + getDeconflictedName(st.extends_name));
     }
 
     public static String getFullParentDatatype(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
-        return (st.extends_name.length() == 0 ? info.namespace.replaceAll("/", ".") + ".object.Object" : getSeriesNamespaceDots(infos, st.extends_series) + getDeconflictedName(st.extends_name) + "." + getDeconflictedName(st.extends_name));
+        return (st.extends_name.length() == 0 ? getDeconflictedNamespace (info.namespace).replaceAll("/", ".") + ".object.Object" : getSeriesNamespaceDots(infos, st.extends_series) + getDeconflictedName(st.extends_name) + "." + getDeconflictedName(st.extends_name));
     }
     
     public static String enum_name(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
@@ -254,10 +266,10 @@ public class AdaMethods {
             str += gen_enum_names(info.enums[i]);
             str += ");\n";
 
-            str += ws + "function toInt32(enum : " + getDeconflictedName(info.enums[i].name) + "Enum) return Int32_t is\n";
+            str += ws + "function toInt32(enum : " + getDeconflictedName(info.enums[i].name) + "Enum) return Int32 is\n";
             str += ws + "   (case enum is " + gen_enum_to_int(info.enums[i]) + ");\n";
 
-            str += ws + "function toEnum(val : Int32_t) return " + getDeconflictedName(info.enums[i].name) + "Enum is\n";
+            str += ws + "function toEnum(val : Int32) return " + getDeconflictedName(info.enums[i].name) + "Enum is\n";
             str += ws + "   (case val is " + gen_int_to_enum(info.enums[i]) + ");\n";
 
             /* Old implementation that explicitly numbers the enumeration, but it requires doing an 
@@ -319,11 +331,12 @@ public class AdaMethods {
             
             String packageName = "";
             for(int j = 0; j < i; j++) {
-                packageName += words[j] + "."; 
+                packageName += getDeconflictedName (words[j]) + "."; 
             }
-            packageName += words[i];
+            packageName += getDeconflictedName (words[i]);
             str = "package " + packageName + " is\n\nend " + packageName + ";\n"; 
 
+            packageName = packageName.replaceAll("\\.", "-");
             packageFileDir = packageFileDir.getParentFile();
             packageFileDir.mkdirs();
             File packageFile = new File(packageFileDir, packageName + ".ads");
@@ -333,7 +346,7 @@ public class AdaMethods {
 
         // Lowest level package definition text, returned as str
         String packageName = "";
-        packageName = info.namespace.replaceAll("/", "\\.");  ;
+        packageName = getDeconflictedNamespace (info.namespace).replaceAll("/", "-");  
         str = "with avtas.lmcp.object; use avtas.lmcp.object;\n";
         str += "with avtas.lmcp.types; use avtas.lmcp.types;\n\n";
         str += "package " + packageName + " is\n\nend " + packageName + ";\n"; 
@@ -353,25 +366,25 @@ public class AdaMethods {
             return "Boolean";
         }
         if (type.equalsIgnoreCase("int16")) {
-            return "Int16_t";
+            return "Int16";
         }
         if (type.equalsIgnoreCase("uint16")) {
-            return "UInt16_t";
+            return "UInt16";
         }
         if (type.equalsIgnoreCase("int32")) {
-            return "Int32_t";
+            return "Int32";
         }
         if (type.equalsIgnoreCase("uint32")) {
-            return "UInt32_t";
+            return "UInt32";
         }
         if (type.equalsIgnoreCase("int64")) {
-            return "Int64_t";
+            return "Int64";
         }
         if (type.equalsIgnoreCase("real32")) {
-            return "Float_t";
+            return "Real32";
         }
         if (type.equalsIgnoreCase("real64")) {
-            return "Double_t";
+            return "Real64";
         }
         if (type.equalsIgnoreCase("string")) {
             return "Unbounded_String";
@@ -396,7 +409,7 @@ public class AdaMethods {
                         vectTypes.add(typename);
                         str += ws + "package Vect_" + typename + " is new Ada.Containers.Vectors\n";
                         str += ws + "  (Index_Type   => Natural,\n";
-                        str += ws + "  Element_Type => " + typename + ");\n";
+                        str += ws + "   Element_Type => " + typename + ");\n";
                         str += ws + "type Vect_" + typename + "_Acc is access all Vect_" + typename + ".Vector;\n";
                     }
                     break;
@@ -405,7 +418,7 @@ public class AdaMethods {
                         vectTypes.add(getDeconflictedName(st.fields[i].type));
                         str += ws + "package Vect_" + getDeconflictedName(st.fields[i].type) + "Enum is new Ada.Containers.Vectors\n";
                         str += ws + "  (Index_Type   => Natural,\n";
-                        str += ws + "  Element_Type => " + getDeconflictedName(st.fields[i].type) + "Enum);\n";
+                        str += ws + "   Element_Type => " + getDeconflictedName(st.fields[i].type) + "Enum);\n";
                         str += ws + "type Vect_" + getDeconflictedName(st.fields[i].type) + "Enum_Acc is access all Vect_" + getDeconflictedName(st.fields[i].type) + "Enum.Vector;\n";
                     }
                     break;
@@ -414,7 +427,7 @@ public class AdaMethods {
                         vectTypes.add(getDeconflictedName(st.fields[i].type));
                         str += ws + "package Vect_" + getDeconflictedName(st.fields[i].type) + "_Any is new Ada.Containers.Vectors\n";
                         str += ws + "  (Index_Type   => Natural,\n";
-                        str += ws + "  Element_Type => " + getDeconflictedName(st.fields[i].type) + "_Any);\n";
+                        str += ws + "   Element_Type => " + getDeconflictedName(st.fields[i].type) + "_Any);\n";
                         str += ws + "type Vect_" + getDeconflictedName(st.fields[i].type) + "_Any_Acc is access all Vect_" + getDeconflictedName(st.fields[i].type) + "_Any.Vector;\n";
                     }
                     break;
@@ -423,7 +436,7 @@ public class AdaMethods {
                         vectTypes.add(getDeconflictedName(st.fields[i].type));
                         str += ws + "package Vect_" + getDeconflictedName(st.fields[i].type) + "_Acc is new Ada.Containers.Vectors\n";
                         str += ws + "  (Index_Type   => Natural,\n";
-                        str += ws + "  Element_Type => " + getDeconflictedName(st.fields[i].type) + "_Acc);\n";
+                        str += ws + "   Element_Type => " + getDeconflictedName(st.fields[i].type) + "_Acc);\n";
                         str += ws + "type Vect_" + getDeconflictedName(st.fields[i].type) + "_Acc_Acc is access all Vect_" + getDeconflictedName(st.fields[i].type) + "_Acc.Vector;\n";                
                     }
                     break;
@@ -748,17 +761,17 @@ public class AdaMethods {
             {
                 continue;
             }
-            buf.append(ws + "with " + i.namespace.replaceAll("/", ".") + "." + "factory;\n");
+            buf.append(ws + "with " + getDeconflictedNamespace(i.namespace).replaceAll("/", ".") + "." + "factory;\n");
         }
         return buf.toString();
     }
 
     public static String include_all_series_headers(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         String str = "";
-        str += ws + "with " + info.namespace.replaceAll("/", ".") + ".enumerations;\n";
-        str += ws + "with " + info.namespace.replaceAll("/", ".") + ".object;\n";
+        str += ws + "with " + getDeconflictedNamespace (info.namespace).replaceAll("/", ".") + ".enumerations;\n";
+        str += ws + "with " + getDeconflictedNamespace (info.namespace).replaceAll("/", ".") + ".object;\n";
         for (int i = 0; i < info.structs.length; i++) {
-            str += ws + "with " + info.namespace.replaceAll("/", ".") + "." + getDeconflictedName(info.structs[i].name) + ";\n";
+            str += ws + "with " + getDeconflictedNamespace (info.namespace).replaceAll("/", ".") + "." + getDeconflictedName(info.structs[i].name) + ";\n";
         }
         return str;
     }
@@ -781,7 +794,7 @@ public class AdaMethods {
                         str += ws + "   Put_" + getAdaPrimativeType(infos, st.fields[i]) + "(object_acc." + fieldname + ", buf);\n";
                     break;
                 case SINGLE_ENUM:
-                    str += ws + "   Put_Int32_t(toInt32(object_acc." + fieldname + "), buf);\n";
+                    str += ws + "   Put_Int32(toInt32(object_acc." + fieldname + "), buf);\n";
                     break; 
                 case SINGLE_NODE_STRUCT:
                 case SINGLE_LEAF_STRUCT:
@@ -789,10 +802,10 @@ public class AdaMethods {
                     break;
                 case VECTOR_PRIMITIVE:
                     if (st.fields[i].isLargeArray) {
-                        str += ws + "   Put_UInt64_t(UInt64_t(object_acc." + fieldname + ".Length), buf);\n";
+                        str += ws + "   Put_UInt64(UInt64(object_acc." + fieldname + ".Length), buf);\n";
                     }
                     else {
-                        str += ws + "   Put_UInt32_t(UInt32_t(object_acc." + fieldname + ".Length), buf);\n";
+                        str += ws + "   Put_UInt32(UInt32(object_acc." + fieldname + ".Length), buf);\n";
                     }
                     str += ws + "   for i of object_acc." + fieldname + ".all loop\n";
                     str += ws + "      Put_" + getAdaPrimativeType(infos, st.fields[i]) + "(i, buf);\n";
@@ -800,42 +813,42 @@ public class AdaMethods {
                     break;
                 case VECTOR_ENUM:
                     if (st.fields[i].isLargeArray) {
-                        str += ws + "   Put_UInt64_t(UInt64_t(object_acc." + fieldname + ".Length), buf);\n";
+                        str += ws + "   Put_UInt64(UInt64(object_acc." + fieldname + ".Length), buf);\n";
                     }
                     else {
-                        str += ws + "   Put_UInt32_t(UInt32_t(object_acc." + fieldname + ".Length), buf);\n";
+                        str += ws + "   Put_UInt32(UInt32(object_acc." + fieldname + ".Length), buf);\n";
                     }
                     str += ws + "   for i of object_acc." + fieldname + ".all loop\n";
-                    str += ws + "      Put_Int32_t(toInt32(i), buf);\n";
+                    str += ws + "      Put_Int32(toInt32(i), buf);\n";
                     str += ws + "   end loop;\n";
                     break;
                 case VECTOR_NODE_STRUCT:
                 case VECTOR_LEAF_STRUCT:
                     if (st.fields[i].isLargeArray) {
-                        str += ws + "   Put_UInt64_t(UInt_64_t(object_acc." + fieldname + ".Length), buf);\n";
+                        str += ws + "   Put_UInt64(UInt_64(object_acc." + fieldname + ".Length), buf);\n";
                     }
                     else {
-                        str += ws + "   Put_UInt32_t(UInt32_t(object_acc." + fieldname + ".Length), buf);\n";
+                        str += ws + "   Put_UInt32(UInt32(object_acc." + fieldname + ".Length), buf);\n";
                     }
                     str += ws + "   for i of object_acc." + fieldname + ".all loop\n";
                     str += ws + "      avtas.lmcp.factory.putObject(avtas.lmcp.object.Object_Any(i), buf);\n";
                     str += ws + "   end loop;\n";
                     break;
                 case FIXED_ARRAY_PRIMITIVE:
-                    //str += ws + "   Put_UInt32_t(UInt32_t(object_acc." + fieldname + "'Length), buf);\n";
+                    //str += ws + "   Put_UInt32(UInt32(object_acc." + fieldname + "'Length), buf);\n";
                     str += ws + "   for i of object_acc." + fieldname + ".all loop\n";
                     str += ws + "      Put_" + getAdaPrimativeType(infos, st.fields[i]) + "(i, buf);\n";
                     str += ws + "   end loop;\n";
                     break;
                 case FIXED_ARRAY_ENUM:
-                    //str += ws + "   Put_UInt32_t(UInt32_t(object_acc." + fieldname + "'Length), buf);\n";
+                    //str += ws + "   Put_UInt32(UInt32(object_acc." + fieldname + "'Length), buf);\n";
                     str += ws + "   for i of object_acc." + fieldname + ".all loop\n";
-                    str += ws + "      Put_Int32_t(toInt32(i), buf);\n";
+                    str += ws + "      Put_Int32(toInt32(i), buf);\n";
                     str += ws + "   end loop;\n";
                     break;
                 case FIXED_ARRAY_NODE_STRUCT:
                 case FIXED_ARRAY_LEAF_STRUCT:
-                    // str += ws + "   Put_UInt32_t(UInt32_t(object_acc." + fieldname + "'Length), buf);\n";
+                    // str += ws + "   Put_UInt32(UInt32(object_acc." + fieldname + "'Length), buf);\n";
                     str += ws + "   for i of object_acc." + fieldname + ".all loop\n";
                     str += ws + "      avtas.lmcp.factory.putObject(avtas.lmcp.object.Object_Any(i), buf);\n";
                     str += ws + "   end loop;\n";
@@ -869,9 +882,9 @@ public class AdaMethods {
                     break;
                 case SINGLE_ENUM:
                     str += ws + "   declare\n";
-                    str += ws + "      i32 : Int32_t;\n";
+                    str += ws + "      i32 : Int32;\n";
                     str += ws + "   begin\n";
-                    str += ws + "      Get_Int32_t(buf, i32);\n";
+                    str += ws + "      Get_Int32(buf, i32);\n";
                     str += ws + "      object_acc." + fieldname + " := toEnum(i32);\n";
                     str += ws + "   end;\n";
                     break; 
@@ -881,16 +894,16 @@ public class AdaMethods {
                     String fieldtype = getSeriesNamespaceDots(infos, st.fields[i].seriesName) + getDeconflictedName(st.fields[i].type) + "." + getDeconflictedName(st.fields[i].type) + accessSuffix;
                     str += ws + "   declare\n";
                     str += ws + "      fieldExists : Boolean;\n";
-                    str += ws + "      seriesId : Int64_t;\n";
-                    str += ws + "      msgType : UInt32_t;\n";
-                    str += ws + "      version : UInt16_t;\n";
+                    str += ws + "      seriesId : Int64;\n";
+                    str += ws + "      msgType : UInt32;\n";
+                    str += ws + "      version : UInt16;\n";
                     str += ws + "      o : " + fieldtype + ";\n";
                     str += ws + "   begin\n";
                     str += ws + "      Get_Boolean(buf, fieldExists);\n";
                     str += ws + "      if fieldExists = True then\n";
-                    str += ws + "         Get_Int64_t(buf, seriesId);\n";
-                    str += ws + "         Get_UInt32_t(buf, msgType);\n";
-                    str += ws + "         Get_UInt16_t(buf, version);\n";
+                    str += ws + "         Get_Int64(buf, seriesId);\n";
+                    str += ws + "         Get_UInt32(buf, msgType);\n";
+                    str += ws + "         Get_UInt16(buf, version);\n";
                     str += ws + "         o := " + fieldtype + "(avtas.lmcp.factory.createObject(seriesId, msgType, version));\n";
                     str += ws + "         unpack(buf, o);\n";
                     str += ws + "      end if;\n";
@@ -900,14 +913,14 @@ public class AdaMethods {
                     str += ws + "   declare\n";
                     str += ws + "      item : " + getAdaPrimativeType(infos, st.fields[i]) + ";\n";
                     if (st.fields[i].isLargeArray) {
-                        str += ws + "      length : UInt64_t;\n";
+                        str += ws + "      length : UInt64;\n";
                         str += ws + "   begin\n";
-                        str += ws + "      Get_UInt64_t(buf, length);\n";
+                        str += ws + "      Get_UInt64(buf, length);\n";
                     }
                     else {
-                        str += ws + "      length : UInt32_t;\n";
+                        str += ws + "      length : UInt32;\n";
                         str += ws + "   begin\n";
-                        str += ws + "      Get_UInt32_t(buf, length);\n";
+                        str += ws + "      Get_UInt32(buf, length);\n";
                     }
                     // TODO: delete any old content from vector
                     str += ws + "      for i in 1 .. length loop\n";
@@ -918,20 +931,20 @@ public class AdaMethods {
                     break;
                 case VECTOR_ENUM:
                     str += ws + "   declare\n";
-                    str += ws + "      item : Int32_t;\n";
+                    str += ws + "      item : Int32;\n";
                     if (st.fields[i].isLargeArray) {
-                        str += ws + "      length : UInt64_t;\n";
+                        str += ws + "      length : UInt64;\n";
                         str += ws + "   begin\n";
-                        str += ws + "      Get_UInt64_t(buf, length);\n";
+                        str += ws + "      Get_UInt64(buf, length);\n";
                     }
                     else {
-                        str += ws + "      length : UInt32_t;\n";
+                        str += ws + "      length : UInt32;\n";
                         str += ws + "   begin\n";
-                        str += ws + "      Get_UInt32_t(buf, length);\n";
+                        str += ws + "      Get_UInt32(buf, length);\n";
                     }
                     // TODO: delete any old content from vector
                     str += ws + "      for i in 1 .. length loop\n";
-                    str += ws + "         Get_Int32_t(buf, item);\n";
+                    str += ws + "         Get_Int32(buf, item);\n";
                     str += ws + "         object_acc.get" + fieldname + ".Append(ToEnum(item));\n";
                     str += ws + "      end loop;\n";
                     str += ws + "   end;\n";
@@ -940,12 +953,12 @@ public class AdaMethods {
                 case VECTOR_LEAF_STRUCT:
                     accessSuffix = (has_descendants(infos, st.fields[i].type, st.fields[i].seriesName) ? "_Any" : "_Acc");
                     String fieldType = getSeriesNamespaceDots(infos, st.fields[i].seriesName) + getDeconflictedName(st.fields[i].type) + "." + getDeconflictedName(st.fields[i].type) + accessSuffix;
-                    String lengthType = (st.fields[i].isLargeArray ? "UInt64_t" : "UInt32_t");
+                    String lengthType = (st.fields[i].isLargeArray ? "UInt64" : "UInt32");
                     str += ws + "   declare\n";
                     str += ws + "      fieldExists : Boolean;\n";
-                    str += ws + "      seriesId : Int64_t;\n";
-                    str += ws + "      msgType : UInt32_t;\n";
-                    str += ws + "      version : UInt16_t;\n";
+                    str += ws + "      seriesId : Int64;\n";
+                    str += ws + "      msgType : UInt32;\n";
+                    str += ws + "      version : UInt16;\n";
                     str += ws + "      item : " + fieldType + " := null;\n";
                     str += ws + "      length : " + lengthType + ";\n";
                     str += ws + "   begin\n";
@@ -954,9 +967,9 @@ public class AdaMethods {
                     str += ws + "      for i in 1 .. length loop\n";
                     str += ws + "         Get_Boolean(buf, fieldExists);\n";
                     str += ws + "         if fieldExists = True then\n";
-                    str += ws + "            Get_Int64_t(buf, seriesId);\n";
-                    str += ws + "            Get_UInt32_t(buf, msgType);\n";
-                    str += ws + "            Get_UInt16_t(buf, version);\n";
+                    str += ws + "            Get_Int64(buf, seriesId);\n";
+                    str += ws + "            Get_UInt32(buf, msgType);\n";
+                    str += ws + "            Get_UInt16(buf, version);\n";
                     str += ws + "            item := " + fieldType + "(avtas.lmcp.factory.createObject(seriesId, msgType, version));\n";
                     str += ws + "            unpack(buf, item);\n";       
                     str += ws + "         end if;\n";
@@ -976,10 +989,10 @@ public class AdaMethods {
                     break;
                 case FIXED_ARRAY_ENUM:
                     str += ws + "   declare\n";
-                    str += ws + "      item : Int32_t;\n";
+                    str += ws + "      item : Int32;\n";
                     str += ws + "   begin\n";
                     str += ws + "      for i in object_acc.get" + fieldname + "\'Range loop\n";
-                    str += ws + "         Get_Int32_t(buf, item);\n";
+                    str += ws + "         Get_Int32(buf, item);\n";
                     str += ws + "         object_acc.get" + fieldname + "(i) := toEnum(item);\n";
                     str += ws + "      end loop;\n";
                     str += ws + "   end;\n";
@@ -990,17 +1003,17 @@ public class AdaMethods {
                     fieldType = getSeriesNamespaceDots(infos, st.fields[i].seriesName) + getDeconflictedName(st.fields[i].type) + "." + getDeconflictedName(st.fields[i].type) + accessSuffix;
                     str += ws + "   declare\n";
                     str += ws + "      fieldExists : Boolean;\n";
-                    str += ws + "      seriesId : Int64_t;\n";
-                    str += ws + "      msgType : UInt32_t;\n";
-                    str += ws + "      version : UInt16_t;\n";
+                    str += ws + "      seriesId : Int64;\n";
+                    str += ws + "      msgType : UInt32;\n";
+                    str += ws + "      version : UInt16;\n";
                     str += ws + "      item : " + fieldType + ";\n";
                     str += ws + "   begin\n";
                     str += ws + "      for i in object_acc.get" + fieldname + "\'Range loop\n";
                     str += ws + "         Get_Boolean(buf, fieldExists);\n";
                     str += ws + "         if fieldExists = True then\n";
-                    str += ws + "            Get_Int64_t(buf, seriesId);\n";
-                    str += ws + "            Get_UInt32_t(buf, msgType);\n";
-                    str += ws + "            Get_UInt16_t(buf, version);\n";
+                    str += ws + "            Get_Int64(buf, seriesId);\n";
+                    str += ws + "            Get_UInt32(buf, msgType);\n";
+                    str += ws + "            Get_UInt16(buf, version);\n";
                     str += ws + "            item := " + fieldType + "(avtas.lmcp.factory.createObject(seriesId, msgType, version));\n";
                     str += ws + "            unpack(buf, item);\n"; 
                     str += ws + "         else\n";
@@ -1021,21 +1034,21 @@ public class AdaMethods {
 
     public static String calculate_packed_size_body(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         String str = "";
-        str += ws + "function calculatePackedSize(this : " + getDeconflictedName(st.name) + ") return UInt32_t is\n";
-        str += ws + "  size : UInt32_t := 0;\n";
+        str += ws + "function calculatePackedSize(this : " + getDeconflictedName(st.name) + ") return UInt32 is\n";
+        str += ws + "  size : UInt32 := 0;\n";
         str += ws + "begin\n";
         for (int i = 0; i < st.fields.length; i++) {
              switch (getAdaTypeCategory(infos,st.fields[i])) {
                 case SINGLE_PRIMITIVE:
                     if(st.fields[i].type.equalsIgnoreCase("string")) {
-                        str += ws + "   size := size + 2 + UInt32_t(Length(this." + getDeconflictedName(st.fields[i].name) + "))*Character\'Size/8;\n";
+                        str += ws + "   size := size + 2 + UInt32(Length(this." + getDeconflictedName(st.fields[i].name) + "))*Character\'Size/8;\n";
                     }
                     else {
                         str += ws + "   size := size + " + getAdaPrimativeType(infos, st.fields[i]) + "\'Size/8;\n";
                     }
                     break;
                 case SINGLE_ENUM:
-                    str += ws + "   size := size + Int32_t\'Size/8;\n";
+                    str += ws + "   size := size + Int32\'Size/8;\n";
                     break; 
                 case SINGLE_NODE_STRUCT:
                 case SINGLE_LEAF_STRUCT:
@@ -1054,11 +1067,11 @@ public class AdaMethods {
                     }
                     if(st.fields[i].type.equalsIgnoreCase("string")) {
                         str += ws + "   for i of this." + getDeconflictedName(st.fields[i].name) + " loop\n";
-                        str += ws + "      size := size + 2 + UInt32_t(Length(i))*Character\'Size/8;\n";
+                        str += ws + "      size := size + 2 + UInt32(Length(i))*Character\'Size/8;\n";
                         str += ws + "   end loop;\n";
                     }
                     else {
-                        str += ws + "   size := size + UInt32_t(this." + getDeconflictedName(st.fields[i].name) + ".Length)*" + getAdaPrimativeType(infos, st.fields[i]) + "\'Size/8;\n";
+                        str += ws + "   size := size + UInt32(this." + getDeconflictedName(st.fields[i].name) + ".Length)*" + getAdaPrimativeType(infos, st.fields[i]) + "\'Size/8;\n";
                     }
                     break;
                 case VECTOR_ENUM:
@@ -1068,7 +1081,7 @@ public class AdaMethods {
                     else {
                         str += ws + "   size := size + 2;\n";
                     }
-                    str += ws + "   size := size + UInt32_t(this." + getDeconflictedName(st.fields[i].name) + ".Length)*Int32_t\'Size/8;\n";
+                    str += ws + "   size := size + UInt32(this." + getDeconflictedName(st.fields[i].name) + ".Length)*Int32\'Size/8;\n";
                     break;
                 case VECTOR_NODE_STRUCT:
                 case VECTOR_LEAF_STRUCT:
@@ -1090,7 +1103,7 @@ public class AdaMethods {
                     str += ws + "   size := size + 2;\n";
                     if(st.fields[i].type.equalsIgnoreCase("string")) {
                         str += ws + "   for i of this." + getDeconflictedName(st.fields[i].name) + ".all loop\n";
-                        str += ws + "      size := size + 2 + UInt32_t(Length(i))*Character\'Size/8;\n";
+                        str += ws + "      size := size + 2 + UInt32(Length(i))*Character\'Size/8;\n";
                         str += ws + "   end loop;\n";
                     }
                     else {
@@ -1099,7 +1112,7 @@ public class AdaMethods {
                     break;
                 case FIXED_ARRAY_ENUM:
                     str += ws + "   size := size + 2;\n";
-                    str += ws + "   size := size + this." + getDeconflictedName(st.fields[i].name) + ".all'Length)*UInt32_t'Size/8;\n";
+                    str += ws + "   size := size + this." + getDeconflictedName(st.fields[i].name) + ".all'Length)*UInt32'Size/8;\n";
                     break;
                 case FIXED_ARRAY_NODE_STRUCT:
                 case FIXED_ARRAY_LEAF_STRUCT:

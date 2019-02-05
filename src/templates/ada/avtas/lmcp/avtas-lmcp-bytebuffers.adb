@@ -4,21 +4,21 @@ package body avtas.lmcp.byteBuffers is
 
 --     function To_Boolean(this : ByteBuffer) return Boolean is
 --
---     function To_Int16(this : ByteBuffer) return Int16_t is
+--     function To_Int16(this : ByteBuffer) return Int16 is
 --
---     function To_Int32(this : ByteBuffer) return Int32_t is
+--     function To_Int32(this : ByteBuffer) return Int32 is
 --
---     function To_Int64(this : ByteBuffer) return Int64_t is
+--     function To_Int64(this : ByteBuffer) return Int64 is
 --
---     function To_UInt16(this : ByteBuffer) return UInt16_t is
+--     function To_UInt16(this : ByteBuffer) return UInt16 is
 --
---     function To_UInt32(this : ByteBuffer) return UInt32_t is
+--     function To_UInt32(this : ByteBuffer) return UInt32 is
 --
---     function To_Float(this : ByteBuffer) return Float_t is
+--     function To_Real32(this : ByteBuffer) return Real32 is
 --
---     function To_Double(this : ByteBuffer) return Double_t is
+--     function To_Real64(this : ByteBuffer) return Real64 is
 --
---     function To_String(this : ByteBuffer; numBytes : UInt32_t) return Unbounded_String is
+--     function To_String(this : ByteBuffer; numBytes : UInt32) return Unbounded_String is
 --        subtype sourceType is ByteArray(1 .. numBytes);
 --        subtype targetType is Unbounded_String;
 --        function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
@@ -38,94 +38,94 @@ package body avtas.lmcp.byteBuffers is
       this.Pos := this.Pos + 1;
    end Get_Byte;
 
-   procedure Get_Int16_t(this : in out ByteBuffer; output : out Int16_t) is
+   procedure Get_Int16(this : in out ByteBuffer; output : out Int16) is
       subtype sourceType is ByteArray2;
       subtype swapType is ByteArray2;
-      subtype targetType is Int16_t;
+      subtype targetType is Int16;
       function Convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
       function SwapBytes is new GNAT.Byte_Swapping.Swapped2 (swapType);
    begin
       output := Convert(SwapBytes(this.Buf(this.Pos .. this.Pos + 1)));
       this.Pos := this.Pos + 2;
-   end Get_Int16_t;
+   end Get_Int16;
 
-   procedure Get_Int32_t(this : in out ByteBuffer; output : out Int32_t) is
+   procedure Get_Int32(this : in out ByteBuffer; output : out Int32) is
       subtype sourceType is ByteArray4;
       subtype swapType is ByteArray4;
-      subtype targetType is Int32_t;
+      subtype targetType is Int32;
       function Convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
       function SwapBytes is new GNAT.Byte_Swapping.Swapped4 (swapType);
    begin
       output := Convert(this.Buf(this.Pos .. this.Pos + 3));
       this.Pos := this.Pos + 4;
-   end Get_Int32_t;
+   end Get_Int32;
 
-   procedure Get_Int64_t(this : in out ByteBuffer; output : out Int64_t) is
+   procedure Get_Int64(this : in out ByteBuffer; output : out Int64) is
       subtype sourceType is ByteArray8;
       subtype swapType is ByteArray8;
-      subtype targetType is Int64_t;
+      subtype targetType is Int64;
       function Convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
       function SwapBytes is new GNAT.Byte_Swapping.Swapped8 (swapType);
    begin
       output := Convert(this.Buf(this.Pos .. this.Pos + 7));
       this.Pos := this.Pos + 8;
-   end Get_Int64_t;
+   end Get_Int64;
 
-   procedure Get_UInt16_t(this : in out ByteBuffer; output : out UInt16_t) is
+   procedure Get_UInt16(this : in out ByteBuffer; output : out UInt16) is
       subtype sourceType is ByteArray2;
       subtype swapType is ByteArray2;
-      subtype targetType is UInt16_t;
+      subtype targetType is UInt16;
       function Convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
       function SwapBytes is new GNAT.Byte_Swapping.Swapped2 (swapType);
    begin
       output := Convert(this.Buf(this.Pos .. this.Pos + 1));
       this.Pos := this.Pos + 2;
-   end Get_UInt16_t;
+   end Get_UInt16;
 
-   procedure Get_UInt32_t(this : in out ByteBuffer; output : out UInt32_t) is
+   procedure Get_UInt32(this : in out ByteBuffer; output : out UInt32) is
       subtype sourceType is ByteArray4;
       subtype swapType is ByteArray4;
-      subtype targetType is UInt32_t;
+      subtype targetType is UInt32;
       function Convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
       function SwapBytes is new GNAT.Byte_Swapping.Swapped4 (swapType);
    begin
       output := Convert(this.Buf(this.Pos .. this.Pos + 3));
       this.Pos := this.Pos + 4;
-   end Get_UInt32_t;
+   end Get_UInt32;
 
-   procedure Get_Float_t(this : in out ByteBuffer; output : out Float_t) is
+   procedure Get_Real32(this : in out ByteBuffer; output : out Real32) is
       subtype sourceType is ByteArray4;
       subtype swapType is ByteArray4;
-      subtype targetType is Float_t;
+      subtype targetType is Real32;
       function Convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
       function SwapBytes is new GNAT.Byte_Swapping.Swapped4 (swapType);
    begin
       output := Convert(this.Buf(this.Pos .. this.Pos + 3));
       this.Pos := this.Pos + 4;
-   end Get_Float_t;
+   end Get_Real32;
 
-   procedure Get_Double_t(this : in out ByteBuffer; output : out Double_t) is
+   procedure Get_Real64(this : in out ByteBuffer; output : out Real64) is
       subtype sourceType is ByteArray8;
       subtype swapType is ByteArray8;
-      subtype targetType is Double_t;
+      subtype targetType is Real64;
       function Convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
       function SwapBytes is new GNAT.Byte_Swapping.Swapped8 (swapType);
    begin
       output := Convert(this.Buf(this.Pos .. this.Pos + 7));
       this.Pos := this.Pos + 8;
-   end Get_Double_t;
+   end Get_Real64;
 
    procedure Get_Unbounded_String(this : in out ByteBuffer; output : out Unbounded_String) is
-      numBytes : UInt16_t;
+      numBytes : UInt16;
    begin
-      Get_UInt16_t(this, numBytes);
+      Get_UInt16(this, numBytes);
       declare
-         subtype sourceType is ByteArray(1 .. UInt32_t(numBytes));
+         subtype sourceType is ByteArray(1 .. UInt32(numBytes));
          subtype targetType is Unbounded_String;
          function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
       begin
-         output := convert(this.Buf(this.Pos .. this.Pos + UInt32_t(numBytes) - 1));
-         this.Pos := this.Pos + UInt32_t(numBytes);
+         output := convert(this.Buf(this.Pos .. this.Pos + UInt32(numBytes) - 1));
+         this.Pos := this.Pos + UInt32(numBytes);
       end;
    end Get_Unbounded_String;
 
@@ -141,8 +141,8 @@ package body avtas.lmcp.byteBuffers is
       this.Pos := this.Pos + 1;
    end Put_Byte;
 
-   procedure Put_Int16_t(input : in Int16_t; this :  in out ByteBuffer) is
-      subtype sourceType is Int16_t;
+   procedure Put_Int16(input : in Int16; this :  in out ByteBuffer) is
+      subtype sourceType is Int16;
       subtype targetType is ByteArray2;
       function Convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
       subtype swapType is ByteArray2;
@@ -150,10 +150,10 @@ package body avtas.lmcp.byteBuffers is
    begin
       this.Buf(this.Pos .. this.Pos + 1) := SwapBytes(Convert(input));
       this.Pos := this.Pos + 2;
-   end Put_Int16_t;
+   end Put_Int16;
 
-   procedure Put_Int32_t(input : in Int32_t; this :  in out ByteBuffer) is
-      subtype sourceType is Int32_t;
+   procedure Put_Int32(input : in Int32; this :  in out ByteBuffer) is
+      subtype sourceType is Int32;
       subtype targetType is ByteArray4;
       function Convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
       subtype swapType is ByteArray4;
@@ -161,10 +161,10 @@ package body avtas.lmcp.byteBuffers is
    begin
       this.Buf(this.Pos .. this.Pos + 3) := SwapBytes(Convert(input));
       this.Pos := this.Pos + 4;
-   end Put_Int32_t;
+   end Put_Int32;
 
-   procedure Put_Int64_t(input : in Int64_t; this :  in out ByteBuffer) is
-      subtype sourceType is Int64_t;
+   procedure Put_Int64(input : in Int64; this :  in out ByteBuffer) is
+      subtype sourceType is Int64;
       subtype targetType is ByteArray8;
       function Convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
       subtype swapType is ByteArray8;
@@ -172,10 +172,10 @@ package body avtas.lmcp.byteBuffers is
    begin
       this.Buf(this.Pos .. this.Pos + 7) := SwapBytes(Convert(input));
       this.Pos := this.Pos + 8;
-   end Put_Int64_t;
+   end Put_Int64;
 
-   procedure Put_UInt16_t(input : in UInt16_t; this :  in out ByteBuffer) is
-      subtype sourceType is UInt16_t;
+   procedure Put_UInt16(input : in UInt16; this :  in out ByteBuffer) is
+      subtype sourceType is UInt16;
       subtype targetType is ByteArray2;
       function Convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
       subtype swapType is ByteArray2;
@@ -183,10 +183,10 @@ package body avtas.lmcp.byteBuffers is
    begin
       this.Buf(this.Pos .. this.Pos + 1) := SwapBytes(Convert(input));
       this.Pos := this.Pos + 2;
-   end Put_UInt16_t;
+   end Put_UInt16;
 
-   procedure Put_UInt32_t(input : in UInt32_t; this :  in out ByteBuffer) is
-      subtype sourceType is UInt32_t;
+   procedure Put_UInt32(input : in UInt32; this :  in out ByteBuffer) is
+      subtype sourceType is UInt32;
       subtype targetType is ByteArray4;
       function Convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
       subtype swapType is ByteArray4;
@@ -194,10 +194,10 @@ package body avtas.lmcp.byteBuffers is
    begin
       this.Buf(this.Pos .. this.Pos + 3) := SwapBytes(Convert(input));
       this.Pos := this.Pos + 4;
-   end Put_UInt32_t;
+   end Put_UInt32;
 
-   procedure Put_Float_t(input : in Float_t; this :  in out ByteBuffer) is
-      subtype sourceType is Float_t;
+   procedure Put_Real32(input : in Real32; this :  in out ByteBuffer) is
+      subtype sourceType is Real32;
       subtype targetType is ByteArray4;
       function Convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
       subtype swapType is ByteArray4;
@@ -205,10 +205,10 @@ package body avtas.lmcp.byteBuffers is
    begin
       this.Buf(this.Pos .. this.Pos + 3) := SwapBytes(Convert(input));
       this.Pos := this.Pos + 4;
-   end Put_Float_t;
+   end Put_Real32;
 
-   procedure Put_Double_t(input : in Double_t; this :  in out ByteBuffer) is
-      subtype sourceType is Double_t;
+   procedure Put_Real64(input : in Real64; this :  in out ByteBuffer) is
+      subtype sourceType is Real64;
       subtype targetType is ByteArray8;
       function Convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
       subtype swapType is ByteArray8;
@@ -216,19 +216,19 @@ package body avtas.lmcp.byteBuffers is
    begin
       this.Buf(this.Pos .. this.Pos + 7) := SwapBytes(Convert(input));
       this.Pos := this.Pos + 8;
-   end Put_Double_t;
+   end Put_Real64;
 
    procedure Put_Unbounded_String(input : in Unbounded_String; this :  in out ByteBuffer) is
       subtype sourceType is Unbounded_String;
-      subtype targetType is ByteArray(1 .. UInt32_t(Length(input)));
+      subtype targetType is ByteArray(1 .. UInt32(Length(input)));
       function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
    begin
-      Put_UInt16_t(UInt16_t(Length(input)), this);
-      this.Buf(this.Pos .. this.Pos + UInt32_t(Length(input))) := Convert(input);
-      this.Pos := this.Pos + UInt32_t(Length(input));
+      Put_UInt16(UInt16(Length(input)), this);
+      this.Buf(this.Pos .. this.Pos + UInt32(Length(input))) := Convert(input);
+      this.Pos := this.Pos + UInt32(Length(input));
    end Put_Unbounded_String;
 
---     function To_BooleanArray(this : ByteBuffer; numBytes : UInt32_t) return BooleanArray is
+--     function To_BooleanArray(this : ByteBuffer; numBytes : UInt32) return BooleanArray is
 --        subtype sourceType is ByteArray(1 .. numBytes);
 --        subtype targetType is BooleanArray(1 .. numBytes);
 --        function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
@@ -236,7 +236,7 @@ package body avtas.lmcp.byteBuffers is
 --        return Convert(this.Buf(this.Pos .. this.Pos + numBytes - 1));
 --     end To_BooleanArray;
 --
---     function To_Int16Array (this : ByteBuffer; numBytes : UInt32_t) return Int16Array is
+--     function To_Int16Array (this : ByteBuffer; numBytes : UInt32) return Int16Array is
 --        subtype sourceType is ByteArray(1 .. numBytes);
 --        subtype targetType is Int16Array(1 .. numBytes/2);
 --        function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
@@ -250,7 +250,7 @@ package body avtas.lmcp.byteBuffers is
 --        return convert(tempArray);
 --     end To_Int16Array;
 --
---     function To_Int32Array (this : ByteBuffer; numBytes : UInt32_t) return Int32Array is
+--     function To_Int32Array (this : ByteBuffer; numBytes : UInt32) return Int32Array is
 --        subtype sourceType is ByteArray(1 .. numBytes);
 --        subtype targetType is Int32Array(1 .. numBytes/4);
 --        function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
@@ -264,7 +264,7 @@ package body avtas.lmcp.byteBuffers is
 --        return convert(tempArray);
 --     end To_Int32Array;
 --
---     function To_Int64Array (this : ByteBuffer; numBytes : UInt32_t) return Int64Array is
+--     function To_Int64Array (this : ByteBuffer; numBytes : UInt32) return Int64Array is
 --        subtype sourceType is ByteArray(1 .. numBytes);
 --        subtype targetType is Int64Array(1 .. numBytes/8);
 --        function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
@@ -278,7 +278,7 @@ package body avtas.lmcp.byteBuffers is
 --        return convert(tempArray);
 --     end To_Int64Array;
 --
---     function To_UInt16Array (this : ByteBuffer; numBytes : UInt32_t) return UInt16Array is
+--     function To_UInt16Array (this : ByteBuffer; numBytes : UInt32) return UInt16Array is
 --        subtype sourceType is ByteArray(1 .. numBytes);
 --        subtype targetType is UInt16Array(1 .. numBytes/2);
 --        function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
@@ -292,7 +292,7 @@ package body avtas.lmcp.byteBuffers is
 --        return convert(tempArray);
 --     end To_UInt16Array;
 --
---     function To_UInt32Array (this : ByteBuffer; numBytes : UInt32_t) return UInt32Array is
+--     function To_UInt32Array (this : ByteBuffer; numBytes : UInt32) return UInt32Array is
 --        subtype sourceType is ByteArray(1 .. numBytes);
 --        subtype targetType is UInt32Array(1 .. numBytes/4);
 --        function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
@@ -306,9 +306,9 @@ package body avtas.lmcp.byteBuffers is
 --        return convert(tempArray);
 --     end To_UInt32Array;
 --
---     function To_FloatArray(this : ByteBuffer; numBytes : UInt32_t) return FloatArray is
+--     function To_Real32Array(this : ByteBuffer; numBytes : UInt32) return Real32Array is
 --        subtype sourceType is ByteArray(1 .. numBytes);
---        subtype targetType is FloatArray(1 .. numBytes/4);
+--        subtype targetType is Real32Array(1 .. numBytes/4);
 --        function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
 --        subtype swapType is ByteArray(1 .. 4);
 --        function SwapBytes is new GNAT.Byte_Swapping.Swapped4 (swapType);
@@ -318,11 +318,11 @@ package body avtas.lmcp.byteBuffers is
 --           tempArray(Nat(4*i - 3) .. Nat(4*i)) := SwapBytes(tempArray(Nat(4*i - 3) .. Nat(4*i)));
 --        end loop;
 --        return convert(tempArray);
---     end To_FloatArray;
+--     end To_Real32Array;
 --
---     function To_DoubleArray(this : ByteBuffer; numBytes : UInt32_t) return DoubleArray is
+--     function To_Real64Array(this : ByteBuffer; numBytes : UInt32) return Real64Array is
 --        subtype sourceType is ByteArray(1 .. numBytes);
---        subtype targetType is DoubleArray(1 .. numBytes/8);
+--        subtype targetType is Real64Array(1 .. numBytes/8);
 --        function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
 --        subtype swapType is ByteArray(1 .. 8);
 --        function SwapBytes is new GNAT.Byte_Swapping.Swapped8 (swapType);
@@ -332,12 +332,12 @@ package body avtas.lmcp.byteBuffers is
 --           tempArray(Nat(8*i - 7) .. Nat(8*i)) := SwapBytes(tempArray(Nat(8*i - 7) .. Nat(8*i)));
 --        end loop;
 --        return convert(tempArray);
---     end To_DoubleArray;
+--     end To_Real64Array;
 --
 --     function To_StringArray(Input : ByteArray) return StringArray is
---        arrayElements : UInt16_t := To_UInt16(ByteArray2(Input(1 .. 2)));
---        position : UInt32_t := 3;
---        stringLength : UInt16_t;
+--        arrayElements : UInt16 := To_UInt16(ByteArray2(Input(1 .. 2)));
+--        position : UInt32 := 3;
+--        stringLength : UInt16;
 --        tempString : Unbounded_String;
 --        output : StringArray(Nat(1) .. Nat(arrayElements));
 --        function convert is new Ada.Unchecked_Conversion(Source => Byte, Target => Character);
@@ -353,7 +353,7 @@ package body avtas.lmcp.byteBuffers is
 --           for j in 1 .. stringLength loop
 --              tempString := tempString & convert(Input(Nat(position) + Nat(j) - Nat(1)));
 --           end loop;
---           position := position + UInt32_t(stringLength);
+--           position := position + UInt32(stringLength);
 --           output(Nat(i)) := tempString;
 --        end loop;
 --        return output;
@@ -367,7 +367,7 @@ package body avtas.lmcp.byteBuffers is
 --        return Convert(this.Buf(this.Pos .. this.Pos + numBytes - 1));
 --     end To_BooleanArray;
 --  
---     function To_Int16Array (this : ByteBuffer; numBytes : UInt32_t) return Int16Array is
+--     function To_Int16Array (this : ByteBuffer; numBytes : UInt32) return Int16Array is
 --        subtype sourceType is ByteArray(1 .. numBytes);
 --        subtype targetType is Int16Array(1 .. numBytes/2);
 --        function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
@@ -381,7 +381,7 @@ package body avtas.lmcp.byteBuffers is
 --        return convert(tempArray);
 --     end To_Int16Array;
 --  
---     function To_Int32Array (this : ByteBuffer; numBytes : UInt32_t) return Int32Array is
+--     function To_Int32Array (this : ByteBuffer; numBytes : UInt32) return Int32Array is
 --        subtype sourceType is ByteArray(1 .. numBytes);
 --        subtype targetType is Int32Array(1 .. numBytes/4);
 --        function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
@@ -395,7 +395,7 @@ package body avtas.lmcp.byteBuffers is
 --        return convert(tempArray);
 --     end To_Int32Array;
 --  
---     function To_Int64Array (this : ByteBuffer; numBytes : UInt32_t) return Int64Array is
+--     function To_Int64Array (this : ByteBuffer; numBytes : UInt32) return Int64Array is
 --        subtype sourceType is ByteArray(1 .. numBytes);
 --        subtype targetType is Int64Array(1 .. numBytes/8);
 --        function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
@@ -409,7 +409,7 @@ package body avtas.lmcp.byteBuffers is
 --        return convert(tempArray);
 --     end To_Int64Array;
 --  
---     function To_UInt16Array (this : ByteBuffer; numBytes : UInt32_t) return UInt16Array is
+--     function To_UInt16Array (this : ByteBuffer; numBytes : UInt32) return UInt16Array is
 --        subtype sourceType is ByteArray(1 .. numBytes);
 --        subtype targetType is UInt16Array(1 .. numBytes/2);
 --        function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
@@ -423,7 +423,7 @@ package body avtas.lmcp.byteBuffers is
 --        return convert(tempArray);
 --     end To_UInt16Array;
 --  
---     function To_UInt32Array (this : ByteBuffer; numBytes : UInt32_t) return UInt32Array is
+--     function To_UInt32Array (this : ByteBuffer; numBytes : UInt32) return UInt32Array is
 --        subtype sourceType is ByteArray(1 .. numBytes);
 --        subtype targetType is UInt32Array(1 .. numBytes/4);
 --        function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
@@ -437,9 +437,9 @@ package body avtas.lmcp.byteBuffers is
 --        return convert(tempArray);
 --     end To_UInt32Array;
 --  
---     function To_FloatArray(this : ByteBuffer; numBytes : UInt32_t) return FloatArray is
+--     function To_Real32Array(this : ByteBuffer; numBytes : UInt32) return Real32Array is
 --        subtype sourceType is ByteArray(1 .. numBytes);
---        subtype targetType is FloatArray(1 .. numBytes/4);
+--        subtype targetType is Real32Array(1 .. numBytes/4);
 --        function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
 --        subtype swapType is ByteArray(1 .. 4);
 --        function SwapBytes is new GNAT.Byte_Swapping.Swapped4 (swapType);
@@ -449,11 +449,11 @@ package body avtas.lmcp.byteBuffers is
 --           tempArray(Nat(4*i - 3) .. Nat(4*i)) := SwapBytes(tempArray(Nat(4*i - 3) .. Nat(4*i)));
 --        end loop;
 --        return convert(tempArray);
---     end To_FloatArray;
+--     end To_Real32Array;
 --  
---     function To_DoubleArray(this : ByteBuffer; numBytes : UInt32_t) return DoubleArray is
+--     function To_Real64Array(this : ByteBuffer; numBytes : UInt32) return Real64Array is
 --        subtype sourceType is ByteArray(1 .. numBytes);
---        subtype targetType is DoubleArray(1 .. numBytes/8);
+--        subtype targetType is Real64Array(1 .. numBytes/8);
 --        function convert is new Ada.Unchecked_Conversion(Source => sourceType, Target => targetType);
 --        subtype swapType is ByteArray(1 .. 8);
 --        function SwapBytes is new GNAT.Byte_Swapping.Swapped8 (swapType);
@@ -463,12 +463,12 @@ package body avtas.lmcp.byteBuffers is
 --           tempArray(Nat(8*i - 7) .. Nat(8*i)) := SwapBytes(tempArray(Nat(8*i - 7) .. Nat(8*i)));
 --        end loop;
 --        return convert(tempArray);
---     end To_DoubleArray;
+--     end To_Real64Array;
 --  
 --     function To_StringArray(Input : ByteArray) return StringArray is
---        arrayElements : UInt16_t := To_UInt16(ByteArray2(Input(1 .. 2)));
---        position : UInt32_t := 3;
---        stringLength : UInt16_t;
+--        arrayElements : UInt16 := To_UInt16(ByteArray2(Input(1 .. 2)));
+--        position : UInt32 := 3;
+--        stringLength : UInt16;
 --        tempString : Unbounded_String;
 --        output : StringArray(Nat(1) .. Nat(arrayElements));
 --        function convert is new Ada.Unchecked_Conversion(Source => Byte, Target => Character);
@@ -484,7 +484,7 @@ package body avtas.lmcp.byteBuffers is
 --           for j in 1 .. stringLength loop
 --              tempString := tempString & convert(Input(Nat(position) + Nat(j) - Nat(1)));
 --           end loop;
---           position := position + UInt32_t(stringLength);
+--           position := position + UInt32(stringLength);
 --           output(Nat(i)) := tempString;
 --        end loop;
 --        return output;
@@ -495,7 +495,7 @@ package body avtas.lmcp.byteBuffers is
       this.Pos := position;
    end setPosition;
 
-   procedure incrementPosition(this : in out ByteBuffer; amount : in UInt32_t) is
+   procedure incrementPosition(this : in out ByteBuffer; amount : in UInt32) is
    begin
       if(amount > 0) then
          this.Pos := this.Pos + Nat(amount);
