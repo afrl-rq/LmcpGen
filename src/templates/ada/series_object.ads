@@ -11,14 +11,18 @@ package -<full_series_name_dots>-.-<datatype_name>- is
    type -<datatype_name>- is new -<full_parent_datatype>- with private;
    type -<datatype_name>-_Acc is access all -<datatype_name>-;
    type -<datatype_name>-_Any is access all -<datatype_name>-'Class;
-   
+
+   Subscription : constant := "-<full_datatype_name_dots>-";
+   TypeName     : constant := "-<datatype_name>-";
+   SeriesName   : constant := -<series_name>-Enum'Pos(-<datatype_name_caps>-_ENUM);
+
    -<vector_package_import>-
 
    function dummy return Integer;
 
-   function getFullLmcpTypeName(this : -<datatype_name>-) return String is ("-<full_datatype_name_dots>-");
-   function getLmcpTypeName(this : -<datatype_name>-) return String is ("-<datatype_name>-");
-   function getLmcpType(this : -<datatype_name>-) return UInt32 is (-<series_name>-Enum'Pos(-<datatype_name_caps>-_ENUM)+1);
+   function getFullLmcpTypeName(this : -<datatype_name>-) return String is (Subscription);
+   function getLmcpTypeName(this : -<datatype_name>-) return String is (TypeName);
+   function getLmcpType(this : -<datatype_name>-) return UInt32_t is (SeriesName);
 
    -<get_and_set_methods_spec>-
    function calculatePackedSize(this: -<datatype_name>-) return UInt32;
