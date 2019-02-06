@@ -5,7 +5,7 @@ package body avtas.lmcp.object is
       null;
    end pack;
 
-   procedure unpack(buf : in out ByteBuffer; object_acc : in out Object_Any) is
+   procedure unpack(object_acc : in out Object_Any; buf : in out ByteBuffer) is
    begin
       null;
    end unpack;
