@@ -80,7 +80,7 @@ public class AdaMethods {
         return AdaTypeCategory.FIXED_ARRAY_LEAF_STRUCT;
     }
 
-    public static final Set<String> adaReservedWords = new HashSet<String>(Arrays.asList("loop", "record", "task"));
+    public static final Set<String> adaReservedWords = new HashSet<String>(Arrays.asList("loop", "record", "task", "range"));
 
     private static String getDeconflictedName(String name) {
         return (adaReservedWords.contains(name.toLowerCase()) ? "lmcp" + name : name );
