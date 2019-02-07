@@ -258,9 +258,9 @@ package body AVTAS.LMCP.ByteBuffers is
 
    procedure Retrieve_UInt32 is new Retrieve_4_Bytes (UInt32) with Inline;
 
---     procedure Insert_UInt64 is new Insert_8_Bytes (UInt64) with Inline;
+   procedure Insert_UInt64 is new Insert_8_Bytes (UInt64) with Inline;
 
---     procedure Retrieve_UInt64 is new Retrieve_8_Bytes (UInt64) with Inline;
+   procedure Retrieve_UInt64 is new Retrieve_8_Bytes (UInt64) with Inline;
 
    procedure Insert_Int16 is new Insert_2_Bytes (Int16) with Inline;
 
@@ -352,15 +352,15 @@ package body AVTAS.LMCP.ByteBuffers is
       This.Position := This.Position + 8;
    end Get_Int64;
 
---     ----------------
---     -- Get_UInt64 --
---     ----------------
---
---     procedure Get_UInt64 (This : in out ByteBuffer; Value : out UInt64) is
---     begin
---        Retrieve_UInt64 (Value, This.Buffer, Start => This.Position);
---        This.Position := This.Position + 8;
---     end Get_UInt64;
+   ----------------
+   -- Get_UInt64 --
+   ----------------
+
+   procedure Get_UInt64 (This : in out ByteBuffer; Value : out UInt64) is
+   begin
+      Retrieve_UInt64 (Value, This.Buffer, Start => This.Position);
+      This.Position := This.Position + 8;
+   end Get_UInt64;
 
    ---------------
    -- Get_Real32 --
@@ -405,6 +405,14 @@ package body AVTAS.LMCP.ByteBuffers is
       This.Position := This.Position + Length;
       Last := Value'First + Natural (Length) - 1;
    end Get_String;
+
+   procedure Get_Unbounded_String
+     (This  : in out ByteBuffer;
+      Value : out Unbounded_String)
+   is
+   begin
+       pragma Compile_Time_Warning (Standard.True, "Get_Unbounded_String unimplemented");
+   end Get_Unbounded_String;
 
    --------------
    -- Put_Byte --
@@ -476,15 +484,15 @@ package body AVTAS.LMCP.ByteBuffers is
       This.Position := This.Position + 8;
    end Put_Int64;
 
---     ----------------
---     -- Put_UInt64 --
---     ----------------
---
---     procedure Put_UInt64 (This : in out ByteBuffer; Value : UInt64) is
---     begin
---        Insert_UInt64 (Value, This.Buffer, Start => This.Position);
---        This.Position := This.Position + 8;
---     end Put_UInt64;
+   ----------------
+   -- Put_UInt64 --
+   ----------------
+
+   procedure Put_UInt64 (This : in out ByteBuffer; Value : UInt64) is
+   begin
+      Insert_UInt64 (Value, This.Buffer, Start => This.Position);
+      This.Position := This.Position + 8;
+   end Put_UInt64;
 
    ---------------
    -- Put_Real32 --
@@ -533,5 +541,18 @@ package body AVTAS.LMCP.ByteBuffers is
                          Count       => Storage_Count (Value'Length));
       This.Position := This.Position + Value'Length;
    end Put_Raw_Bytes;
+
+   --------------------------
+   -- Put_Unbounded_String --
+   --------------------------
+
+   procedure Put_Unbounded_String (This : in out ByteBuffer;
+                                   Value : Unbounded_String)
+   is
+   begin
+       pragma Compile_Time_Warning (Standard.True, "Put_Unbounded_String unimplemented");
+   end Put_Unbounded_String;
+
+
 
 end AVTAS.LMCP.ByteBuffers;

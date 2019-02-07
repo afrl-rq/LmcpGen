@@ -1,5 +1,6 @@
-with System;           use System;
-with AVTAS.LMCP.Types; use AVTAS.LMCP.Types;
+with System;                use System;
+with AVTAS.LMCP.Types;      use AVTAS.LMCP.Types;
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
 package AVTAS.LMCP.ByteBuffers is
 
@@ -73,11 +74,11 @@ package AVTAS.LMCP.ByteBuffers is
 
    procedure Get_Long (This : in out ByteBuffer;  Value : out Int64) renames Get_Int64;
 
---     procedure Get_UInt64 (This : in out ByteBuffer;  Value : out UInt64) with
---       Pre'Class  => Remaining (This) >= 8,
---       Post'Class => Position (This) = Position (This)'Old + 8;
---
---     procedure Get_ULong (This : in out ByteBuffer;  Value : out UInt64) renames Get_UInt64;
+   procedure Get_UInt64 (This : in out ByteBuffer;  Value : out UInt64) with
+      Pre'Class  => Remaining (This) >= 8,
+      Post'Class => Position (This) = Position (This)'Old + 8;
+
+   procedure Get_ULong (This : in out ByteBuffer;  Value : out UInt64) renames Get_UInt64;
 
    procedure Get_Real32 (This : in out ByteBuffer;  Value : out Real32) with
      Pre'Class  => Remaining (This) >= 4,
@@ -99,6 +100,10 @@ package AVTAS.LMCP.ByteBuffers is
    --  there could be at most one actual character in the string (ie, a length
    --  of 1), so we check that there are least three bytes available. The
    --  corresponding Put routine does not allow inserting an empty string.
+
+   procedure Get_Unbounded_String
+     (This  : in out ByteBuffer;
+      Value : out Unbounded_String);
 
    --  ByteBuffer & put(const uint8_t b);
    procedure Put_Byte (This : in out ByteBuffer;  Value : Byte) with
@@ -141,11 +146,11 @@ package AVTAS.LMCP.ByteBuffers is
      Pre'Class => Remaining (This) >= 8;
    procedure Put_Long (This : in out ByteBuffer;  Value : Int64) renames Put_Int64;
 
---     --  ByteBuffer & putULong(uint64_t ul);
---     procedure Put_UInt64 (This : in out ByteBuffer;  Value : UInt64) with
---       Pre'Class => Remaining (This) >= 8;
+   --  ByteBuffer & putULong(uint64_t ul);
+   procedure Put_UInt64 (This : in out ByteBuffer;  Value : UInt64) with
+     Pre'Class => Remaining (This) >= 8;
 --
---     procedure Put_ULong (This : in out ByteBuffer;  Value : UInt64) renames Put_UInt64;
+   procedure Put_ULong (This : in out ByteBuffer;  Value : UInt64) renames Put_UInt64;
 
    --  ByteBuffer & putFloat(float f);
    procedure Put_Real32 (This : in out ByteBuffer;  Value : Real32) with
@@ -161,8 +166,10 @@ package AVTAS.LMCP.ByteBuffers is
 
    -- Populate the ByteBuffer from the bytes in a String. Useful for then
    -- rewinding and reading back out meaningful objects.
-   procedure Put_Raw_Bytes ( This : in out ByteBuffer; Value : String) with
+   procedure Put_Raw_Bytes (This : in out ByteBuffer; Value : String) with
      Pre'Class => Value /= "" and Remaining (This) >= Value'Length; -- we don't write the length
+
+   procedure Put_Unbounded_String (This : in out ByteBuffer; Value : Unbounded_String);
 
    type Byte_Array is array (Index range <>) of Byte
      with Component_Size => 1 * Storage_Unit;   -- confirming

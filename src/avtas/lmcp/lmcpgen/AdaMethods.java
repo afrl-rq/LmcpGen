@@ -829,7 +829,7 @@ public class AdaMethods {
                 case VECTOR_NODE_STRUCT:
                 case VECTOR_LEAF_STRUCT:
                     if (st.fields[i].isLargeArray) {
-                        str += ws + "   buf.Put_UInt64(UInt_64(object_acc." + fieldname + ".Length));\n";
+                        str += ws + "   buf.Put_UInt64(UInt64(object_acc." + fieldname + ".Length));\n";
                     }
                     else {
                         str += ws + "   buf.Put_UInt32(UInt32(object_acc." + fieldname + ".Length));\n";
