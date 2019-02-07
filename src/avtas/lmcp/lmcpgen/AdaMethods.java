@@ -444,15 +444,31 @@ public class AdaMethods {
                         str += ws + "type Vect_" + getDeconflictedName(st.fields[i].type) + "_Acc_Acc is access all Vect_" + getDeconflictedName(st.fields[i].type) + "_Acc.Vector;\n";
                     }
                     break;
-                case FIXED_ARRAY_PRIMITIVE:
+                case FIXED_ARRAY_PRIMITIVE: {
+                    String typename = get_array_type_for_fixed_array_primitive(infos, st.fields[i]);
+                    if (!vectTypes.contains(typename)) {
+                        vectTypes.add(typename);
+                        str += ws + "type " + typename + " is array (1 .. " + st.fields[i].length + ") of " + getAdaPrimativeType(infos, st.fields[i]) + ";\n";
+                        str += ws + "type " + typename + "_Acc is access all " + typename + ";\n";
+                    }
+                    break;
+                }
                 case FIXED_ARRAY_ENUM:
                 case FIXED_ARRAY_NODE_STRUCT:
                 case FIXED_ARRAY_LEAF_STRUCT:
+                    throw new IllegalArgumentException("ENUM, NODE_STRUCT, and LEAF_STRUCT uses of FIXED_ARRAY are unimplemented");
+
+                    // These will need to be implemented as in FIXED_ARRAY_PRIMITIVE.
+                    // break;
                 default:
                     break;
             }
         }
         return str;
+    }
+
+    private static String get_array_type_for_fixed_array_primitive(MDMInfo[] infos, FieldInfo field) {
+        return getAdaPrimativeType(infos, field) + "_" + field.length + "D";
     }
 
     public static String get_and_set_methods_spec(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
@@ -492,17 +508,26 @@ public class AdaMethods {
                     str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return Vect_" + type + "_Acc_Acc;\n";
                     break;
                 case FIXED_ARRAY_PRIMITIVE:
-                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + getAdaPrimativeType(infos, st.fields[i]) + ";\n";
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return " + get_array_type_for_fixed_array_primitive(infos, st.fields[i]) + "_Acc;\n";
                     break;
                 case FIXED_ARRAY_ENUM:
-                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + type + "Enum;\n";
-                    break;
+                    throw new IllegalArgumentException("FIXED_ARRAY_ENUM unimplemented in `get_and_set_methods_body`");
+
+                    // This is illegal in Ada. It would need to be handled like the FIXED_ARRAY_PRIMITIVE.
+                    // str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + type + "Enum;\n";
+                    // break;
                 case FIXED_ARRAY_NODE_STRUCT:
-                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + type + "_Any;\n";
-                    break;
+                    throw new IllegalArgumentException("FIXED_ARRAY_NODE_STRUCT unimplemented in `get_and_set_methods_body`");
+
+                    // This is illegal in Ada. It would need to be handled like the FIXED_ARRAY_PRIMITIVE.
+                    // str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + type + "_Any;\n";
+                    // break;
                 case FIXED_ARRAY_LEAF_STRUCT:
-                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + type + "_Acc;\n";
-                    break;
+                    throw new IllegalArgumentException("FIXED_ARRAY_LEAF_STRUCT unimplemented in `get_and_set_methods_body`");
+
+                    // This is illegal in Ada. It would need to be handled like the FIXED_ARRAY_PRIMITIVE.
+                    // str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + type + "_Acc;\n";
+                    // break;
                 default:
                     break;
             }
@@ -555,17 +580,26 @@ public class AdaMethods {
                     str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return Vect_" + type + "_Acc_Acc is (this." + fieldname + ");\n";
                     break;
                 case FIXED_ARRAY_PRIMITIVE:
-                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + getAdaPrimativeType(infos, st.fields[i]) + " is (this." + fieldname +");\n";
+                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return " + get_array_type_for_fixed_array_primitive(infos, st.fields[i]) + "_Acc is (this." + fieldname + ");\n";
                     break;
                 case FIXED_ARRAY_ENUM:
-                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + type + "Enum is (this." + fieldname + ");\n";
-                    break;
+                    throw new IllegalArgumentException("FIXED_ARRAY_ENUM unimplemented in `get_and_set_methods_body`");
+
+                    // This is illegal in Ada. It would need to be handled like the FIXED_ARRAY_PRIMITIVE.
+                    // str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + type + "Enum is (this." + fieldname + ");\n";
+                    // break;
                 case FIXED_ARRAY_NODE_STRUCT:
-                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + type + "_Any is (this." + fieldname + ");\n";
-                    break;
+                    throw new IllegalArgumentException("FIXED_ARRAY_NODE_STRUCT unimplemented in `get_and_set_methods_body`");
+
+                    // This is illegal in Ada. It would need to be handled like the FIXED_ARRAY_PRIMITIVE.
+                    // str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + type + "_Any is (this." + fieldname + ");\n";
+                    // break;
                 case FIXED_ARRAY_LEAF_STRUCT:
-                    str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + type + "_Acc is (this." + fieldname + ");\n";
-                    break;
+                    throw new IllegalArgumentException("FIXED_ARRAY_LEAF_STRUCT unimplemented in `get_and_set_methods_body`");
+
+                    // This is illegal in Ada. It would need to be handled like the FIXED_ARRAY_PRIMITIVE.
+                    // str += ws + "function get" + fieldname + "(this : " + thisRecordName + ") return access all array (Integer range 1 .. " + st.fields[i].length + ") of " + type + "_Acc is (this." + fieldname + ");\n";
+                    // break;
                 default:
                     break;
             }
@@ -609,17 +643,26 @@ public class AdaMethods {
                     str += ws + fieldname + " : Vect_" + type + "_Acc_Acc := new Vect_" + type + "_Acc.Vector;\n";
                     break;
                 case FIXED_ARRAY_PRIMITIVE:
-                    str += ws + fieldname + " : access all array (Integer range 1 .. " + st.fields[i].length + ") of " + getAdaPrimativeType(infos, st.fields[i]) + " := (others => " + getAdaDefaultVal(infos, st.fields[i]) + ");\n";
+                    str += ws + fieldname + " : " + get_array_type_for_fixed_array_primitive(infos, st.fields[i]) + "_Acc := new " + get_array_type_for_fixed_array_primitive(infos, st.fields[i]) + ";\n";
                     break;
                 case FIXED_ARRAY_ENUM:
-                    str += ws + fieldname + " : access all array (Integer range 1 .. " + st.fields[i].length + ") of " + getResolvedTypeName(infos, st.fields[i]) + "Enum := (others => " + getAdaDefaultVal(infos, st.fields[i]) + ");\n";
-                    break;
+                    throw new IllegalArgumentException("FIXED_ARRAY_ENUM unimplemented in `record_fields`");
+
+                    // This is illegal in Ada. It would need to be handled like the FIXED_ARRAY_PRIMITIVE.
+                    // str += ws + fieldname + " : access all array (Integer range 1 .. " + st.fields[i].length + ") of " + getResolvedTypeName(infos, st.fields[i]) + "Enum := (others => " + getAdaDefaultVal(infos, st.fields[i]) + ");\n";
+                    // break;
                 case FIXED_ARRAY_NODE_STRUCT:
-                    str += ws + fieldname + " : access all array (Integer range 1 .. " + st.fields[i].length + ") of " + getResolvedTypeName(infos, st.fields[i]) + "_Any := (others => " + getAdaDefaultVal(infos, st.fields[i]) + ");\n";
-                    break;
+                    throw new IllegalArgumentException("FIXED_ARRAY_NODE_STRUCT unimplemented in `record_fields`");
+
+                    // This is illegal in Ada. It would need to be handled like the FIXED_ARRAY_PRIMITIVE.
+                    // str += ws + fieldname + " : access all array (Integer range 1 .. " + st.fields[i].length + ") of " + getResolvedTypeName(infos, st.fields[i]) + "_Any := (others => " + getAdaDefaultVal(infos, st.fields[i]) + ");\n";
+                    // break;
                 case FIXED_ARRAY_LEAF_STRUCT:
-                    str += ws + fieldname + " : access all array (Integer range 1 .. " + st.fields[i].length + ") of " + getResolvedTypeName(infos, st.fields[i]) + "_Acc := (others => " + getAdaDefaultVal(infos, st.fields[i]) + ");\n";
-                    break;
+                    throw new IllegalArgumentException("FIXED_ARRAY_LEAF_STRUCT unimplemented in `record_fields`");
+
+                    // This is illegal in Ada. It would need to be handled like the FIXED_ARRAY_PRIMITIVE.
+                    // str += ws + fieldname + " : access all array (Integer range 1 .. " + st.fields[i].length + ") of " + getResolvedTypeName(infos, st.fields[i]) + "_Acc := (others => " + getAdaDefaultVal(infos, st.fields[i]) + ");\n";
+                    // break;
                 default:
                     break;
             }
@@ -1112,12 +1155,12 @@ public class AdaMethods {
                         str += ws + "   end loop;\n";
                     }
                     else {
-                        str += ws + "   size := size + this." + getDeconflictedName(st.fields[i].name) + ".all'Length)*" + getAdaPrimativeType(infos, st.fields[i]) + "'Size/8;\n";
+                        str += ws + "   size := size + UInt32(this." + getDeconflictedName(st.fields[i].name) + ".all'Length)*" + getAdaPrimativeType(infos, st.fields[i]) + "'Size/8;\n";
                     }
                     break;
                 case FIXED_ARRAY_ENUM:
                     str += ws + "   size := size + 2;\n";
-                    str += ws + "   size := size + this." + getDeconflictedName(st.fields[i].name) + ".all'Length)*UInt32'Size/8;\n";
+                    str += ws + "   size := size + UInt32(this." + getDeconflictedName(st.fields[i].name) + ".all'Length)*UInt32'Size/8;\n";
                     break;
                 case FIXED_ARRAY_NODE_STRUCT:
                 case FIXED_ARRAY_LEAF_STRUCT:
