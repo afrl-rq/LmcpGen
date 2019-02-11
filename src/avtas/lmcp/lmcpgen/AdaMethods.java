@@ -346,7 +346,7 @@ public class AdaMethods {
 
         // Lowest level package definition text, returned as str
         String packageName = "";
-        packageName = info.namespace.replaceAll("/", "\\.");
+        packageName = getDeconflictedNamespace (info.namespace).replaceAll("/", "\\.");
         str = "with avtas.lmcp.object; use avtas.lmcp.object;\n";
         str += "with avtas.lmcp.types; use avtas.lmcp.types;\n\n";
         str += "package " + packageName + " is\n\nend " + packageName + ";\n"; 
