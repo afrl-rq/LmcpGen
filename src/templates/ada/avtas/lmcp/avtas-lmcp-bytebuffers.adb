@@ -151,7 +151,7 @@ package body AVTAS.LMCP.ByteBuffers is
       Buffer : in out Byte_Array;
       Start  : Index)
    is
-      Result : System.Address with Unreferenced;  -- except by postcondition
+      Result : System.Address with Unreferenced;
    begin
       pragma Compile_Time_Error (Inserted'Object_Size /= 2 * Storage_Unit, "Generic actual param should be 2 bytes");
       Result := MemCopy (Source => Value'Address, Destination => Buffer (Start)'Address, Count => 2);
@@ -169,7 +169,7 @@ package body AVTAS.LMCP.ByteBuffers is
       Buffer : in out Byte_Array;
       Start  : Index)
    is
-      Result : System.Address with Unreferenced;  -- except by postcondition
+      Result : System.Address with Unreferenced;
    begin
       pragma Compile_Time_Error (Inserted'Object_Size /= 4 * Storage_Unit, "Generic actual param should be 4 bytes");
       Result := MemCopy (Source => Value'Address, Destination => Buffer (Start)'Address, Count => 4);
@@ -187,7 +187,7 @@ package body AVTAS.LMCP.ByteBuffers is
       Buffer : in out Byte_Array;
       Start  : Index)
    is
-      Result : System.Address with Unreferenced;  -- except by postcondition
+      Result : System.Address with Unreferenced;
    begin
       pragma Compile_Time_Error (Inserted'Object_Size /= 8 * Storage_Unit, "Generic actual param should be 8 bytes");
       Result := MemCopy (Source => Value'Address, Destination => Buffer (Start)'Address, Count => 8);
@@ -205,7 +205,7 @@ package body AVTAS.LMCP.ByteBuffers is
       Buffer : Byte_Array;
       Start  : Index)
    is
-      Result : System.Address with Unreferenced;  -- except by postcondition
+      Result : System.Address with Unreferenced;
    begin
       pragma Compile_Time_Error (Retrieved'Object_Size /= 2 * Storage_Unit, "Generic actual param should be 2 bytes");
       Result := MemCopy (Source => Buffer (Start)'Address, Destination => Value'Address, Count => 2);
@@ -223,7 +223,7 @@ package body AVTAS.LMCP.ByteBuffers is
       Buffer : Byte_Array;
       Start  : Index)
    is
-      Result : System.Address with Unreferenced;  -- except by postcondition
+      Result : System.Address with Unreferenced;
    begin
       pragma Compile_Time_Error (Retrieved'Object_Size /= 4 * Storage_Unit, "Generic actual param should be 4 bytes");
       Result := MemCopy (Source => Buffer (Start)'Address, Destination => Value'Address, Count => 4);
@@ -241,7 +241,7 @@ package body AVTAS.LMCP.ByteBuffers is
       Buffer : Byte_Array;
       Start  : Index)
    is
-      Result : System.Address with Unreferenced;  -- except by postcondition
+      Result : System.Address with Unreferenced;
    begin
       pragma Compile_Time_Error (Retrieved'Object_Size /= 8 * Storage_Unit, "Generic actual param should be 8 bytes");
       Result := MemCopy (Source => Buffer (Start)'Address, Destination => Value'Address, Count => 8);
@@ -391,7 +391,7 @@ package body AVTAS.LMCP.ByteBuffers is
       Value : out String;
       Last  : out Natural)
    is
-      Result : System.Address with Unreferenced;  -- except by postcondition
+      Result : System.Address with Unreferenced;
       Length : Index;
    begin
       Retrieve_Int16 (Int16 (Length), This.Buffer, Start => This.Position);
@@ -406,12 +406,25 @@ package body AVTAS.LMCP.ByteBuffers is
       Last := Value'First + Natural (Length) - 1;
    end Get_String;
 
+   --------------------------
+   -- Get_Unbounded_String --
+   --------------------------
+
    procedure Get_Unbounded_String
      (This  : in out ByteBuffer;
       Value : out Unbounded_String)
    is
+      Length : Index;
    begin
-       pragma Compile_Time_Warning (Standard.True, "Get_Unbounded_String unimplemented");
+      Retrieve_Int16 (Int16 (Length), This.Buffer, Start => This.Position);
+      declare
+         S : String (1 .. Integer (Length));
+         Last : Natural;
+      begin
+         This.Get_String (S, Last);
+         pragma Assert (Last = Integer (Length));
+         Value := To_Unbounded_String (S);
+      end;
    end Get_Unbounded_String;
 
    --------------
@@ -519,7 +532,7 @@ package body AVTAS.LMCP.ByteBuffers is
    ----------------
 
    procedure Put_String (This : in out ByteBuffer;  Value : String) is
-      Result : System.Address with Unreferenced;  -- except by postcondition
+      Result : System.Address with Unreferenced;
    begin
       Insert_Int16 (Value'Length, This.Buffer, Start => This.Position);
       This.Position := This.Position + 2;
@@ -534,7 +547,7 @@ package body AVTAS.LMCP.ByteBuffers is
    -------------------
 
    procedure Put_Raw_Bytes ( This : in out ByteBuffer; Value : String) is
-      Result : System.Address with Unreferenced;  -- except by postcondition
+      Result : System.Address with Unreferenced;
    begin
       Result := MemCopy (Destination => This.Buffer (This.Position)'Address,
                          Source      => Value'Address,
@@ -546,13 +559,10 @@ package body AVTAS.LMCP.ByteBuffers is
    -- Put_Unbounded_String --
    --------------------------
 
-   procedure Put_Unbounded_String (This : in out ByteBuffer;
-                                   Value : Unbounded_String)
-   is
+   procedure Put_Unbounded_String (This : in out ByteBuffer;  Value : Unbounded_String) is
    begin
-       pragma Compile_Time_Warning (Standard.True, "Put_Unbounded_String unimplemented");
+      This.Put_String (To_String (Value));
    end Put_Unbounded_String;
-
 
 
 end AVTAS.LMCP.ByteBuffers;

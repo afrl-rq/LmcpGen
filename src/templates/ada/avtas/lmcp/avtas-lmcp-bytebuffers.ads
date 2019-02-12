@@ -97,8 +97,8 @@ package AVTAS.LMCP.ByteBuffers is
        Pre'Class  => Remaining (This) >= 3,
        Post'Class => Last in Value'Range;
    --  The string content is preceeded in the buffer by a two-byte length, and
-   --  there could be at most one actual character in the string (ie, a length
-   --  of 1), so we check that there are least three bytes available. The
+   --  since there might only be one actual character in the string (i.e., a
+   --  length of 1), we check that there are least three bytes available. The
    --  corresponding Put routine does not allow inserting an empty string.
 
    procedure Get_Unbounded_String
@@ -149,7 +149,7 @@ package AVTAS.LMCP.ByteBuffers is
    --  ByteBuffer & putULong(uint64_t ul);
    procedure Put_UInt64 (This : in out ByteBuffer;  Value : UInt64) with
      Pre'Class => Remaining (This) >= 8;
---
+
    procedure Put_ULong (This : in out ByteBuffer;  Value : UInt64) renames Put_UInt64;
 
    --  ByteBuffer & putFloat(float f);
@@ -165,11 +165,13 @@ package AVTAS.LMCP.ByteBuffers is
      Pre'Class => Value /= "" and Remaining (This) >= Value'Length + 2;  -- 2 bytes for the length
 
    -- Populate the ByteBuffer from the bytes in a String. Useful for then
-   -- rewinding and reading back out meaningful objects.
+   -- rewinding and reading back out meaningful objects. The input Value is a
+   -- String because that's the most convenient choice, based on client usage.
    procedure Put_Raw_Bytes (This : in out ByteBuffer; Value : String) with
      Pre'Class => Value /= "" and Remaining (This) >= Value'Length; -- we don't write the length
 
-   procedure Put_Unbounded_String (This : in out ByteBuffer; Value : Unbounded_String);
+   procedure Put_Unbounded_String (This : in out ByteBuffer; Value : Unbounded_String) with
+     Pre'Class => Value /= "" and Integer (Remaining (This)) >= Length (Value) + 2;  -- 2 bytes for the length
 
    type Byte_Array is array (Index range <>) of Byte
      with Component_Size => 1 * Storage_Unit;   -- confirming
