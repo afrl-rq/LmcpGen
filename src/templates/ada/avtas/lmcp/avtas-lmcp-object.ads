@@ -1,5 +1,7 @@
 with avtas.lmcp.types; use avtas.lmcp.types;
 with avtas.lmcp.byteBuffers; use avtas.lmcp.byteBuffers;
+with Ada.Streams;
+with Utilities;
 
 package avtas.lmcp.object is
 
@@ -26,6 +28,18 @@ package avtas.lmcp.object is
    function calculatePackedSize(this : Object) return UInt32 is (0);
 
    procedure pack(object_acc : in Object_Any; buf : in out ByteBuffer);
+
    procedure unpack(object_acc : in out Object_Any; buf : in out ByteBuffer);
 
+   -- XML output
+   function LeftPad is new Utilities.LeftPad (Width => 2);
+
+   procedure XML_Output (this  : Object'Class;
+                         S     : access Ada.Streams.Root_Stream_Type'Class;
+                         Level : Natural := 0);
+
+   procedure XML_Write (this  : Object;
+                        S     : access Ada.Streams.Root_Stream_Type'Class;
+                        Level : Natural) is null;
+   
 end avtas.lmcp.object;
