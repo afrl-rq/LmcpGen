@@ -8,7 +8,22 @@ package body AVTAS.LMCP.ByteBuffers is
    ---------------
 
    function Raw_Bytes (This : ByteBuffer) return Byte_Array is
-      (This.Buffer (1 .. This.Position - 1));
+     (This.Buffer (1 .. This.Position - 1));
+     -- Position is one greater than the last index used in Buffer
+
+   ----------
+   -- Tail --
+   ----------
+
+   function Tail (This : ByteBuffer; Length : Index) return Byte_Array is
+      (This.Buffer (This.Position - Length .. This.Position - 1));
+
+   ---------------
+   -- Raw_Bytes --
+   ---------------
+
+   function Raw_Bytes (This : ByteBuffer; First, Last : Index) return Byte_Array is
+      (This.Buffer (First .. Last));
 
    ---------------
    -- Raw_Bytes --
@@ -30,7 +45,7 @@ package body AVTAS.LMCP.ByteBuffers is
 
    procedure Rewind (This : in out ByteBuffer) is
    begin
-      This.Position := 1;
+      This.Position := 1;  -- thus content 1 .. Position-1 would be null, ie empty
    end Rewind;
 
    -----------

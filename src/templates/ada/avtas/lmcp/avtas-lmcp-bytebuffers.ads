@@ -177,7 +177,23 @@ package AVTAS.LMCP.ByteBuffers is
      with Component_Size => 1 * Storage_Unit;   -- confirming
 
    function Raw_Bytes (This : ByteBuffer) return Byte_Array;
+   --  Returns the full internal byte array content
+
+   function Raw_Bytes (This : ByteBuffer; First, Last : Index) return Byte_Array with
+     Pre'Class => First <= This.Capacity   and then   -- physically possible
+                  Last  <= This.Capacity   and then
+                  First <= Last            and then   -- no null slices
+                  First <  Position (This) and then   -- logically possible
+                  Last  <  Position (This);
+   --  Returns the slice of the internal byte array, First .. Last
+
+   function Tail (This : ByteBuffer; Length : Index) return Byte_Array with
+     Pre'Class => Length <= This.Capacity and then
+                  Length < Position (This);
+   --  Returns the slice of the internal byte array containing the last Length bytes
+
    function Raw_Bytes (This : ByteBuffer) return String;
+   --  Returns the full internal byte array content, as a String
 
 --     type Int16_Array   is array (Index range <>) of Int16_T  with Component_Size => 2 * Storage_Unit;
 --     type Int32_Array   is array (Index range <>) of Int32_t  with Component_Size => 4 * Storage_Unit;
