@@ -79,73 +79,7 @@ package body -<full_series_name_dots>-.factory is
 
    function createObject(seriesId : in Int64; msgType : in UInt32; version: in UInt16) return avtas.lmcp.object.Object_Any is
    begin
-      if seriesId = 4849604199710720000 and then version = 3 then
-         case msgType is
-            when 1 => return new afrl.cmasi.AbstractGeometry.AbstractGeometry;
-            when 2 => return new afrl.cmasi.KeyValuePair.KeyValuePair;
-            when 3 => return new afrl.cmasi.Location3D.Location3D;
-            when 4 => return new afrl.cmasi.PayloadAction.PayloadAction;
-            when 5 => return new afrl.cmasi.PayloadConfiguration.PayloadConfiguration;
-            when 6 => return new afrl.cmasi.PayloadState.PayloadState;
-            when 7 => return new afrl.cmasi.VehicleAction.VehicleAction;
-            when 8 => return new afrl.cmasi.LmcpTask.LmcpTask;
-            when 9 => return new afrl.cmasi.SearchTask.SearchTask;
-            when 10 => return new afrl.cmasi.AbstractZone.AbstractZone;
-            when 11 => return new afrl.cmasi.EntityConfiguration.EntityConfiguration;
-            when 12 => return new afrl.cmasi.FlightProfile.FlightProfile;
-            when 13 => return new afrl.cmasi.AirVehicleConfiguration.AirVehicleConfiguration;
-            when 14 => return new afrl.cmasi.EntityState.EntityState;
-            when 15 => return new afrl.cmasi.AirVehicleState.AirVehicleState;
-            when 16 => return new afrl.cmasi.Wedge.Wedge;
-            when 17 => return new afrl.cmasi.AreaSearchTask.AreaSearchTask;
-            when 18 => return new afrl.cmasi.CameraAction.CameraAction;
-            when 19 => return new afrl.cmasi.CameraConfiguration.CameraConfiguration;
-            when 20 => return new afrl.cmasi.GimballedPayloadState.GimballedPayloadState;
-            when 21 => return new afrl.cmasi.CameraState.CameraState;
-            when 22 => return new afrl.cmasi.Circle.Circle;
-            when 23 => return new afrl.cmasi.GimbalAngleAction.GimbalAngleAction;
-            when 24 => return new afrl.cmasi.GimbalConfiguration.GimbalConfiguration;
-            when 25 => return new afrl.cmasi.GimbalScanAction.GimbalScanAction;
-            when 26 => return new afrl.cmasi.GimbalStareAction.GimbalStareAction;
-            when 27 => return new afrl.cmasi.GimbalState.GimbalState;
-            when 28 => return new afrl.cmasi.GoToWaypointAction.GoToWaypointAction;
-            when 29 => return new afrl.cmasi.KeepInZone.KeepInZone;
-            when 30 => return new afrl.cmasi.KeepOutZone.KeepOutZone;
-            when 31 => return new afrl.cmasi.LineSearchTask.LineSearchTask;
-            when 32 => return new afrl.cmasi.NavigationAction.NavigationAction;
-            when 33 => return new afrl.cmasi.LoiterAction.LoiterAction;
-            when 34 => return new afrl.cmasi.LoiterTask.LoiterTask;
-            when 35 => return new afrl.cmasi.Waypoint.Waypoint;
-            when 36 => return new afrl.cmasi.MissionCommand.MissionCommand;
-            when 37 => return new afrl.cmasi.MustFlyTask.MustFlyTask;
-            when 38 => return new afrl.cmasi.OperatorSignal.OperatorSignal;
-            when 39 => return new afrl.cmasi.OperatingRegion.OperatingRegion;
-            when 40 => return new afrl.cmasi.AutomationRequest.AutomationRequest;
-            when 41 => return new afrl.cmasi.PointSearchTask.PointSearchTask;
-            when 42 => return new afrl.cmasi.Polygon.Polygon;
-            when 43 => return new afrl.cmasi.Rectangle.Rectangle;
-            when 44 => return new afrl.cmasi.RemoveTasks.RemoveTasks;
-            when 45 => return new afrl.cmasi.ServiceStatus.ServiceStatus;
-            when 46 => return new afrl.cmasi.SessionStatus.SessionStatus;
-            when 47 => return new afrl.cmasi.VehicleActionCommand.VehicleActionCommand;
-            when 48 => return new afrl.cmasi.VideoStreamAction.VideoStreamAction;
-            when 49 => return new afrl.cmasi.VideoStreamConfiguration.VideoStreamConfiguration;
-            when 50 => return new afrl.cmasi.VideoStreamState.VideoStreamState;
-            when 51 => return new afrl.cmasi.AutomationResponse.AutomationResponse;
-            when 52 => return new afrl.cmasi.RemoveZones.RemoveZones;
-            when 53 => return new afrl.cmasi.RemoveEntities.RemoveEntities;
-            when 54 => return new afrl.cmasi.FlightDirectorAction.FlightDirectorAction;
-            when 55 => return new afrl.cmasi.WeatherReport.WeatherReport;
-            when 56 => return new afrl.cmasi.FollowPathCommand.FollowPathCommand;
-            when 57 => return new afrl.cmasi.PathWaypoint.PathWaypoint;
-            when 58 => return new afrl.cmasi.StopMovementAction.StopMovementAction;
-            when 59 => return new afrl.cmasi.WaypointTransfer.WaypointTransfer;
-            when 60 => return new afrl.cmasi.PayloadStowAction.PayloadStowAction;
-            when others => return null;
-         end case;
-      else
-         return null;
-      end if;
+      -<series_factory_switch>-
    end createObject;
 
    function calculateChecksum (Buffer : in ByteBuffer) return UInt32 is

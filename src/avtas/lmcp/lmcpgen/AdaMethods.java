@@ -778,7 +778,7 @@ public class AdaMethods {
             {
                 continue;
             }
-            buf.append(ws + "   when " + i.seriesNameAsLong + " => return " + i.namespace.replaceAll("/", ".") + ".factory.createObject(seriesId, msgType, version);\n");
+            buf.append(ws + "   when " + i.seriesNameAsLong + " => return " + getDeconflictedNamespace(i.namespace).replaceAll("/", ".") + ".factory.createObject(seriesId, msgType, version);\n");
         }
         buf.append(ws + "   when others => return null;\n");
         buf.append(ws + "end case;");
@@ -791,7 +791,7 @@ public class AdaMethods {
         buf.append(ws + "if seriesId = " + info.seriesNameAsLong + " and then version = " + info.version + " then\n");
         buf.append(ws + "   case msgType is\n");
         for (int j = 0; j < info.structs.length; j++) {
-            buf.append(ws + "      when " + info.structs[j].id + " => return new " + info.namespace.replaceAll("/", ".") + "."
+            buf.append(ws + "      when " + info.structs[j].id + " => return new " + getDeconflictedNamespace(info.namespace).replaceAll("/", ".") + "."
                     + getDeconflictedName(info.structs[j].name) + "." + getDeconflictedName(info.structs[j].name) + "; \n");
         }
         buf.append(ws + "      when others => return null;\n");

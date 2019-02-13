@@ -76,10 +76,7 @@ package body avtas.lmcp.factory is
 
    function createObject(seriesId : in Int64; msgType : in UInt32; version: in UInt16) return avtas.lmcp.object.Object_Any is
    begin
-      case seriesId is
-         when 4849604199710720000 => return afrl.cmasi.factory.createObject(seriesId, msgType, version);
-         when others => return null;
-      end case;
+      -<global_factory_switch>-
    end createObject;
 
    function calculateChecksum (Buffer : in ByteBuffer) return UInt32 is
