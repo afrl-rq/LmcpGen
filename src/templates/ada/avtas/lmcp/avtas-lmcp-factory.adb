@@ -4,78 +4,73 @@ with GNAT.Byte_Swapping;
 
 package body avtas.lmcp.factory is
 
-   function packMessage(rootObject : in avtas.lmcp.object.Object_Any; enableChecksum : in Boolean) return ByteBuffer is
-      msgSize : UInt32;
-   begin
+   function PackMessage (RootObject : in Avtas.Lmcp.Object.Object_Any; EnableChecksum : in Boolean) return ByteBuffer is
       -- Allocate space for message, with 15 extra bytes for
       --  Existence (1 byte), series name (8 bytes), type (4 bytes), version number (2 bytes)
-      msgSize := rootObject.calculatePackedSize + 15;
-      declare
-         buffer : ByteBuffer(HEADER_SIZE + msgSize + CHECKSUM_SIZE);
-      begin
-         -- add header values
-         Put_Int32(LMCP_CONTROL_STR, buffer);
-         Put_UInt32(msgSize, buffer);
-
-         -- add root object
-         putObject(rootObject, buffer);
-           
-         -- add checksum if enabled
-         Put_UInt32((if enableChecksum then calculateChecksum(buffer) else 0), buffer);
-         return buffer;
-      end;
-   end packMessage;
+      MsgSize : constant UInt32 := RootObject.CalculatePackedSize + 15;
+      Buffer  : ByteBuffer (HEADER_SIZE + MsgSize + CHECKSUM_SIZE);
+   begin
+      -- add header values
+      Buffer.Put_Int32 (LMCP_CONTROL_STR);
+      Buffer.Put_UInt32 (MsgSize);
+      
+      -- add root object
+      PutObject (RootObject, Buffer);
+      
+      -- add checksum if enabled
+      Buffer.Put_UInt32 ((if EnableChecksum then CalculateChecksum (Buffer) else 0));
+      return Buffer;
+   end PackMessage;
    
    procedure putObject(object : in avtas.lmcp.object.Object_Any; buffer : in out ByteBuffer) is
    begin
-         -- If object is null, pack a 0; otherwise, add root object
-         if(object = null) then
-            Put_Boolean(False, buffer);
-         else
-            Put_Boolean(True, buffer);
-            Put_Int64(object.getSeriesNameAsLong, buffer);
-            Put_UInt32(object.getLmcpType, buffer);
-            Put_UInt16(object.getSeriesVersion, buffer);
-            pack(object, buffer);
-         end if;
+      -- If object is null, pack a 0; otherwise, add root object
+      if Object = null then
+         Buffer.Put_Boolean (False);
+      else
+         Buffer.Put_Boolean (True);
+         Buffer.Put_Int64 (Object.GetSeriesNameAsLong);
+         Buffer.Put_UInt32 (Object.GetLmcpType);
+         Buffer.Put_UInt16 (Object.GetSeriesVersion);
+         Pack (Object, Buffer);
+      end if;
    end putObject;
 
    procedure getObject(buffer : in out ByteBuffer; output : out avtas.lmcp.object.Object_Any) is
-      ctrlStr : Int32;
-      msgSize : UInt32;
-      msgExists : Boolean;
-      seriesId : Int64;
-      msgType : Uint32;
-      version : Uint16;
+      CtrlStr   : Int32;
+      MsgSize   : UInt32;
+      MsgExists : Boolean;
+      SeriesId  : Int64;
+      MsgType   : Uint32;
+      Version   : Uint16;
    begin
+      Output := null; -- default
       -- TODO: add some kind of warning/error messages for each null case
       if buffer.Capacity < HEADER_SIZE + CHECKSUM_SIZE then
-         output := null;
-      else
-         Get_Int32(buffer, ctrlStr);
-         if ctrlStr /= LMCP_CONTROL_STR then
-            output := null;
-         else
-            Get_UInt32(buffer, msgSize);
-            if buffer.Capacity < msgSize then
-               output := null;
-            elsif(validate(buffer) = False) then
-               output := null;
-            else
-               Get_Boolean(buffer, msgExists);
-               if(msgExists = False) then
-                  output := null;
-               else
-                  Get_Int64(buffer, seriesId);
-                  Get_UInt32(buffer, msgType);
-                  Get_UInt16(buffer, version);
-                  output := createObject(seriesId, msgType, version);
-                  if (output /= null) then
-                     unpack(buffer, output);
-                  end if;
-               end if;
-            end if;
-         end if;
+         return;
+      end if;
+      Buffer.Get_Int32 (CtrlStr);
+      if CtrlStr /= LMCP_CONTROL_STR then
+         return;
+      end if;
+      Buffer.Get_UInt32 (MsgSize);
+      if Buffer.Capacity < MsgSize then
+         return;
+      end if;
+      if not validate (buffer) then
+         return;
+      end if;
+      Buffer.Get_Boolean (MsgExists);
+      if not MsgExists then
+         return;
+      end if;
+      
+      Buffer.Get_Int64 (SeriesId);
+      Buffer.Get_UInt32 (MsgType);
+      Buffer.Get_UInt16 (Version);
+      Output := CreateObject (SeriesId, MsgType, Version);
+      if Output /= null then
+         Unpack (Output, Buffer);
       end if;
    end getObject;
 
@@ -87,34 +82,39 @@ package body avtas.lmcp.factory is
       end case;
    end createObject;
 
-   function calculateChecksum (buffer : in ByteBuffer) return UInt32 is
-      sum : UInt32 := 0;
-      function IntToByteArray is new Ada.Unchecked_Conversion(Source => UInt32, Target => ByteArray4);
-      function ByteArrayToInt is new Ada.Unchecked_Conversion(Source => ByteArray4, Target => UInt32);
+   function calculateChecksum (Buffer : in ByteBuffer) return UInt32 is
+      Sum   : UInt32 := 0;
+      Bytes : constant Byte_Array := Buffer.Raw_Bytes;  -- TODO: this is making a copy, 1 .. Position - 1
    begin
-      for i in 1 .. buffer.Capacity - CHECKSUM_SIZE loop
-         sum := sum + UInt32(buffer.Buf(i));
+      for K in Index range 1 .. Bytes'Length - Checksum_Size loop
+         Sum := Sum + UInt32 (Bytes (K));
       end loop;
-      -- The C++ code does the following, but why? It seems like a no-op to me
-      -- Can't we just return sum?
-      -- return (ByteArrayToInt(IntToByteArray(sum) & IntToByteArray(UInt32(16#FFFFFFFF#))));
       return sum;
    end calculateChecksum;
 
-   function getObjectSize (buffer : in ByteBuffer) return UInt32 is
-      function ByteArrayToInt is new Ada.Unchecked_Conversion(Source => ByteArray4, Target => UInt32);
+   subtype Four_Bytes is Byte_Array (1 .. 4);  -- for arbitrary UInt32 values as well as for checksums
+   
+   pragma Compile_Time_Error (UInt32'Object_Size /= 4 * 8, "UInt32 expected to be 4 bytes");
+   
+   pragma Compile_Time_Error (Checksum_Size /= 4, "Checksum_Size expected to be 4 bytes");
+   
+   function As_UInt32 is new Ada.Unchecked_Conversion (Source => Four_Bytes, Target => UInt32);
+   
+   function Swapped4 is new GNAT.Byte_Swapping.Swapped4 (Four_Bytes);   
+   
+   function GetObjectSize (Buffer : in ByteBuffer) return UInt32 is
+      Msg_Size_Bytes : constant Four_Bytes := Buffer.Raw_Bytes (First => 5, Last => 8);  -- the second UInt32 in the buffer
    begin
-      return ByteArrayToInt(buffer.Buf(5 .. 8));
+      return As_UInt32 (Swapped4 (Msg_Size_Bytes));
    end getObjectSize;
 
-   function validate(buffer : in ByteBuffer) return Boolean is
-      function ByteArrayToInt is new Ada.Unchecked_Conversion(Source => ByteArray4, Target => UInt32);
-      subtype SwapType is ByteArray4;
-      function SwapBytes is new GNAT.Byte_Swapping.Swapped4 (swapType);
-      sum : UInt32;
+   function validate (Buffer : in ByteBuffer) return Boolean is
+      Sum   : UInt32;      
+      Checksum_Bytes : constant Four_Bytes := Buffer.Tail (Length => Checksum_Size);  -- the last 4 bytes in the buffer
    begin
-      sum := calculateChecksum(buffer);
-      return sum = 0 or else sum = ByteArrayToInt(SwapBytes(buffer.Buf(buffer.Buf'Last - 3 .. buffer.Buf'Last)));
+      sum := calculateChecksum (buffer);
+      return Sum = 0 or else 
+             Sum = As_UInt32 (Swapped4 (Checksum_Bytes));
    end validate;
 
 end avtas.lmcp.factory;
