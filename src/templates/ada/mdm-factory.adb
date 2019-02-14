@@ -1,12 +1,10 @@
 -<include_all_series_headers>-
 with Ada.Unchecked_Conversion;
-with GNAT.Byte_Swapping;
 
 package body -<full_series_name_dots>-.factory is
 
    procedure PutObject (Object : in Avtas.Lmcp.Object.Object_Any; Buffer : in out ByteBuffer);
    
-
    function PackMessage (RootObject : in Avtas.Lmcp.Object.Object_Any; EnableChecksum : in Boolean) return ByteBuffer is
       -- Allocate space for message, with 15 extra bytes for
       --  Existence (1 byte), series name (8 bytes), type (4 bytes), version number (2 bytes)
@@ -16,15 +14,15 @@ package body -<full_series_name_dots>-.factory is
       -- add header values
       Buffer.Put_Int32 (LMCP_CONTROL_STR);
       Buffer.Put_UInt32 (MsgSize);
-      
+
       -- add root object
       PutObject (RootObject, Buffer);
-      
+
       -- add checksum if enabled
-      Buffer.Put_UInt32 ((if EnableChecksum then CalculateChecksum (Buffer) else 0));
+      Buffer.Put_UInt32 ((if EnableChecksum then CalculateChecksum (Buffer, Last => Buffer.Capacity) else 0));
       return Buffer;
    end PackMessage;
-   
+
    procedure PutObject (Object : in Avtas.Lmcp.Object.Object_Any; Buffer : in out ByteBuffer) is
    begin
       -- If object is null, pack a 0; otherwise, add root object
@@ -67,7 +65,7 @@ package body -<full_series_name_dots>-.factory is
       if not MsgExists then
          return;
       end if;
-      
+
       Buffer.Get_Int64 (SeriesId);
       Buffer.Get_UInt32 (MsgType);
       Buffer.Get_UInt16 (Version);
@@ -82,39 +80,36 @@ package body -<full_series_name_dots>-.factory is
       -<series_factory_switch>-
    end createObject;
 
-   function calculateChecksum (Buffer : in ByteBuffer) return UInt32 is
-      Sum   : UInt32 := 0;
-      Bytes : constant Byte_Array := Buffer.Raw_Bytes;  -- TODO: this is making a copy, 1 .. Position - 1
-   begin
-      for K in Index range 1 .. Bytes'Length - Checksum_Size loop
-         Sum := Sum + UInt32 (Bytes (K));
-      end loop;
-      return sum;
-   end calculateChecksum;
+    function CalculateChecksum (Buffer : in ByteBuffer; Last : UInt32) return UInt32 is
+     (Buffer.Checksum (From => 1, To => Last - Checksum_Size));
+   --  We want to compute the checksum of the entire message so we start at
+   --  index 1, but we don't want to include those bytes that either will,
+   --  or already do hold the checksum stored within the message in the
+   --  byte array. That stored checksum is at the very end so we subtract a
+   --  UInt32's number of bytes from Last in order to skip those bytes in the
+   --  calculation. The caller is responsible for passing a value to Last such
+   --  that this subtraction gets us the last byte of the message prior to
+   --  the checksum's bytes. For example, PackMessage knows that the buffer
+   --  is exactly the size of the entire message so Capacity is the last index.
 
-   subtype Four_Bytes is Byte_Array (1 .. 4);  -- for arbitrary UInt32 values as well as for checksums
-   
-   pragma Compile_Time_Error (UInt32'Object_Size /= 4 * 8, "UInt32 expected to be 4 bytes");
-   
-   pragma Compile_Time_Error (Checksum_Size /= 4, "Checksum_Size expected to be 4 bytes");
-   
-   function As_UInt32 is new Ada.Unchecked_Conversion (Source => Four_Bytes, Target => UInt32);
-   
-   function Swapped4 is new GNAT.Byte_Swapping.Swapped4 (Four_Bytes);   
-   
    function GetObjectSize (Buffer : in ByteBuffer) return UInt32 is
-      Msg_Size_Bytes : constant Four_Bytes := Buffer.Raw_Bytes (First => 5, Last => 8);  -- the second UInt32 in the buffer
+      Result : UInt32;
    begin
-      return As_UInt32 (Swapped4 (Msg_Size_Bytes));
+      Buffer.Get_UInt32 (Result, First => 5);  -- the second UInt32 value in the buffer
+      return Result;
    end getObjectSize;
 
-   function validate (Buffer : in ByteBuffer) return Boolean is
-      Sum   : UInt32;      
-      Checksum_Bytes : constant Four_Bytes := Buffer.Tail (Length => Checksum_Size);  -- the last 4 bytes in the buffer
+   function Validate (Buffer : in ByteBuffer) return Boolean is
+      Computed_Checksum : UInt32;
+      Existing_Checksum : UInt32;
    begin
-      sum := calculateChecksum (buffer);
-      return Sum = 0 or else 
-             Sum = As_UInt32 (Swapped4 (Checksum_Bytes));
-   end validate;
+      Computed_Checksum := CalculateChecksum (Buffer, Last => Buffer.Position);
+      if Computed_Checksum = 0 then
+         return True;
+      else
+         Buffer.Get_UInt32 (Existing_Checksum, First => Buffer.Position - 5);  -- the last 4 bytes in the buffer
+         return Computed_Checksum = Existing_Checksum;
+      end if;
+   end Validate;
 
 end -<full_series_name_dots>-.factory;

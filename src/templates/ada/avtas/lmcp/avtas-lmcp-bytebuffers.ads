@@ -38,8 +38,6 @@ package AVTAS.LMCP.ByteBuffers is
      Pre'Class  => Remaining (This) >= 1,
      Post'Class => Position (This) = Position (This)'Old + 1;
 
---  ByteBuffer & get(uint8_t* dst, uint32_t length, uint32_t offset = 0);
-
    procedure Get_Boolean (This : in out ByteBuffer;  Value : out Boolean) with
      Pre'Class  => Remaining (This) >= 1,
      Post'Class => Position (This) = Position (This)'Old + 1;
@@ -61,6 +59,18 @@ package AVTAS.LMCP.ByteBuffers is
      Post'Class => Position (This) = Position (This)'Old + 4;
 
    procedure Get_Int (This : in out ByteBuffer;  Value : out Int32) renames Get_Int32;
+
+   procedure Get_UInt32
+     (This  : in ByteBuffer;
+      Value : out UInt32;
+      First : Index)
+   with
+     Pre'Class  => First <= Remaining (This) - 4,
+     Post'Class => Position (This) = Position (This)'Old;
+   --  Gets a UInt32 value from This buffer, at indexes First .. First + 3
+   --  rather than from This.Position .. This.Positon + 3
+   --
+   --  Position is unchanged.
 
    procedure Get_UInt32 (This : in out ByteBuffer;  Value : out UInt32) with
      Pre'Class  => Remaining (This) >= 4,
@@ -88,7 +98,6 @@ package AVTAS.LMCP.ByteBuffers is
      Pre'Class  => Remaining (This) >= 8,
      Post'Class => Position (This) = Position (This)'Old + 8;
 
-   --  std::string getString(void);
    procedure Get_String
      (This  : in out ByteBuffer;
       Value : out String;
@@ -105,48 +114,37 @@ package AVTAS.LMCP.ByteBuffers is
      (This  : in out ByteBuffer;
       Value : out Unbounded_String);
 
-   --  ByteBuffer & put(const uint8_t b);
    procedure Put_Byte (This : in out ByteBuffer;  Value : Byte) with
      Pre'Class => Remaining (This) >= 1;
 
---  ByteBuffer & put(const uint8_t * src, uint32_t length, uint32_t offset = 0);
-
---  ByteBuffer & put(ByteBuffer & buf);
-
-   --  ByteBuffer & putBool(bool b);
    procedure Put_Boolean (This : in out ByteBuffer;  Value : Boolean) with
      Pre'Class => Remaining (This) >= 1;
 
-   --  ByteBuffer & putShort(int16_t s);
    procedure Put_Int16 (This : in out ByteBuffer;  Value : Int16) with
      Pre'Class => Remaining (This) >= 2;
 
    procedure Put_Short (This : in out ByteBuffer;  Value : Int16) renames Put_Int16;
 
-   --  ByteBuffer & putUShort(uint16_t us);
    procedure Put_UInt16 (This : in out ByteBuffer;  Value : UInt16) with
      Pre'Class => Remaining (This) >= 2;
 
    procedure Put_UShort (This : in out ByteBuffer;  Value : UInt16) renames Put_UInt16;
 
-   --  ByteBuffer & putInt(int32_t i);
    procedure Put_Int32 (This : in out ByteBuffer;  Value : Int32) with
      Pre'Class => Remaining (This) >= 4;
 
    procedure Put_Int (This : in out ByteBuffer;  Value : Int32) renames Put_Int32;
 
-   --  ByteBuffer & putUInt(uint32_t ui);
    procedure Put_UInt32 (This : in out ByteBuffer;  Value : UInt32) with
      Pre'Class => Remaining (This) >= 4;
 
    procedure Put_UInt (This : in out ByteBuffer;  Value : UInt32) renames Put_UInt32;
 
-   --  ByteBuffer & putLong(int64_t l);
    procedure Put_Int64 (This : in out ByteBuffer;  Value : Int64) with
      Pre'Class => Remaining (This) >= 8;
+
    procedure Put_Long (This : in out ByteBuffer;  Value : Int64) renames Put_Int64;
 
-   --  ByteBuffer & putULong(uint64_t ul);
    procedure Put_UInt64 (This : in out ByteBuffer;  Value : UInt64) with
      Pre'Class => Remaining (This) >= 8;
 
@@ -160,7 +158,6 @@ package AVTAS.LMCP.ByteBuffers is
    procedure Put_Real64 (This : in out ByteBuffer;  Value : Real64) with
      Pre'Class => Remaining (This) >= 8;
 
-   --  ByteBuffer & putString(std::string s);
    procedure Put_String (This : in out ByteBuffer;  Value : String) with
      Pre'Class => Value /= "" and Remaining (This) >= Value'Length + 2;  -- 2 bytes for the length
 
@@ -179,22 +176,18 @@ package AVTAS.LMCP.ByteBuffers is
    function Raw_Bytes (This : ByteBuffer) return Byte_Array;
    --  Returns the full internal byte array content
 
-   function Raw_Bytes (This : ByteBuffer; First, Last : Index) return Byte_Array with
-     Pre'Class => First <= This.Capacity   and then   -- physically possible
-                  Last  <= This.Capacity   and then
-                  First <= Last            and then   -- no null slices
-                  First <  Position (This) and then   -- logically possible
-                  Last  <  Position (This);
-   --  Returns the slice of the internal byte array, First .. Last
-
-   function Tail (This : ByteBuffer; Length : Index) return Byte_Array with
-     Pre'Class => Length <= This.Capacity and then
-                  Length < Position (This);
-   --  Returns the slice of the internal byte array containing the last Length bytes
-
    function Raw_Bytes (This : ByteBuffer) return String;
    --  Returns the full internal byte array content, as a String
-
+   
+   function Checksum (This : ByteBuffer;  From, To : Index) return UInt32 with
+     Pre'Class =>
+       From <= To                and   -- null ranges are not useful
+       From <= This.Capacity     and   -- physically possible
+       To   <= This.Capacity     and 
+       From <= This.Position - 1 and   -- logically possible
+       To   <= This.Position - 1;            
+   --  computes the checksum of the slice of the internal byte array From .. To
+  
 --     type Int16_Array   is array (Index range <>) of Int16_T  with Component_Size => 2 * Storage_Unit;
 --     type Int32_Array   is array (Index range <>) of Int32_t  with Component_Size => 4 * Storage_Unit;
 --     type Int64_Array   is array (Index range <>) of Int64_t  with Component_Size => 8 * Storage_Unit;
@@ -231,7 +224,7 @@ private
 
    type ByteBuffer (Capacity : Index) is tagged record
       Buffer   : Byte_Array (1 .. Capacity) := (others => 0);
-      Position : Index := 1;
+      Position : Index := 1;    -- reset to 1 by Rewind
    end record;
 
 end AVTAS.LMCP.ByteBuffers;

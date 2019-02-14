@@ -10,21 +10,7 @@ package body AVTAS.LMCP.ByteBuffers is
    function Raw_Bytes (This : ByteBuffer) return Byte_Array is
      (This.Buffer (1 .. This.Position - 1));
      -- Position is one greater than the last index used in Buffer
-
-   ----------
-   -- Tail --
-   ----------
-
-   function Tail (This : ByteBuffer; Length : Index) return Byte_Array is
-      (This.Buffer (This.Position - Length .. This.Position - 1));
-
-   ---------------
-   -- Raw_Bytes --
-   ---------------
-
-   function Raw_Bytes (This : ByteBuffer; First, Last : Index) return Byte_Array is
-      (This.Buffer (First .. Last));
-
+   
    ---------------
    -- Raw_Bytes --
    ---------------
@@ -45,7 +31,7 @@ package body AVTAS.LMCP.ByteBuffers is
 
    procedure Rewind (This : in out ByteBuffer) is
    begin
-      This.Position := 1;  -- thus content 1 .. Position-1 would be null, ie empty
+      This.Position := 1;
    end Rewind;
 
    -----------
@@ -53,7 +39,6 @@ package body AVTAS.LMCP.ByteBuffers is
    -----------
 
    procedure Clear (This : in out ByteBuffer) renames Rewind;
-   --  a renaming since we don't dynamically allocate the internal array
 
    ---------------
    -- Remaining --
@@ -75,13 +60,33 @@ package body AVTAS.LMCP.ByteBuffers is
 
    function Position (This : ByteBuffer) return UInt32 is
      (This.Position);
+   
+   --------------
+   -- Checksum --
+   --------------
 
+   function Checksum (This : ByteBuffer;  From, To : Index) return UInt32 is
+      Result : UInt32 := 0;
+   begin
+      for K in Index range From .. To loop
+         Result := Result + UInt32 (This.Buffer (K));
+      end loop;
+      return Result;
+   end Checksum;
+   
+   -----------------
+   -- Overlapping --
+   -----------------
 
-  function Overlapping (Destination, Source : Address; Count : Storage_Count) return Boolean is
+   function Overlapping (Destination, Source : Address; Count : Storage_Count) return Boolean is
      (for some Location in To_Integer (Destination) .. To_Integer (Destination + Count - 1) =>
            Location in To_Integer (Source) .. To_Integer (Source + Count - 1))
    with Pre => Source /= Null_Address and
                Destination /= Null_Address;
+
+   -------------
+   -- MemCopy --
+   -------------
 
    function MemCopy (Destination, Source : Address; Count : Storage_Count) return Address with
      Import,
@@ -357,6 +362,20 @@ package body AVTAS.LMCP.ByteBuffers is
       This.Position := This.Position + 4;
    end Get_UInt32;
 
+   ----------------
+   -- Get_UInt32 --
+   ----------------
+
+   procedure Get_UInt32
+     (This  : in ByteBuffer;
+      Value : out UInt32;
+      First : Index)
+   is
+   begin
+      Retrieve_UInt32 (Value, This.Buffer, Start => First);
+      --  Position is unchanged
+   end Get_UInt32;
+
    ---------------
    -- Get_Int64 --
    ---------------
@@ -578,6 +597,5 @@ package body AVTAS.LMCP.ByteBuffers is
    begin
       This.Put_String (To_String (Value));
    end Put_Unbounded_String;
-
 
 end AVTAS.LMCP.ByteBuffers;
