@@ -1,6 +1,4 @@
-with avtas.lmcp.types;       use avtas.lmcp.types;
-with avtas.lmcp.byteBuffers; use avtas.lmcp.byteBuffers;
-with avtas.lmcp.object;      use avtas.lmcp.object;
+with avtas.lmcp.byteBuffers;  use avtas.lmcp.byteBuffers;
 
 package -<full_series_name_dots>-.factory is
 
@@ -17,3 +15,4 @@ package -<full_series_name_dots>-.factory is
    function validate(buffer : in ByteBuffer) return Boolean;
 
 end -<full_series_name_dots>-.factory;
+

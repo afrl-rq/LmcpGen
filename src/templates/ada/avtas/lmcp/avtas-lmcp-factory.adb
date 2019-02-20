@@ -31,7 +31,7 @@ package body avtas.lmcp.factory is
          Buffer.Put_Int64 (Object.GetSeriesNameAsLong);
          Buffer.Put_UInt32 (Object.GetLmcpType);
          Buffer.Put_UInt16 (Object.GetSeriesVersion);
-         Pack (Object, Buffer);
+         Object.Pack (Buffer);
       end if;
    end PutObject;
 
@@ -69,7 +69,7 @@ package body avtas.lmcp.factory is
       Buffer.Get_UInt16 (Version);
       Output := CreateObject (SeriesId, MsgType, Version);
       if Output /= null then
-         Unpack (Output, Buffer);
+         Output.Unpack (Buffer);
       end if;
    end GetObject;
 
@@ -110,3 +110,4 @@ package body avtas.lmcp.factory is
       end if;
    end Validate;
 end avtas.lmcp.factory;
+

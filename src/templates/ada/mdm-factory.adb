@@ -33,7 +33,7 @@ package body -<full_series_name_dots>-.factory is
          Buffer.Put_Int64 (Object.GetSeriesNameAsLong);
          Buffer.Put_UInt32 (Object.GetLmcpType);
          Buffer.Put_UInt16 (Object.GetSeriesVersion);
-         Pack (Object, Buffer);
+         Object.Pack (Buffer);
       end if;
    end PutObject;
 
@@ -45,8 +45,7 @@ package body -<full_series_name_dots>-.factory is
       MsgType   : Uint32;
       Version   : Uint16;
    begin
-      Output := null; -- default
-      -- TODO: add some kind of warning/error messages for each null case
+      Output := null; -- default for early returns
       if buffer.Capacity < HEADER_SIZE + CHECKSUM_SIZE then
          return;
       end if;
@@ -71,7 +70,7 @@ package body -<full_series_name_dots>-.factory is
       Buffer.Get_UInt16 (Version);
       Output := CreateObject (SeriesId, MsgType, Version);
       if Output /= null then
-         Unpack (Output, Buffer);
+         Output.Unpack (Buffer);
       end if;
    end GetObject;
 
@@ -113,3 +112,4 @@ package body -<full_series_name_dots>-.factory is
    end Validate;
 
 end -<full_series_name_dots>-.factory;
+
