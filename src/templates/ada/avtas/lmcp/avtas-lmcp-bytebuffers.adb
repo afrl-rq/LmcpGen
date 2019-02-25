@@ -8,18 +8,16 @@ package body AVTAS.LMCP.ByteBuffers is
    ---------------
 
    function Raw_Bytes (This : ByteBuffer) return Byte_Array is
-     (This.Content (1 .. This.Position - 1));
-     -- Position is one greater than the last index used in Buffer
+     (This.Content (1 .. This.Length));
 
    ---------------
    -- Raw_Bytes --
    ---------------
 
    function Raw_Bytes (This : ByteBuffer) return String is
-      Result : String (1 .. Positive (This.Position));
+      Result : String (1 .. Positive (This.Length));
    begin
-      -- return This.Buffer (1 .. This.Position - 1) as a String
-      for K in 1 .. This.Position - 1 loop
+      for K in 1 .. This.Length loop
          Result (Positive (K)) := Character'Val (This.Content (K));
       end loop;
       return Result;

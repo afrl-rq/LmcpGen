@@ -233,7 +233,7 @@ private
    type ByteBuffer (Capacity : Index) is tagged record
       Content  : Byte_Array (1 .. Capacity) := (others => 0);
       Position : Index := 1;    -- reset to 1 by Rewind
-      Length   : UInt32 := 0;
+      Length   : UInt32 := 0;   -- reset to by Clear
    end record;
 
 end AVTAS.LMCP.ByteBuffers;
