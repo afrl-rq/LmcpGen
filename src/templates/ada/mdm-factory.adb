@@ -14,12 +14,10 @@ package body -<full_series_name_dots>-.factory is
       -- add header values
       Buffer.Put_Int32 (LMCP_CONTROL_STR);
       Buffer.Put_UInt32 (MsgSize);
-
       -- add root object
       PutObject (RootObject, Buffer);
-
       -- add checksum if enabled
-      Buffer.Put_UInt32 ((if EnableChecksum then CalculateChecksum (Buffer, Last => Buffer.Capacity) else 0));
+      Buffer.Put_UInt32 (if EnableChecksum then CalculateChecksum (Buffer) else 0);
       return Buffer;
    end PackMessage;
 
@@ -45,7 +43,8 @@ package body -<full_series_name_dots>-.factory is
       MsgType   : Uint32;
       Version   : Uint16;
    begin
-      Output := null; -- default for early returns
+      Output := null; -- default
+      -- TODO: add some kind of warning/error messages for each null case
       if buffer.Capacity < HEADER_SIZE + CHECKSUM_SIZE then
          return;
       end if;
@@ -79,17 +78,12 @@ package body -<full_series_name_dots>-.factory is
       -<series_factory_switch>-
    end createObject;
 
-    function CalculateChecksum (Buffer : in ByteBuffer; Last : UInt32) return UInt32 is
-     (Buffer.Checksum (From => 1, To => Last - Checksum_Size));
+   function CalculateChecksum (Buffer : in ByteBuffer) return UInt32 is
+     (Buffer.Checksum (From => 1,  To  => Buffer.Length - Checksum_Size));
    --  We want to compute the checksum of the entire message so we start at
-   --  index 1, but we don't want to include those bytes that either will,
-   --  or already do hold the checksum stored within the message in the
-   --  byte array. That stored checksum is at the very end so we subtract a
-   --  UInt32's number of bytes from Last in order to skip those bytes in the
-   --  calculation. The caller is responsible for passing a value to Last such
-   --  that this subtraction gets us the last byte of the message prior to
-   --  the checksum's bytes. For example, PackMessage knows that the buffer
-   --  is exactly the size of the entire message so Capacity is the last index.
+   --  index 1, but we don't want to include those bytes that either
+   --  will, or already do hold the checksum stored within the message in the
+   --  byte array. That stored checksum is at the very end.
 
    function GetObjectSize (Buffer : in ByteBuffer) return UInt32 is
       Result : UInt32;
@@ -102,11 +96,11 @@ package body -<full_series_name_dots>-.factory is
       Computed_Checksum : UInt32;
       Existing_Checksum : UInt32;
    begin
-      Computed_Checksum := CalculateChecksum (Buffer, Last => Buffer.Position);
+      Computed_Checksum := CalculateChecksum (Buffer);
       if Computed_Checksum = 0 then
          return True;
       else
-         Buffer.Get_UInt32 (Existing_Checksum, First => Buffer.Position - 5);  -- the last 4 bytes in the buffer
+         Buffer.Get_UInt32 (Existing_Checksum, First => Buffer.Length - Checksum_Size + 1);  -- the last 4 bytes in the buffer
          return Computed_Checksum = Existing_Checksum;
       end if;
    end Validate;

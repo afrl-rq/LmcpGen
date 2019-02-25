@@ -8,7 +8,7 @@ package body AVTAS.LMCP.ByteBuffers is
    ---------------
 
    function Raw_Bytes (This : ByteBuffer) return Byte_Array is
-     (This.Buffer (1 .. This.Position - 1));
+     (This.Content (1 .. This.Position - 1));
      -- Position is one greater than the last index used in Buffer
 
    ---------------
@@ -20,7 +20,7 @@ package body AVTAS.LMCP.ByteBuffers is
    begin
       -- return This.Buffer (1 .. This.Position - 1) as a String
       for K in 1 .. This.Position - 1 loop
-         Result (Positive (K)) := Character'Val (This.Buffer (K));
+         Result (Positive (K)) := Character'Val (This.Content (K));
       end loop;
       return Result;
    end Raw_Bytes;
@@ -38,7 +38,11 @@ package body AVTAS.LMCP.ByteBuffers is
    -- Clear --
    -----------
 
-   procedure Clear (This : in out ByteBuffer) renames Rewind;
+   procedure Clear (This : in out ByteBuffer) is
+   begin
+      This.Rewind;
+      This.Length := 0;
+   end Clear;
 
    ---------------
    -- Remaining --
@@ -61,6 +65,13 @@ package body AVTAS.LMCP.ByteBuffers is
    function Position (This : ByteBuffer) return UInt32 is
      (This.Position);
 
+   ------------
+   -- Length --
+   ------------
+
+   function Length (This : ByteBuffer) return UInt32 is
+      (This.Length);
+
    --------------
    -- Checksum --
    --------------
@@ -69,7 +80,7 @@ package body AVTAS.LMCP.ByteBuffers is
       Result : UInt32 := 0;
    begin
       for K in Index range From .. To loop
-         Result := Result + UInt32 (This.Buffer (K));
+         Result := Result + UInt32 (This.Content (K));
       end loop;
       return Result;
    end Checksum;
@@ -308,7 +319,7 @@ package body AVTAS.LMCP.ByteBuffers is
 
    procedure Get_Byte (This : in out ByteBuffer; Value : out Byte) is
    begin
-      Value := This.Buffer (This.Position);
+      Value := This.Content (This.Position);
       This.Position := This.Position + 1;
    end Get_Byte;
 
@@ -318,7 +329,7 @@ package body AVTAS.LMCP.ByteBuffers is
 
    procedure Get_Boolean (This : in out ByteBuffer; Value : out Boolean) is
    begin
-      Value := This.Buffer (This.Position) /= 0;
+      Value := This.Content (This.Position) /= 0;
       This.Position := This.Position + 1;
    end Get_Boolean;
 
@@ -328,7 +339,7 @@ package body AVTAS.LMCP.ByteBuffers is
 
    procedure Get_Int16 (This : in out ByteBuffer; Value : out Int16) is
    begin
-      Retrieve_Int16 (Value, This.Buffer, Start => This.Position);
+      Retrieve_Int16 (Value, This.Content, Start => This.Position);
       This.Position := This.Position + 2;
    end Get_Int16;
 
@@ -338,7 +349,7 @@ package body AVTAS.LMCP.ByteBuffers is
 
    procedure Get_UInt16 (This : in out ByteBuffer; Value : out UInt16) is
    begin
-      Retrieve_UInt16 (Value, This.Buffer, Start => This.Position);
+      Retrieve_UInt16 (Value, This.Content, Start => This.Position);
       This.Position := This.Position + 2;
    end Get_UInt16;
 
@@ -348,7 +359,7 @@ package body AVTAS.LMCP.ByteBuffers is
 
    procedure Get_Int32 (This : in out ByteBuffer; Value : out Int32) is
    begin
-      Retrieve_Int32 (Value, This.Buffer, Start => This.Position);
+      Retrieve_Int32 (Value, This.Content, Start => This.Position);
       This.Position := This.Position + 4;
    end Get_Int32;
 
@@ -358,7 +369,7 @@ package body AVTAS.LMCP.ByteBuffers is
 
    procedure Get_UInt32 (This : in out ByteBuffer; Value : out UInt32) is
    begin
-      Retrieve_UInt32 (Value, This.Buffer, Start => This.Position);
+      Retrieve_UInt32 (Value, This.Content, Start => This.Position);
       This.Position := This.Position + 4;
    end Get_UInt32;
 
@@ -372,7 +383,7 @@ package body AVTAS.LMCP.ByteBuffers is
       First : Index)
    is
    begin
-      Retrieve_UInt32 (Value, This.Buffer, Start => First);
+      Retrieve_UInt32 (Value, This.Content, Start => First);
       --  Position is unchanged
    end Get_UInt32;
 
@@ -382,7 +393,7 @@ package body AVTAS.LMCP.ByteBuffers is
 
    procedure Get_Int64 (This : in out ByteBuffer; Value : out Int64) is
    begin
-      Retrieve_Int64 (Value, This.Buffer, Start => This.Position);
+      Retrieve_Int64 (Value, This.Content, Start => This.Position);
       This.Position := This.Position + 8;
    end Get_Int64;
 
@@ -392,7 +403,7 @@ package body AVTAS.LMCP.ByteBuffers is
 
    procedure Get_UInt64 (This : in out ByteBuffer; Value : out UInt64) is
    begin
-      Retrieve_UInt64 (Value, This.Buffer, Start => This.Position);
+      Retrieve_UInt64 (Value, This.Content, Start => This.Position);
       This.Position := This.Position + 8;
    end Get_UInt64;
 
@@ -402,7 +413,7 @@ package body AVTAS.LMCP.ByteBuffers is
 
    procedure Get_Real32 (This : in out ByteBuffer; Value : out Real32) is
    begin
-      Retrieve_Float (Value, This.Buffer, Start => This.Position);
+      Retrieve_Float (Value, This.Content, Start => This.Position);
       This.Position := This.Position + 4;
   end Get_Real32;
 
@@ -412,7 +423,7 @@ package body AVTAS.LMCP.ByteBuffers is
 
    procedure Get_Real64 (This : in out ByteBuffer; Value : out Real64) is
    begin
-      Retrieve_Double (Value, This.Buffer, Start => This.Position);
+      Retrieve_Double (Value, This.Content, Start => This.Position);
       This.Position := This.Position + 8;
   end Get_Real64;
 
@@ -428,12 +439,12 @@ package body AVTAS.LMCP.ByteBuffers is
       Result : System.Address with Unreferenced;
       Length : Index;
    begin
-      Retrieve_Int16 (Int16 (Length), This.Buffer, Start => This.Position);
+      Retrieve_Int16 (Int16 (Length), This.Content, Start => This.Position);
       This.Position := This.Position + 2;
       if This.Position + Length > This.Capacity then
          Length := This.Capacity;
       end if;
-      Result := MemCopy (Source      => This.Buffer (This.Position)'Address,
+      Result := MemCopy (Source      => This.Content (This.Position)'Address,
                          Destination => Value'Address,
                          Count       => Storage_Count (Length));
       This.Position := This.Position + Length;
@@ -450,7 +461,7 @@ package body AVTAS.LMCP.ByteBuffers is
    is
       Length : Index;
    begin
-      Retrieve_Int16 (Int16 (Length), This.Buffer, Start => This.Position);
+      Retrieve_Int16 (Int16 (Length), This.Content, Start => This.Position);
       declare
          S : String (1 .. Integer (Length));
          Last : Natural;
@@ -467,8 +478,9 @@ package body AVTAS.LMCP.ByteBuffers is
 
    procedure Put_Byte (This : in out ByteBuffer; Value : Byte) is
    begin
-      This.Buffer (This.Position) := Value;
+      This.Content (This.Position) := Value;
       This.Position := This.Position + 1;
+      This.Length := This.Length + 1;
    end Put_Byte;
 
    -----------------
@@ -477,8 +489,9 @@ package body AVTAS.LMCP.ByteBuffers is
 
    procedure Put_Boolean (This : in out ByteBuffer; Value : Boolean) is
    begin
-      This.Buffer (This.Position) := (if Value then 1 else 0);
+      This.Content (This.Position) := (if Value then 1 else 0);
       This.Position := This.Position + 1;
+      This.Length := This.Length + 1;
    end Put_Boolean;
 
    ---------------
@@ -487,8 +500,9 @@ package body AVTAS.LMCP.ByteBuffers is
 
    procedure Put_Int16 (This : in out ByteBuffer; Value : Int16) is
    begin
-      Insert_Int16 (Value, This.Buffer, Start => This.Position);
+      Insert_Int16 (Value, This.Content, Start => This.Position);
       This.Position := This.Position + 2;
+      This.Length := This.Length + 2;
    end Put_Int16;
 
    ----------------
@@ -497,8 +511,9 @@ package body AVTAS.LMCP.ByteBuffers is
 
    procedure Put_UInt16 (This : in out ByteBuffer; Value : UInt16) is
    begin
-      Insert_UInt16 (Value, This.Buffer, Start => This.Position);
+      Insert_UInt16 (Value, This.Content, Start => This.Position);
       This.Position := This.Position + 2;
+      This.Length := This.Length + 2;
    end Put_UInt16;
 
    ---------------
@@ -507,8 +522,9 @@ package body AVTAS.LMCP.ByteBuffers is
 
    procedure Put_Int32 (This : in out ByteBuffer; Value : Int32) is
    begin
-      Insert_Int32 (Value, This.Buffer, Start => This.Position);
+      Insert_Int32 (Value, This.Content, Start => This.Position);
       This.Position := This.Position + 4;
+      This.Length := This.Length + 4;
    end Put_Int32;
 
    ----------------
@@ -517,8 +533,9 @@ package body AVTAS.LMCP.ByteBuffers is
 
    procedure Put_UInt32 (This : in out ByteBuffer; Value : UInt32) is
    begin
-      Insert_UInt32 (Value, This.Buffer, Start => This.Position);
+      Insert_UInt32 (Value, This.Content, Start => This.Position);
       This.Position := This.Position + 4;
+      This.Length := This.Length + 4;
    end Put_UInt32;
 
    ---------------
@@ -527,8 +544,9 @@ package body AVTAS.LMCP.ByteBuffers is
 
    procedure Put_Int64 (This : in out ByteBuffer; Value : Int64) is
    begin
-      Insert_Int64 (Value, This.Buffer, Start => This.Position);
+      Insert_Int64 (Value, This.Content, Start => This.Position);
       This.Position := This.Position + 8;
+      This.Length := This.Length + 8;
    end Put_Int64;
 
    ----------------
@@ -537,8 +555,9 @@ package body AVTAS.LMCP.ByteBuffers is
 
    procedure Put_UInt64 (This : in out ByteBuffer; Value : UInt64) is
    begin
-      Insert_UInt64 (Value, This.Buffer, Start => This.Position);
+      Insert_UInt64 (Value, This.Content, Start => This.Position);
       This.Position := This.Position + 8;
+      This.Length := This.Length + 8;
    end Put_UInt64;
 
    ---------------
@@ -547,8 +566,9 @@ package body AVTAS.LMCP.ByteBuffers is
 
    procedure Put_Real32 (This : in out ByteBuffer; Value : Real32) is
    begin
-      Insert_Float (Value, This.Buffer, Start => This.Position);
+      Insert_Float (Value, This.Content, Start => This.Position);
       This.Position := This.Position + 4;
+      This.Length := This.Length + 4;
   end Put_Real32;
 
    ----------------
@@ -557,8 +577,9 @@ package body AVTAS.LMCP.ByteBuffers is
 
    procedure Put_Real64 (This : in out ByteBuffer; Value : Real64) is
    begin
-      Insert_Double (Value, This.Buffer, Start => This.Position);
+      Insert_Double (Value, This.Content, Start => This.Position);
       This.Position := This.Position + 8;
+      This.Length := This.Length + 8;
   end Put_Real64;
 
    ----------------
@@ -568,12 +589,13 @@ package body AVTAS.LMCP.ByteBuffers is
    procedure Put_String (This : in out ByteBuffer;  Value : String) is
       Result : System.Address with Unreferenced;
    begin
-      Insert_Int16 (Value'Length, This.Buffer, Start => This.Position);
+      Insert_Int16 (Value'Length, This.Content, Start => This.Position);
       This.Position := This.Position + 2;
-      Result := MemCopy (Destination => This.Buffer (This.Position)'Address,
+      Result := MemCopy (Destination => This.Content (This.Position)'Address,
                          Source      => Value'Address,
                          Count       => Storage_Count (Value'Length));
       This.Position := This.Position + Value'Length;
+      This.Length := This.Length + 2 + Value'Length;
    end Put_String;
 
    -------------------
@@ -583,10 +605,11 @@ package body AVTAS.LMCP.ByteBuffers is
    procedure Put_Raw_Bytes ( This : in out ByteBuffer; Value : String) is
       Result : System.Address with Unreferenced;
    begin
-      Result := MemCopy (Destination => This.Buffer (This.Position)'Address,
+      Result := MemCopy (Destination => This.Content (This.Position)'Address,
                          Source      => Value'Address,
                          Count       => Storage_Count (Value'Length));
       This.Position := This.Position + Value'Length;
+      This.Length := This.Length + Value'Length;
    end Put_Raw_Bytes;
 
    --------------------------
