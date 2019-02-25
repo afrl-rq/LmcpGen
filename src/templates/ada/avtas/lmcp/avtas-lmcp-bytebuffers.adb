@@ -10,7 +10,7 @@ package body AVTAS.LMCP.ByteBuffers is
    function Raw_Bytes (This : ByteBuffer) return Byte_Array is
      (This.Buffer (1 .. This.Position - 1));
      -- Position is one greater than the last index used in Buffer
-   
+
    ---------------
    -- Raw_Bytes --
    ---------------
@@ -45,14 +45,14 @@ package body AVTAS.LMCP.ByteBuffers is
    ---------------
 
    function Remaining (This : ByteBuffer) return UInt32 is
-      (This.Capacity - This.Position);
+      (This.Capacity - This.Position + 1);
 
    -------------------
    -- Has_Remaining --
    -------------------
 
    function Has_Remaining (This : ByteBuffer) return Boolean is
-     (This.Capacity - This.Position > 0);
+     (Remaining (This) > 0);
 
    --------------
    -- Position --
@@ -60,7 +60,7 @@ package body AVTAS.LMCP.ByteBuffers is
 
    function Position (This : ByteBuffer) return UInt32 is
      (This.Position);
-   
+
    --------------
    -- Checksum --
    --------------
@@ -73,7 +73,7 @@ package body AVTAS.LMCP.ByteBuffers is
       end loop;
       return Result;
    end Checksum;
-   
+
    -----------------
    -- Overlapping --
    -----------------
