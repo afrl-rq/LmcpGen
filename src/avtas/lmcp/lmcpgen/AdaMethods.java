@@ -344,8 +344,14 @@ public class AdaMethods {
             packageFileDir = packageFileDir.getParentFile();
             packageFileDir.mkdirs();
             File packageFile = new File(packageFileDir, packageName + ".ads");
-            packageFile.createNewFile();
-            Files.write(packageFile.toPath(), str.getBytes());
+            
+            // We do not want to write the package file if it already exists,
+            // because we may have previously written it, with necessary withs,
+            // on an earlier mdm. (This is particularly true for CMASI MDMs.)
+            if (!packageFile.exists()) {
+            	packageFile.createNewFile();
+            	Files.write(packageFile.toPath(), str.getBytes());
+            }
         }
 
         // Lowest level package definition text, returned as str
