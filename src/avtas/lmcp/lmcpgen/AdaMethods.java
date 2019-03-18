@@ -776,6 +776,16 @@ public class AdaMethods {
         }
     }
 
+    public static String all_descendants(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        String ret = "";
+        List<String> descendants = new ArrayList<String>();
+        add_descendants(infos, st.name, st.seriesName, descendants);
+        for(String child : descendants) {
+            ret += ws + "Descendants.Append (\"" + child + "\");\n";
+        }
+        return ret;
+    }
+  
     public static String global_factory_switch(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         StringBuffer buf = new StringBuffer();
         buf.append(ws + "case seriesId is\n");

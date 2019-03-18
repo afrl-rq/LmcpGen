@@ -3,6 +3,7 @@ with -<full_series_name_dots>-.enumerations; use -<full_series_name_dots>-.enume
 with avtas.lmcp.byteBuffers; use avtas.lmcp.byteBuffers;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Streams;
+with Ada.Containers.Indefinite_Vectors;
 
 -<with_all_field_types>-
 
@@ -19,8 +20,6 @@ package -<full_series_name_dots>-.-<datatype_name>- is
    --  The other languages start their enums at 1, whereas Ada starts at 0,
    --  so add 1. This is critical in the case statement (switch) in the 
    --  factories so that an object of the right subclass is created.
-   --  TODO: use the enumerals in the switch instead of numeric literals so
-   --  this will never be an issue (and then don't add one above).
 
    -<vector_package_import>-
 
@@ -45,6 +44,12 @@ package -<full_series_name_dots>-.-<datatype_name>- is
    procedure Unpack (This : out -<datatype_name>-; Buffer : in out ByteBuffer);
 
    --function toString(this : -<datatype_name>-; depth : Integer) return String;
+
+   package String_Vectors is new Ada.Containers.Indefinite_Vectors 
+      (Index_Type => Positive, Element_Type => String);
+   --  TODO: move to a single, shared instantiation
+
+   function -<datatype_name>-_Descendants return String_Vectors.Vector;
 
 private
 
