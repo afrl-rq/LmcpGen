@@ -1,7 +1,7 @@
 // ===============================================================================
 // Authors: AFRL/RQQA
 // Organization: Air Force Research Laboratory, Aerospace Systems Directorate, Power and Control Division
-// 
+//
 // Copyright (c) 2017 Government of the United State of America, as represented by
 // the Secretary of the Air Force.  No copyright is claimed in the United States under
 // Title 17, U.S. Code.  All Other Rights Reserved.
@@ -173,7 +173,7 @@ public class LmcpGen {
 
         return buf.toString();
     }
-    
+
     public static String FileIntoString(File file) throws Exception {
         return new String(Files.readAllBytes(file.toPath()));
     }
@@ -201,7 +201,7 @@ public class LmcpGen {
         return true;
     }
 
-    /** calls the methodClass methods based on strings encountered in the file.  Each tag has a -<\\w*>- format */
+    /** calls the methodClass methods based on strings encountered in the file.  Each tag has a -&lt;\\w*&gt;- format */
     public static String replaceTags(String input, File outfile, Class<?> methodClass,
             MDMInfo[] infos, MDMInfo info, StructInfo st, EnumInfo en) throws Exception {
         String outputStr = input;

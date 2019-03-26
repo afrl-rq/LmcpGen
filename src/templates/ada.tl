@@ -19,7 +19,6 @@ PER_MDM ada/mdm-factory.ads src/-<series_dir>-/-<full_series_name_dashes>--facto
 PER_MDM ada/mdm-factory.adb src/-<series_dir>-/-<full_series_name_dashes>--factory.adb
 PER_MDM ada/enumerations.ads src/-<series_dir>-/-<full_series_name_dashes>--enumerations.ads
 PER_MDM ada/mdm-object.ads src/-<series_dir>-/-<full_series_name_dashes>--object.ads
-PER_MDM ada/mdm-object.adb src/-<series_dir>-/-<full_series_name_dashes>--object.adb
 
 
 PER_STRUCT	ada/series_object.ads          src/-<series_dir>-/-<full_datatype_name_dashes_lowercase>-.ads

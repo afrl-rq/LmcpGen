@@ -4,31 +4,33 @@ with Ada.Streams;
 with Utilities;
 
 package avtas.lmcp.object is
-   
-   type Object is tagged null record;
+
+   type Object is abstract tagged null record;
    type Object_Acc is access all Object;
    type Object_Any is access all Object'Class;
-   
-   function clone(this, that: Object_Acc) return Object_Acc is abstract;
-   
-   function "="(this, that: Object) return Boolean is (True);
-     
+
+--     function clone(this, that: access Object) return Object_Acc is abstract;
+
+   overriding
+   function "=" (This, That : Object) return Boolean is (True);  -- FIXME
+
    function getLmcpTypeName(this : Object) return String is ("Object");
-   
+
    function getFullLmcpTypeName(this : Object) return String is ("avtas.lmcp.object.Object");
-   
+
    function getLmcpType(this : Object) return UInt32 is (0);
-   
+
    function getSeriesName(this : Object) return String is ("");
-   
+
    function getSeriesNameAsLong(this : Object) return Int64 is (0);
-   
+
    function getSeriesVersion(this : Object) return UInt16 is (0);
 
    function calculatePackedSize(this : Object) return UInt32 is (0);
 
-   procedure pack(object_acc : in Object_Any; buf : in out ByteBuffer);
-   procedure unpack(buf : in out ByteBuffer; object_acc : in out Object_Any);
+   procedure Pack (This : Object; Buf : in out ByteBuffer) is null;
+
+   procedure Unpack (This : out Object; Buf : in out ByteBuffer) is null;
 
    -- XML output
    function LeftPad is new Utilities.LeftPad (Width => 2);
@@ -42,3 +44,4 @@ package avtas.lmcp.object is
                         Level : Natural) is null;
    
 end avtas.lmcp.object;
+
