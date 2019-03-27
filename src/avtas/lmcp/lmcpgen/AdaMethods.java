@@ -1091,11 +1091,18 @@ public class AdaMethods {
     };
 
     public static String calculate_packed_size_body(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        String parentDataType = getFullParentDatatype(infos, info, outfile, st, en, ws);
         String str = "";
         str += ws + "overriding\n";
         str += ws + "function calculatePackedSize(this : " + getDeconflictedName(st.name) + ") return UInt32 is\n";
         str += ws + "  size : UInt32 := 0;\n";
         str += ws + "begin\n";
+
+        if (parentDataType != null) {
+           str += ws + "   -- call parent version statically\n";
+           str += ws + "   Size := Size + calculatePackedSize (" + parentDataType + " (this));\n";
+        }
+
         for (int i = 0; i < st.fields.length; i++) {
              switch (getAdaTypeCategory(infos,st.fields[i])) {
                 case SINGLE_PRIMITIVE:
