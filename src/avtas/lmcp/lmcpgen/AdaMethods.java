@@ -979,7 +979,7 @@ public class AdaMethods {
                         str += ws + "   begin\n";
                         str += ws + "      Buffer.Get_UInt16(length);\n";
                     }
-                    // TODO: delete any old content from vector
+                    str += ws + "      This.get" + fieldname + ".Clear;  -- delete old content\n";
                     str += ws + "      for i in 1 .. length loop\n";
                     str += ws + "         Buffer.Get_" + getAdaPrimativeType(infos, st.fields[i]) + "(item);\n";
                     str += ws + "         This.get" + fieldname + ".Append(item);\n";
@@ -999,7 +999,7 @@ public class AdaMethods {
                         str += ws + "   begin\n";
                         str += ws + "      Buffer.Get_UInt16(length);\n";
                     }
-                    // TODO: delete any old content from vector
+                    str += ws + "      This.get" + fieldname + ".Clear;  -- delete old content\n";
                     str += ws + "      for i in 1 .. length loop\n";
                     str += ws + "         Buffer.Get_Int32(item);\n";
                     str += ws + "         This.get" + fieldname + ".Append(ToEnum(item));\n";
@@ -1020,7 +1020,7 @@ public class AdaMethods {
                     str += ws + "      length : " + lengthType + ";\n";
                     str += ws + "   begin\n";
                     str += ws + "      Buffer.Get_" + lengthType + "(length);\n";
-                    // TODO: delete any old content from vector
+                    str += ws + "      This.get" + fieldname + ".Clear;  -- delete old content\n";
                     str += ws + "      for i in 1 .. length loop\n";
                     str += ws + "         Buffer.Get_Boolean(fieldExists);\n";
                     str += ws + "         if fieldExists then\n";
