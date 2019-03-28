@@ -230,10 +230,12 @@ package AVTAS.LMCP.ByteBuffers is
 
 private
 
+   subtype Natural_Index is UInt32 range 0 .. Maximum_Length;
+
    type ByteBuffer (Capacity : Index) is tagged record
       Content  : Byte_Array (1 .. Capacity) := (others => 0);
       Position : Index := 1;    -- reset to 1 by Rewind
-      Length   : UInt32 := 0;   -- reset to by Clear
+      Length   : Natural_Index := 0;   -- reset to by Clear
    end record;
 
 end AVTAS.LMCP.ByteBuffers;

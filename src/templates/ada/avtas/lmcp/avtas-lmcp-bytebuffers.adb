@@ -435,18 +435,22 @@ package body AVTAS.LMCP.ByteBuffers is
       Last  : out Natural)
    is
       Result : System.Address with Unreferenced;
-      Length : Index;
+      Length : UInt32;
    begin
       Retrieve_Int16 (Int16 (Length), This.Content, Start => This.Position);
       This.Position := This.Position + 2;
-      if This.Position + Length > This.Capacity then
-         Length := This.Capacity;
+      if Length > This.Length then
+         Length := This.Length;
       end if;
-      Result := MemCopy (Source      => This.Content (This.Position)'Address,
-                         Destination => Value'Address,
-                         Count       => Storage_Count (Length));
-      This.Position := This.Position + Length;
-      Last := Value'First + Natural (Length) - 1;
+      if Length = 0 then
+         Last := Value'First - 1;
+      else
+         Result := MemCopy (Source      => This.Content (This.Position)'Address,
+                            Destination => Value'Address,
+                            Count       => Storage_Count (Length));
+         This.Position := This.Position + Length;
+         Last := Value'First + Natural (Length) - 1;
+      end if;
    end Get_String;
 
    --------------------------
@@ -457,17 +461,27 @@ package body AVTAS.LMCP.ByteBuffers is
      (This  : in out ByteBuffer;
       Value : out Unbounded_String)
    is
-      Length : Index;
+      Result : System.Address with Unreferenced;
+      Length : UInt16;
    begin
-      Retrieve_Int16 (Int16 (Length), This.Content, Start => This.Position);
-      declare
-         S : String (1 .. Integer (Length));
-         Last : Natural;
-      begin
-         This.Get_String (S, Last);
-         pragma Assert (Last = Integer (Length));
-         Value := To_Unbounded_String (S);
-      end;
+      Retrieve_UInt16 (Length, This.Content, Start => This.Position);
+      This.Position := This.Position + 2;
+      if Length > UInt16 (This.Length) then
+         Length := UInt16 (This.Length);
+      end if;
+      if Length = 0 then
+         Value := Null_Unbounded_String;
+      else
+         declare
+            S : String (1 .. Integer (Length));
+         begin
+            Result := MemCopy (Source      => This.Content (This.Position)'Address,
+                               Destination => S'Address,
+                               Count       => Storage_Count (Length));
+            This.Position := This.Position + Index (Length);
+            Value := To_Unbounded_String (S);
+         end;
+      end if;
    end Get_Unbounded_String;
 
    --------------
