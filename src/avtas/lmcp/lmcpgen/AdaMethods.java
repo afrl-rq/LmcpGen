@@ -121,8 +121,10 @@ public class AdaMethods {
         return getSeriesNamespaceDashes(infos, st.seriesName).toLowerCase() + getDeconflictedName(st.name).toLowerCase();
     }
 
+    //  used ONLY to get the subscription value in the series package spec template, so it MUST NOT provide deconflicted values
     public static String full_datatype_name_dots(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
-        return getSeriesNamespaceDots(infos, st.seriesName) + getDeconflictedName(st.name);
+        MDMInfo i = MDMReader.getMDM(st.seriesName, infos);
+        return i.namespace.replaceAll("/", ".") + "." + st.name;
     }
 
     public static String datatype_id(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
