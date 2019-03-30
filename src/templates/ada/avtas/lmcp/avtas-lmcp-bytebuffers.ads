@@ -8,7 +8,10 @@ package AVTAS.LMCP.ByteBuffers is
 
    subtype Index is UInt32 range 1 .. Maximum_Length;
 
-   type ByteBuffer (Capacity : Index) is tagged private;
+   type ByteBuffer (Capacity : Index) is tagged private with
+     Default_Initial_Condition =>
+       Position (ByteBuffer) = 1 and
+       Length (ByteBuffer) = 0;
 
    procedure Rewind (This : in out ByteBuffer) with
      Post'Class => Position (This) = 1 and
@@ -129,8 +132,11 @@ package AVTAS.LMCP.ByteBuffers is
    with
      Pre'Class  => Remaining (This) >= 2,
      Post'Class =>
-       Last <= Value'Last and
-       (if Last = Value'First - 1  then Position (This) = Position (This'Old) + 2) and  -- +2 for length read but nothing else read
+       --  Last is Value'First - 1 when the number of characters is read as zero, otherwise it is in Value'Range
+       Last in Value'First - 1 .. Value'Last and
+       --  we read the length, which was zero, so nothing else was read
+       (if Last = Value'First - 1  then Position (This) = Position (This'Old) + 2) and
+       --  we read the length, which was nonzero, and then that many characters
        (if Last /= Value'First - 1 then Position (This) = Position (This'Old) + 2 + UInt32(Last - Value'First + 1)) and
        Length (This) = Length (This)'Old;
    --  The string content is preceeded in the buffer by a two-byte length,
@@ -143,89 +149,80 @@ package AVTAS.LMCP.ByteBuffers is
    with
      Pre'Class  => Remaining (This) >= 3,
      Post'Class =>
-       (if Value = Null_Unbounded_String  then Position (This) = Position (This'Old) + 2) and  -- +2 for length read
+       --  we read the length, which was zero, so nothing else was read
+       (if Value = Null_Unbounded_String  then Position (This) = Position (This'Old) + 2) and
+       --  we read the length, which was nonzero, and then that many characters
        (if Value /= Null_Unbounded_String then Position (This) = Position (This'Old) + 2 + UInt32 (Length (Value))) and
        Length (This) = Length (This)'Old;
 
    procedure Put_Byte (This : in out ByteBuffer;  Value : Byte) with
      Pre'Class  => Remaining (This) >= 1,
-     Post'Class =>
-       Position (This) = Position (This)'Old + 1 and
-       Length (This) = Length (This)'Old + 1;
+     Post'Class => Position (This) = Position (This)'Old + 1 and
+                   Length (This) = Length (This)'Old + 1;
 
    procedure Put_Boolean (This : in out ByteBuffer;  Value : Boolean) with
      Pre'Class  => Remaining (This) >= 1,
-     Post'Class =>
-       Position (This) = Position (This)'Old + 1 and
-       Length (This) = Length (This)'Old + 1;
+     Post'Class => Position (This) = Position (This)'Old + 1 and
+                   Length (This) = Length (This)'Old + 1;
 
    procedure Put_Int16 (This : in out ByteBuffer;  Value : Int16) with
      Pre'Class  => Remaining (This) >= 2,
-     Post'Class =>
-       Position (This) = Position (This)'Old + 2 and
-       Length (This) = Length (This)'Old + 2;
+     Post'Class => Position (This) = Position (This)'Old + 2 and
+                   Length (This) = Length (This)'Old + 2;
 
    procedure Put_Short (This : in out ByteBuffer;  Value : Int16) renames Put_Int16;
 
    procedure Put_UInt16 (This : in out ByteBuffer;  Value : UInt16) with
      Pre'Class  => Remaining (This) >= 2,
-     Post'Class =>
-       Position (This) = Position (This)'Old + 2 and
-       Length (This) = Length (This)'Old + 2;
+     Post'Class => Position (This) = Position (This)'Old + 2 and
+                   Length (This) = Length (This)'Old + 2;
 
    procedure Put_UShort (This : in out ByteBuffer;  Value : UInt16) renames Put_UInt16;
 
    procedure Put_Int32 (This : in out ByteBuffer;  Value : Int32) with
      Pre'Class  => Remaining (This) >= 4,
-     Post'Class =>
-       Position (This) = Position (This)'Old + 4 and
-       Length (This) = Length (This)'Old + 4;
+     Post'Class => Position (This) = Position (This)'Old + 4 and
+                   Length (This) = Length (This)'Old + 4;
 
    procedure Put_Int (This : in out ByteBuffer;  Value : Int32) renames Put_Int32;
 
    procedure Put_UInt32 (This : in out ByteBuffer;  Value : UInt32) with
      Pre'Class  => Remaining (This) >= 4,
-     Post'Class =>
-       Position (This) = Position (This)'Old + 4 and
-       Length (This) = Length (This)'Old + 4;
+     Post'Class => Position (This) = Position (This)'Old + 4 and
+                   Length (This) = Length (This)'Old + 4;
 
    procedure Put_UInt (This : in out ByteBuffer;  Value : UInt32) renames Put_UInt32;
 
    procedure Put_Int64 (This : in out ByteBuffer;  Value : Int64) with
      Pre'Class  => Remaining (This) >= 8,
-     Post'Class =>
-       Position (This) = Position (This)'Old + 8 and
-       Length (This) = Length (This)'Old + 8;
+     Post'Class => Position (This) = Position (This)'Old + 8 and
+                   Length (This) = Length (This)'Old + 8;
 
    procedure Put_Long (This : in out ByteBuffer;  Value : Int64) renames Put_Int64;
 
    procedure Put_UInt64 (This : in out ByteBuffer;  Value : UInt64) with
      Pre'Class  => Remaining (This) >= 8,
-     Post'Class =>
-       Position (This) = Position (This)'Old + 8 and
-       Length (This) = Length (This)'Old + 8;
+     Post'Class => Position (This) = Position (This)'Old + 8 and
+                   Length (This) = Length (This)'Old + 8;
 
    procedure Put_ULong (This : in out ByteBuffer;  Value : UInt64) renames Put_UInt64;
 
    --  ByteBuffer & putFloat(float f);
    procedure Put_Real32 (This : in out ByteBuffer;  Value : Real32) with
      Pre'Class  => Remaining (This) >= 4,
-     Post'Class =>
-       Position (This) = Position (This)'Old + 4 and
-       Length (This) = Length (This)'Old + 4;
+     Post'Class => Position (This) = Position (This)'Old + 4 and
+                   Length (This) = Length (This)'Old + 4;
 
    --  ByteBuffer & putDouble(double d);
    procedure Put_Real64 (This : in out ByteBuffer;  Value : Real64) with
      Pre'Class  => Remaining (This) >= 8,
-     Post'Class =>
-       Position (This) = Position (This)'Old + 8 and
-       Length (This) = Length (This)'Old + 8;
+     Post'Class => Position (This) = Position (This)'Old + 8 and
+                   Length (This) = Length (This)'Old + 8;
 
    procedure Put_String (This : in out ByteBuffer;  Value : String) with
      Pre'Class  => Remaining (This) >= Value'Length + 2,  -- 2 bytes for the length
-     Post'Class =>
-       Position (This) = Position (This)'Old + 2 + Value'Length and
-       Length (This) = Length (This)'Old + Value'Length + 2;
+     Post'Class => Position (This) = Position (This)'Old + 2 + Value'Length and
+                   Length (This) = Length (This)'Old + Value'Length + 2;
 
    -- Populate the ByteBuffer from the bytes in a String. Useful for then
    -- rewinding and reading back out meaningful objects. The input Value is a
