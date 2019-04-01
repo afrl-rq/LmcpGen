@@ -1109,14 +1109,14 @@ public class AdaMethods {
              switch (getAdaTypeCategory(infos,st.fields[i])) {
                 case SINGLE_PRIMITIVE:
                     if(st.fields[i].type.equalsIgnoreCase("string")) {
-                        str += ws + "   size := size + 2 + UInt32(Length(this." + getDeconflictedName(st.fields[i].name) + "))*Character\'Size/8;\n";
+                        str += ws + "   size := size + 2 + UInt32(Length(this." + getDeconflictedName(st.fields[i].name) + "))*Character\'Object_Size/8;\n";
                     }
                     else {
-                        str += ws + "   size := size + " + getAdaPrimativeType(infos, st.fields[i]) + "\'Size/8;\n";
+                        str += ws + "   size := size + " + getAdaPrimativeType(infos, st.fields[i]) + "\'Object_Size/8;\n";
                     }
                     break;
                 case SINGLE_ENUM:
-                    str += ws + "   size := size + Int32\'Size/8;\n";
+                    str += ws + "   size := size + Int32\'Object_Size/8;\n";
                     break;
                 case SINGLE_NODE_STRUCT:
                 case SINGLE_LEAF_STRUCT:
@@ -1135,11 +1135,11 @@ public class AdaMethods {
                     }
                     if(st.fields[i].type.equalsIgnoreCase("string")) {
                         str += ws + "   for i of this." + getDeconflictedName(st.fields[i].name) + " loop\n";
-                        str += ws + "      size := size + 2 + UInt32(Length(i))*Character\'Size/8;\n";
+                        str += ws + "      size := size + 2 + UInt32(Length(i))*Character\'Object_Size/8;\n";
                         str += ws + "   end loop;\n";
                     }
                     else {
-                        str += ws + "   size := size + UInt32(this." + getDeconflictedName(st.fields[i].name) + ".Length)*" + getAdaPrimativeType(infos, st.fields[i]) + "\'Size/8;\n";
+                        str += ws + "   size := size + UInt32(this." + getDeconflictedName(st.fields[i].name) + ".Length)*" + getAdaPrimativeType(infos, st.fields[i]) + "\'Object_Size/8;\n";
                     }
                     break;
                 case VECTOR_ENUM:
@@ -1149,7 +1149,7 @@ public class AdaMethods {
                     else {
                         str += ws + "   size := size + 2;\n";
                     }
-                    str += ws + "   size := size + UInt32(this." + getDeconflictedName(st.fields[i].name) + ".Length)*Int32\'Size/8;\n";
+                    str += ws + "   size := size + UInt32(this." + getDeconflictedName(st.fields[i].name) + ".Length)*Int32\'Object_Size/8;\n";
                     break;
                 case VECTOR_NODE_STRUCT:
                 case VECTOR_LEAF_STRUCT:
@@ -1171,16 +1171,16 @@ public class AdaMethods {
                     str += ws + "   size := size + 2;\n";
                     if(st.fields[i].type.equalsIgnoreCase("string")) {
                         str += ws + "   for i of this." + getDeconflictedName(st.fields[i].name) + ".all loop\n";
-                        str += ws + "      size := size + 2 + UInt32(Length(i))*Character\'Size/8;\n";
+                        str += ws + "      size := size + 2 + UInt32(Length(i))*Character\'Object_Size/8;\n";
                         str += ws + "   end loop;\n";
                     }
                     else {
-                        str += ws + "   size := size + UInt32(this." + getDeconflictedName(st.fields[i].name) + ".all'Length)*" + getAdaPrimativeType(infos, st.fields[i]) + "'Size/8;\n";
+                        str += ws + "   size := size + UInt32(this." + getDeconflictedName(st.fields[i].name) + ".all'Length)*" + getAdaPrimativeType(infos, st.fields[i]) + "'Object_Size/8;\n";
                     }
                     break;
                 case FIXED_ARRAY_ENUM:
                     str += ws + "   size := size + 2;\n";
-                    str += ws + "   size := size + UInt32(this." + getDeconflictedName(st.fields[i].name) + ".all'Length)*UInt32'Size/8;\n";
+                    str += ws + "   size := size + UInt32(this." + getDeconflictedName(st.fields[i].name) + ".all'Length)*UInt32'Object_Size/8;\n";
                     break;
                 case FIXED_ARRAY_NODE_STRUCT:
                 case FIXED_ARRAY_LEAF_STRUCT:
