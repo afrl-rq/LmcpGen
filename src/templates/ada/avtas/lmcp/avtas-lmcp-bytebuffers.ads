@@ -234,7 +234,7 @@ package AVTAS.LMCP.ByteBuffers is
        Length (This) = Length (This)'Old + Value'Length; -- we don't write the length attr
 
    procedure Put_Unbounded_String (This : in out ByteBuffer; Value : Unbounded_String) with
-     Pre'Class  => Value /= "" and Integer (Remaining (This)) >= 2 + Length (Value),  -- 2 bytes for the length
+     Pre'Class  => Integer (Remaining (This)) >= 2 + Length (Value),  -- 2 bytes for the length
      Post'Class =>
        Position (This) = Position (This)'Old + 2 + UInt32 (Length (Value)) and
        Length (This) = Length (This)'Old + 2 + UInt32 (Length (Value));
