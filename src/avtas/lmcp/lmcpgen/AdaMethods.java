@@ -948,23 +948,22 @@ public class AdaMethods {
                     break;
                 case SINGLE_NODE_STRUCT:
                 case SINGLE_LEAF_STRUCT:
-                    //String accessSuffix = (has_descendants(infos, st.fields[i].type, st.fields[i].seriesName) ? "_Any" : "_Acc");
-                    String accessSuffix = "_Any";
+                    String accessSuffix = (has_descendants(infos, st.fields[i].type, st.fields[i].seriesName) ? "_Any" : "_Acc");
+                    String component_name = "This." + st.fields[i].name;
                     String fieldtype = getSeriesNamespaceDots(infos, st.fields[i].seriesName) + getDeconflictedName(st.fields[i].type) + "." + getDeconflictedName(st.fields[i].type) + accessSuffix;
                     str += ws + "   declare\n";
                     str += ws + "      fieldExists : Boolean;\n";
                     str += ws + "      seriesId : Int64;\n";
                     str += ws + "      msgType : UInt32;\n";
                     str += ws + "      version : UInt16;\n";
-                    str += ws + "      o : " + fieldtype + ";\n";
                     str += ws + "   begin\n";
                     str += ws + "      Buffer.Get_Boolean(fieldExists);\n";
                     str += ws + "      if fieldExists then\n";
                     str += ws + "         Buffer.Get_Int64(seriesId);\n";
                     str += ws + "         Buffer.Get_UInt32(msgType);\n";
                     str += ws + "         Buffer.Get_UInt16(version);\n";
-                    str += ws + "         O := " + fieldtype + "(avtas.lmcp.factory.createObject(seriesId, msgType, version));\n";
-                    str += ws + "         O.Unpack (Buffer);\n";
+                    str += ws + "         " + component_name + " := " + fieldtype + "(avtas.lmcp.factory.createObject(seriesId, msgType, version));\n";
+                    str += ws + "         " + component_name + ".Unpack (Buffer);\n";
                     str += ws + "      end if;\n";
                     str += ws + "   end;\n";
                     break;
