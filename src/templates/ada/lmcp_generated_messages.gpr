@@ -1,0 +1,27 @@
+project LMCP_Generated_Messages is
+
+   for Source_Dirs use ("src/**");
+
+   type Modes is ("debug", "release");
+   Generated_Msgs_Mode : Modes := external ("GEN_MSGS_MODE", "debug");
+
+   for Object_Dir use "objs/" & Generated_Msgs_Mode;
+
+   package Compiler is
+      case Generated_Msgs_Mode is
+         when "debug" =>
+            for Default_Switches ("ada") use
+              ("-g",
+               -- don't enable warnings because there are too many "unreferenced" messages
+               "-O0");
+         when "release" =>
+            for Default_Switches ("ada") use
+              ("-O2",
+               "-gnatn",
+               "-gnatp",
+               "-fdata-sections",
+               "-ffunction-sections");
+      end case;
+   end Compiler;
+
+end LMCP_Generated_Messages;
