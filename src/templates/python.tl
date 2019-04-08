@@ -9,6 +9,7 @@ ONCE               py/LMCPClient.py            LMCPClient.py
 ONCE               py/__init__.py              lmcp/__init__.py
 ONCE               py/__init__.py              __init__.py
 ONCE               py/Readme.html              Readme.html
+ONCE               py/GenRefMsgs.py 		   GenRefMsgs.py
 
 PER_STRUCT 	   py/SeriesObject.py	       -<series_dir>-/-<datatype_name>-.py
 PER_ENUM           py/enum.py	               -<series_dir>-/-<enum_name>-.py
