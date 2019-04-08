@@ -12,7 +12,7 @@ project LMCP_Generated_Messages is
          when "debug" =>
             for Default_Switches ("ada") use
               ("-g",
-               -- don't enable warnings because there are too many "unreferenced" messages
+               "-gnatwaRU", -- enables warnings but but not about unused and unreferenced entities
                "-O0");
          when "release" =>
             for Default_Switches ("ada") use
