@@ -668,44 +668,58 @@ class PythonMethods {
         boolean first = true;
         for (FieldInfo f : st.fields) {
             String name = "self." + f.name;
-            if (first) {
-                buf.append(ws + "        if e.localName == \"" + f.name + "\" and len(e.childNodes) > 0 :\n");
-                first = false;
+
+            if (f.type.equalsIgnoreCase("string")) {
+                if (first) {
+                    buf.append(ws + "        if e.localName == \"" + f.name + "\" :\n");
+                    first = false;
+                }
+                else {
+                    buf.append(ws + "        elif e.localName == \"" + f.name + "\" :\n");
+                }
+
+                buf.append(ws + "            " + name + " = " + getPythonType(f.type) + "(e.childNodes[0].nodeValue) if len(e.childNodes) > 0 else \"\"\n");
             }
             else {
-                buf.append(ws + "        elif e.localName == \"" + f.name + "\" and len(e.childNodes) > 0 :\n");
-            }
-            if (!f.isArray) {
-                if (f.isStruct) {
-                    buf.append(ws + "            for n in e.childNodes:\n" );
-                    buf.append(ws + "                if n.nodeType == xml.dom.Node.ELEMENT_NODE:\n");
-                    buf.append(ws + "                    " + name + " = seriesFactory.createObjectByName(n.getAttribute('Series'), n.localName)\n");
-                    buf.append(ws + "                    if " + name + " != None:\n");
-                    buf.append(ws + "                        " + name + ".unpackFromXMLNode(n, seriesFactory)\n");
-                } else if (f.isEnum) {
-                    buf.append(ws + "            " + name + " = " + f.type  + ".get_" + f.type + "_str(e.childNodes[0].nodeValue)\n");
-                } else if (f.type.equalsIgnoreCase("Bool")) {
-                    buf.append(ws + "            " + name + " = e.childNodes[0].nodeValue.lower() == 'true'\n");
-                } else {
-                    buf.append(ws + "            " + name + " = " + getPythonType(f.type) + "(e.childNodes[0].nodeValue)\n");
+                if (first) {
+                    buf.append(ws + "        if e.localName == \"" + f.name + "\" and len(e.childNodes) > 0 :\n");
+                    first = false;
                 }
-            // struct arrays
-            } else {
-                buf.append(ws + "            " + name + " = []\n");
-                buf.append(ws + "            for c in e.childNodes:\n");
-                buf.append(ws + "                if c.nodeType == xml.dom.Node.ELEMENT_NODE:\n");
-                if (f.isStruct) {
-                    buf.append(ws + "                    obj = seriesFactory.createObjectByName(c.getAttribute('Series'), c.localName)\n");
-                    buf.append(ws + "                    if obj != None:\n");
-                    buf.append(ws + "                        obj.unpackFromXMLNode(c, seriesFactory)\n");
-                    buf.append(ws + "                        " + name + ".append(obj)\n");
+                else {
+                    buf.append(ws + "        elif e.localName == \"" + f.name + "\" and len(e.childNodes) > 0 :\n");
                 }
-                else if (f.isEnum) {
-                    buf.append(ws + "                    " + name + ".append( " + f.type + ".get_" + f.type + "_str(c.childNodes[0].nodeValue) )\n");
-                } else if (f.type.equalsIgnoreCase("Bool")) {
-                    buf.append(ws + "                    " + name + ".append( c.childNodes[0].nodeValue.lower() == 'true' )\n");
+                if (!f.isArray) {
+                    if (f.isStruct) {
+                        buf.append(ws + "            for n in e.childNodes:\n" );
+                        buf.append(ws + "                if n.nodeType == xml.dom.Node.ELEMENT_NODE:\n");
+                        buf.append(ws + "                    " + name + " = seriesFactory.createObjectByName(n.getAttribute('Series'), n.localName)\n");
+                        buf.append(ws + "                    if " + name + " != None:\n");
+                        buf.append(ws + "                        " + name + ".unpackFromXMLNode(n, seriesFactory)\n");
+                    } else if (f.isEnum) {
+                        buf.append(ws + "            " + name + " = " + f.type  + ".get_" + f.type + "_str(e.childNodes[0].nodeValue)\n");
+                    } else if (f.type.equalsIgnoreCase("Bool")) {
+                        buf.append(ws + "            " + name + " = e.childNodes[0].nodeValue.lower() == 'true'\n");
+                    } else {
+                        buf.append(ws + "            " + name + " = " + getPythonType(f.type) + "(e.childNodes[0].nodeValue)\n");
+                    }
+                    // struct arrays
                 } else {
-                    buf.append(ws + "                    " + name + ".append( " + getPythonType(f.type) + "(c.childNodes[0].nodeValue) )\n");
+                    buf.append(ws + "            " + name + " = []\n");
+                    buf.append(ws + "            for c in e.childNodes:\n");
+                    buf.append(ws + "                if c.nodeType == xml.dom.Node.ELEMENT_NODE:\n");
+                    if (f.isStruct) {
+                        buf.append(ws + "                    obj = seriesFactory.createObjectByName(c.getAttribute('Series'), c.localName)\n");
+                        buf.append(ws + "                    if obj != None:\n");
+                        buf.append(ws + "                        obj.unpackFromXMLNode(c, seriesFactory)\n");
+                        buf.append(ws + "                        " + name + ".append(obj)\n");
+                    }
+                    else if (f.isEnum) {
+                        buf.append(ws + "                    " + name + ".append( " + f.type + ".get_" + f.type + "_str(c.childNodes[0].nodeValue) )\n");
+                    } else if (f.type.equalsIgnoreCase("Bool")) {
+                        buf.append(ws + "                    " + name + ".append( c.childNodes[0].nodeValue.lower() == 'true' )\n");
+                    } else {
+                        buf.append(ws + "                    " + name + ".append( " + getPythonType(f.type) + "(c.childNodes[0].nodeValue) )\n");
+                    }
                 }
             }
         }
