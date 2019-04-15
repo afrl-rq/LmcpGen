@@ -612,12 +612,10 @@ class PythonMethods {
 
                 str += ws + "buf += ws + \"</" + f.name + ">\\n\"\n";
             } else if (f.isStruct) {
-                str += ws + "buf += ws + \"<" + f.name + ">\\n\"\n";
-                str += ws + "if " + name + " == None:\n";
-                str += ws + "    buf += ws + \"    <null/>\\n\"\n";
-                str += ws + "else:\n";
+                str += ws + "if " + name + " != None:\n";
+                str += ws + "    buf += ws + \"<" + f.name + ">\\n\"\n";
                 str += ws + "    buf += ws + " + name + ".toXMLStr(ws + \"    \") \n";
-                str += ws + "buf += ws + \"</" + f.name + ">\\n\"\n";
+                str += ws + "    buf += ws + \"</" + f.name + ">\\n\"\n";
             } else if (f.isEnum) {
                 str += ws + "buf += ws + \"<" + f.name + ">\" + " + f.type + ".get_" + f.type + "_int(" + name + ") + \"</" + f.name + ">\\n\"\n";
             } else if (f.type.equalsIgnoreCase("Bool")) {
