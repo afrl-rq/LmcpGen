@@ -10,6 +10,7 @@
 // This file was auto-created by LmcpGen. Modifications will be overwritten.
 
 #include <cassert>
+#include <limits>
 #include <sstream>
 #include <iomanip>
 #include "-<series_dir>-/-<datatype_name>-.h"
@@ -110,7 +111,7 @@
    {
       std::string indent(depth*3, ' ');
       std::ostringstream oss;
-      oss << std::setprecision(15);
+      oss << std::setprecision(std::numeric_limits<double>::max_digits10);
       oss << indent << "Object ( -<datatype_name>- ) {\n";
       indent = std::string((++depth)*3, ' ');
       -<tostring_attributes>-
@@ -123,7 +124,7 @@
    {
       std::string ws(depth*3, ' ');
       std::ostringstream str;
-      str << std::setprecision(15);
+      str << std::setprecision(std::numeric_limits<double>::max_digits10);
       -<xml_write_object>-
       return str.str();
    }
