@@ -85,43 +85,42 @@ int main(int argc, char* argv[])
 						{
 							if (testByteBuffer->get(i) != refByteBuffer.get(i))
 							{
-								std::cerr << "    Error: binary -> msg -> binary doesn't match reference" << std::endl;
+								std::cerr << "    Error: ref binary -> msg -> binary doesn't match" << std::endl;
 								break;
 							}
 						}
 					}
 					else
 					{
-						std::cerr << "    Error: binary -> msg -> binary doesn't match reference" << std::endl;
+						std::cerr << "    Error: ref binary -> msg -> binary doesn't match" << std::endl;
 					}
-				}
-				else
-				{
-					std::cerr << "    Error: unable to construct message object from '" << filename << "'" << std::endl;
-				}
 
-				ifs.close();
-			}
-		}
-		else if (ext.compare("xml") == 0)
-		{
-			std::ifstream ifs(filename);
+					// Test xml roundtrip (via reference binary)
+					msg.reset(avtas::lmcp::xml::readXML(msg->toXML()));
 
-			if (ifs.is_open())
-			{
-				std::cout << "Checking '" << filename << "'" << std::endl;
-
-				std::stringstream buffer;
-				buffer << ifs.rdbuf();
-				auto refXML = buffer.str();
-
-				std::unique_ptr<avtas::lmcp::Object> testMsg(avtas::lmcp::xml::readXML(refXML));
-
-				if (testMsg)
-				{
-					if (testMsg->toXML().compare(refXML) != 0)
+					if (msg)
 					{
-						std::cerr << "    Error: xml -> msg -> xml doesn't match reference" << std::endl;
+						testByteBuffer.reset(avtas::lmcp::Factory::packMessage(msg.get(), enableChecksum));
+
+						if (refByteBuffer.capacity() == testByteBuffer->capacity())
+						{
+							for (size_t i=0; i < refByteBuffer.capacity(); i++)
+							{
+								if (testByteBuffer->get(i) != refByteBuffer.get(i))
+								{
+									std::cerr << "    Error: ref binary -> msg -> xml -> msg -> binary doesn't match" << std::endl;
+									break;
+								}
+							}
+						}
+						else
+						{
+							std::cerr << "    Error: ref binary -> msg -> xml -> msg -> binary doesn't match" << std::endl;
+						}
+					}
+					else
+					{
+						std::cerr << "    Error: unable to construct message object from xml" << std::endl;
 					}
 				}
 				else

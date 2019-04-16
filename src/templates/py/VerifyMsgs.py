@@ -55,8 +55,7 @@ def main():
     ref_files = []
 
     for root, _, files in os.walk(str(args.dir)):
-        # filter to all xml files that have a corresponding binary file (no extension) with the same name
-        ref_files += [(file, root) for file in files if (not file.endswith(".xml")) & os.path.isfile(os.path.join(root, file + '.xml'))]
+        ref_files += [(file, root) for file in files if os.path.isfile(os.path.join(root, file))]
 
     width = len(str(len(ref_files)))
 
@@ -66,29 +65,27 @@ def main():
         print(str('{:>0' + str(width) + '}/{:>' + str(width) + '}: checking \'{}\'').format(current, len(ref_files), os.path.join(path, msg_name)))
         current += 1
 
-        # check binary roundtrip equivalence
         ref_bytes = []
         with open(os.path.join(path, msg_name), 'rb') as file:
             ref_bytes = file.read()
 
         msg = factory.getObject(ref_bytes)
         if msg:
+            # check binary roundtrip equivalence
             if LMCPFactory.packMessage(msg, args.checksum) != ref_bytes:
-                print('    Error: binary -> msg -> binary doesn\'t match reference', file=sys.stderr)
-        else:
-            print('    Error: unable to construct message object \'{}\' of series \'{}\''.format(msg_name, series), file=sys.stderr)
+                print('    Error: ref bin -> msg -> bin doesn\'t match', file=sys.stderr)
 
-        # check xml roundtrip equivalence
-        ref_xml = None
-        with open(os.path.join(path, msg_name + '.xml'), 'rt') as file:
-            ref_xml = file.read()
+            # check xml roundtrip equivalence (via reference binary)
+            msg = from_xml_str(msg.toXMLStr(""))
 
-        msg = from_xml_str(ref_xml)
-        if msg:
-            if msg.toXMLStr("") != ref_xml:
-                print('    Error: xml -> msg -> xml doesn\'t match reference', file=sys.stderr)
+            if msg:
+                if LMCPFactory.packMessage(msg, args.checksum) != ref_bytes:
+                    print('    Error: ref bin -> msg -> xml -> msg -> bin doesn\'t match', file=sys.stderr)
+            else:
+                print('    Error: unable to construct message object from xml (ref bin -> msg -> xml -> msg)', file=sys.stderr)
+
         else:
-            print('    Error: unable to construct message object from xml file', file=sys.stderr)
+            print('    Error: unable to construct message object \'{}\''.format(msg_name), file=sys.stderr)
 
     return 0
 

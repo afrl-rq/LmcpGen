@@ -1024,10 +1024,7 @@ class PythonMethods {
 
                 buf.append(ws + "bytes = LMCPFactory.packMessage(msg, self.checksum)\n");
                 buf.append(ws + "with open(str(path.joinpath(\"" + si.name + "\")), \"wb\") as f:\n");
-                buf.append(ws + "    f.write(bytes)\n");
-
-                buf.append(ws + "with open(str(path.joinpath(\"" + si.name + ".xml\")), \"wt\") as f:\n");
-                buf.append(ws + "    f.write(msg.toXMLStr(\"\"))\n\n");
+                buf.append(ws + "    f.write(bytes)\n\n");
             }
         }
 
