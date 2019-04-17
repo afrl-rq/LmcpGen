@@ -1,0 +1,18 @@
+CXX := g++
+CFLAGS := -std=c++11 -Wall
+
+INCS := -I../..
+
+LDFLAGS := -static
+LMCPLIB := ../../liblmcp.a
+
+all: verify
+
+%.o: %.cpp
+	$(CXX) $(CFLAGS) $(INCS) -o $@ -c $<
+
+verify: main.o $(LMCPLIB)
+	$(CXX) main.o -o $@ $(LDFLAGS) $(LMCPLIB)
+
+clean:
+	@rm -f main.o verify

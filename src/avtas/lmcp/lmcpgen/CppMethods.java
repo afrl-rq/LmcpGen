@@ -1135,7 +1135,7 @@ public class CppMethods {
                 else {
                     if (f.isStruct) {
                         str += ws + "         Object* oo = readXML( tmp->getChild(0) );\n";
-                        str += ws + "         o->set" + setname + "((" + ctype + "*) oo );\n";
+                        str += ws + "         if (oo) o->set" + setname + "((" + ctype + "*) oo );\n";
                         //str += ws + "            delete oo;\n";
                     }
                     else if (f.isEnum) {

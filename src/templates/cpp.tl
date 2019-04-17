@@ -41,3 +41,5 @@ ONCE            cpp/clientMain.cpp          test/client/main.cpp
 ONCE            cpp/TestClient.vcproj       test/client/TestClient.vcproj
 ONCE            cpp/TestClient.vcxproj      test/client/TestClient.vcxproj
 ONCE            cpp/test_client_makefile    test/client/Makefile
+ONCE            cpp/VerifyMsgs.cpp          test/verify/main.cpp
+ONCE            cpp/VerifyMsgs_makefile     test/verify/Makefile
