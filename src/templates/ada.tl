@@ -11,8 +11,7 @@ ONCE ada/avtas/lmcp/avtas-lmcp-factory.ads src/avtas/lmcp/avtas-lmcp-factory.ads
 ONCE ada/avtas/lmcp/avtas-lmcp-factory.adb src/avtas/lmcp/avtas-lmcp-factory.adb
 ONCE ada/utilities.ads src/utilities.ads
 ONCE ada/utilities.adb src/utilities.adb
-ONCE ada/default.gpr default.gpr
-ONCE ada/main.adb src/main.adb
+ONCE ada/lmcp_generated_messages.gpr  lmcp_generated_messages.gpr
 
 PER_MDM ada/namespace.ads  src/-<series_dir>-/-<full_series_name_dashes>-.ads
 PER_MDM ada/mdm-factory.ads src/-<series_dir>-/-<full_series_name_dashes>--factory.ads
