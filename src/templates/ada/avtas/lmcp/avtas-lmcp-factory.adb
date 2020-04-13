@@ -15,7 +15,7 @@ package body avtas.lmcp.factory is
       -- add root object
       PutObject (RootObject, Buffer);
       -- add checksum if enabled
-      Buffer.Put_UInt32 (if EnableChecksum then CalculateChecksum (Buffer) else 0);
+      Buffer.Put_UInt32 (if EnableChecksum then CalculateChecksum (Buffer, Buffer.Length) else 0);
       return Buffer;
    end PackMessage;
 
@@ -76,12 +76,8 @@ package body avtas.lmcp.factory is
       -<global_factory_switch>-
    end createObject;
 
-  function CalculateChecksum (Buffer : in ByteBuffer) return UInt32 is
-     (Buffer.Checksum (From => 1,  To  => Buffer.Length - Checksum_Size));
-   --  We want to compute the checksum of the entire message so we start at
-   --  index 1, but we don't want to include those bytes that either
-   --  will, or already do hold the checksum stored within the message in the
-   --  byte array. That stored checksum is at the very end.
+  function CalculateChecksum (Buffer : in ByteBuffer; Last : in Index) return UInt32 is
+     (Buffer.Checksum (From => 1, To => Last));
 
    function GetObjectSize (Buffer : in ByteBuffer) return UInt32 is
       Result : UInt32;
@@ -94,11 +90,11 @@ package body avtas.lmcp.factory is
       Computed_Checksum : UInt32;
       Existing_Checksum : UInt32;
    begin
-      Computed_Checksum := CalculateChecksum (Buffer);
+      Computed_Checksum := CalculateChecksum (Buffer, Last => Buffer.Length - Checksum_Size);  -- all except the existing checksum
       if Computed_Checksum = 0 then
          return True;
       else
-         Buffer.Get_UInt32 (Existing_Checksum, First => Buffer.Length - Checksum_Size + 1);  -- the last 4 bytes in the buffer
+         Buffer.Get_UInt32 (Existing_Checksum, First => Buffer.Length - Checksum_Size + 1);  -- the existing checksum
          return Computed_Checksum = Existing_Checksum;
       end if;
    end Validate;
