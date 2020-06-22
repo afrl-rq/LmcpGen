@@ -64,7 +64,8 @@ class -<classname>-(-<extends_name>-):
         m = {}
         self.toDictMembers(m)
         d = {}
-        if (-<series_name>- is None) or (-<series_name>- is ""): # this should never happen
+        if (not -<series_name>-) or (len(-<series_name>-) == 0): # this should never happen
+        	# Checks for -<series_name>- being None or empty
             # need to fill this with error message
             d["datatype"] = str("DEBUG_PROBLEM_HERE" + "/-<datatype_name>-")
             d["datastring"] = str(m)
