@@ -121,8 +121,10 @@ public class AdaMethods {
         return getSeriesNamespaceDashes(infos, st.seriesName).toLowerCase() + getDeconflictedName(st.name).toLowerCase();
     }
 
+    //  used ONLY to get the subscription value in the series package spec template, so it MUST NOT provide deconflicted values
     public static String full_datatype_name_dots(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
-        return getSeriesNamespaceDots(infos, st.seriesName) + getDeconflictedName(st.name);
+        MDMInfo i = MDMReader.getMDM(st.seriesName, infos);
+        return i.namespace.replaceAll("/", ".") + "." + st.name;
     }
 
     public static String datatype_id(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
@@ -946,23 +948,22 @@ public class AdaMethods {
                     break;
                 case SINGLE_NODE_STRUCT:
                 case SINGLE_LEAF_STRUCT:
-                    //String accessSuffix = (has_descendants(infos, st.fields[i].type, st.fields[i].seriesName) ? "_Any" : "_Acc");
-                    String accessSuffix = "_Any";
+                    String accessSuffix = (has_descendants(infos, st.fields[i].type, st.fields[i].seriesName) ? "_Any" : "_Acc");
+                    String component_name = "This." + st.fields[i].name;
                     String fieldtype = getSeriesNamespaceDots(infos, st.fields[i].seriesName) + getDeconflictedName(st.fields[i].type) + "." + getDeconflictedName(st.fields[i].type) + accessSuffix;
                     str += ws + "   declare\n";
                     str += ws + "      fieldExists : Boolean;\n";
                     str += ws + "      seriesId : Int64;\n";
                     str += ws + "      msgType : UInt32;\n";
                     str += ws + "      version : UInt16;\n";
-                    str += ws + "      o : " + fieldtype + ";\n";
                     str += ws + "   begin\n";
                     str += ws + "      Buffer.Get_Boolean(fieldExists);\n";
                     str += ws + "      if fieldExists then\n";
                     str += ws + "         Buffer.Get_Int64(seriesId);\n";
                     str += ws + "         Buffer.Get_UInt32(msgType);\n";
                     str += ws + "         Buffer.Get_UInt16(version);\n";
-                    str += ws + "         O := " + fieldtype + "(avtas.lmcp.factory.createObject(seriesId, msgType, version));\n";
-                    str += ws + "         O.Unpack (Buffer);\n";
+                    str += ws + "         " + component_name + " := " + fieldtype + "(avtas.lmcp.factory.createObject(seriesId, msgType, version));\n";
+                    str += ws + "         " + component_name + ".Unpack (Buffer);\n";
                     str += ws + "      end if;\n";
                     str += ws + "   end;\n";
                     break;
@@ -979,7 +980,7 @@ public class AdaMethods {
                         str += ws + "   begin\n";
                         str += ws + "      Buffer.Get_UInt16(length);\n";
                     }
-                    // TODO: delete any old content from vector
+                    str += ws + "      This.get" + fieldname + ".Clear;  -- delete old content\n";
                     str += ws + "      for i in 1 .. length loop\n";
                     str += ws + "         Buffer.Get_" + getAdaPrimativeType(infos, st.fields[i]) + "(item);\n";
                     str += ws + "         This.get" + fieldname + ".Append(item);\n";
@@ -999,7 +1000,7 @@ public class AdaMethods {
                         str += ws + "   begin\n";
                         str += ws + "      Buffer.Get_UInt16(length);\n";
                     }
-                    // TODO: delete any old content from vector
+                    str += ws + "      This.get" + fieldname + ".Clear;  -- delete old content\n";
                     str += ws + "      for i in 1 .. length loop\n";
                     str += ws + "         Buffer.Get_Int32(item);\n";
                     str += ws + "         This.get" + fieldname + ".Append(ToEnum(item));\n";
@@ -1020,7 +1021,7 @@ public class AdaMethods {
                     str += ws + "      length : " + lengthType + ";\n";
                     str += ws + "   begin\n";
                     str += ws + "      Buffer.Get_" + lengthType + "(length);\n";
-                    // TODO: delete any old content from vector
+                    str += ws + "      This.get" + fieldname + ".Clear;  -- delete old content\n";
                     str += ws + "      for i in 1 .. length loop\n";
                     str += ws + "         Buffer.Get_Boolean(fieldExists);\n";
                     str += ws + "         if fieldExists then\n";
@@ -1091,23 +1092,30 @@ public class AdaMethods {
     };
 
     public static String calculate_packed_size_body(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        String parentDataType = getFullParentDatatype(infos, info, outfile, st, en, ws);
         String str = "";
         str += ws + "overriding\n";
         str += ws + "function calculatePackedSize(this : " + getDeconflictedName(st.name) + ") return UInt32 is\n";
         str += ws + "  size : UInt32 := 0;\n";
         str += ws + "begin\n";
+
+        if (parentDataType != null) {
+           str += ws + "   -- call parent version statically\n";
+           str += ws + "   Size := Size + calculatePackedSize (" + parentDataType + " (this));\n";
+        }
+
         for (int i = 0; i < st.fields.length; i++) {
              switch (getAdaTypeCategory(infos,st.fields[i])) {
                 case SINGLE_PRIMITIVE:
                     if(st.fields[i].type.equalsIgnoreCase("string")) {
-                        str += ws + "   size := size + 2 + UInt32(Length(this." + getDeconflictedName(st.fields[i].name) + "))*Character\'Size/8;\n";
+                        str += ws + "   size := size + 2 + UInt32(Length(this." + getDeconflictedName(st.fields[i].name) + "))*Character\'Object_Size/8;\n";
                     }
                     else {
-                        str += ws + "   size := size + " + getAdaPrimativeType(infos, st.fields[i]) + "\'Size/8;\n";
+                        str += ws + "   size := size + " + getAdaPrimativeType(infos, st.fields[i]) + "\'Object_Size/8;\n";
                     }
                     break;
                 case SINGLE_ENUM:
-                    str += ws + "   size := size + Int32\'Size/8;\n";
+                    str += ws + "   size := size + Int32\'Object_Size/8;\n";
                     break;
                 case SINGLE_NODE_STRUCT:
                 case SINGLE_LEAF_STRUCT:
@@ -1126,11 +1134,11 @@ public class AdaMethods {
                     }
                     if(st.fields[i].type.equalsIgnoreCase("string")) {
                         str += ws + "   for i of this." + getDeconflictedName(st.fields[i].name) + " loop\n";
-                        str += ws + "      size := size + 2 + UInt32(Length(i))*Character\'Size/8;\n";
+                        str += ws + "      size := size + 2 + UInt32(Length(i))*Character\'Object_Size/8;\n";
                         str += ws + "   end loop;\n";
                     }
                     else {
-                        str += ws + "   size := size + UInt32(this." + getDeconflictedName(st.fields[i].name) + ".Length)*" + getAdaPrimativeType(infos, st.fields[i]) + "\'Size/8;\n";
+                        str += ws + "   size := size + UInt32(this." + getDeconflictedName(st.fields[i].name) + ".Length)*" + getAdaPrimativeType(infos, st.fields[i]) + "\'Object_Size/8;\n";
                     }
                     break;
                 case VECTOR_ENUM:
@@ -1140,7 +1148,7 @@ public class AdaMethods {
                     else {
                         str += ws + "   size := size + 2;\n";
                     }
-                    str += ws + "   size := size + UInt32(this." + getDeconflictedName(st.fields[i].name) + ".Length)*Int32\'Size/8;\n";
+                    str += ws + "   size := size + UInt32(this." + getDeconflictedName(st.fields[i].name) + ".Length)*Int32\'Object_Size/8;\n";
                     break;
                 case VECTOR_NODE_STRUCT:
                 case VECTOR_LEAF_STRUCT:
@@ -1162,16 +1170,16 @@ public class AdaMethods {
                     str += ws + "   size := size + 2;\n";
                     if(st.fields[i].type.equalsIgnoreCase("string")) {
                         str += ws + "   for i of this." + getDeconflictedName(st.fields[i].name) + ".all loop\n";
-                        str += ws + "      size := size + 2 + UInt32(Length(i))*Character\'Size/8;\n";
+                        str += ws + "      size := size + 2 + UInt32(Length(i))*Character\'Object_Size/8;\n";
                         str += ws + "   end loop;\n";
                     }
                     else {
-                        str += ws + "   size := size + UInt32(this." + getDeconflictedName(st.fields[i].name) + ".all'Length)*" + getAdaPrimativeType(infos, st.fields[i]) + "'Size/8;\n";
+                        str += ws + "   size := size + UInt32(this." + getDeconflictedName(st.fields[i].name) + ".all'Length)*" + getAdaPrimativeType(infos, st.fields[i]) + "'Object_Size/8;\n";
                     }
                     break;
                 case FIXED_ARRAY_ENUM:
                     str += ws + "   size := size + 2;\n";
-                    str += ws + "   size := size + UInt32(this." + getDeconflictedName(st.fields[i].name) + ".all'Length)*UInt32'Size/8;\n";
+                    str += ws + "   size := size + UInt32(this." + getDeconflictedName(st.fields[i].name) + ".all'Length)*UInt32'Object_Size/8;\n";
                     break;
                 case FIXED_ARRAY_NODE_STRUCT:
                 case FIXED_ARRAY_LEAF_STRUCT:

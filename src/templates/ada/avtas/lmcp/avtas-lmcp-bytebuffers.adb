@@ -1,5 +1,6 @@
 with System.Storage_Elements; use System.Storage_Elements;
 with GNAT.Byte_Swapping;
+with Ada.Unchecked_Conversion;
 
 package body AVTAS.LMCP.ByteBuffers is
 
@@ -180,10 +181,12 @@ package body AVTAS.LMCP.ByteBuffers is
       Buffer : in out Byte_Array;
       Start  : Index)
    is
-      Result : System.Address with Unreferenced;
+      subtype Bytes is Byte_Array (1 .. 2);
+      Buffer_Overlay : Bytes with Address => Buffer (Start)'Address;
+      function As_Bytes is new Ada.Unchecked_Conversion (Source => Inserted, Target => Bytes);
    begin
       pragma Compile_Time_Error (Inserted'Object_Size /= 2 * Storage_Unit, "Generic actual param should be 2 bytes");
-      Result := MemCopy (Source => Value'Address, Destination => Buffer (Start)'Address, Count => 2);
+      Buffer_Overlay := As_Bytes (Value);
       if Standard'Default_Scalar_Storage_Order /= System.High_Order_First then -- we're not on a Big Endinan machine
          GNAT.Byte_Swapping.Swap2 (Buffer (Start)'Address);
       end if;
@@ -198,10 +201,12 @@ package body AVTAS.LMCP.ByteBuffers is
       Buffer : in out Byte_Array;
       Start  : Index)
    is
-      Result : System.Address with Unreferenced;
+      subtype Bytes is Byte_Array (1 .. 4);
+      Buffer_Overlay : Bytes with Address => Buffer (Start)'Address;
+      function As_Bytes is new Ada.Unchecked_Conversion (Source => Inserted, Target => Bytes);
    begin
       pragma Compile_Time_Error (Inserted'Object_Size /= 4 * Storage_Unit, "Generic actual param should be 4 bytes");
-      Result := MemCopy (Source => Value'Address, Destination => Buffer (Start)'Address, Count => 4);
+      Buffer_Overlay := As_Bytes (Value);
       if Standard'Default_Scalar_Storage_Order /= System.High_Order_First then -- we're not on a Big Endinan machine
          GNAT.Byte_Swapping.Swap4 (Buffer (Start)'Address);
       end if;
@@ -216,10 +221,12 @@ package body AVTAS.LMCP.ByteBuffers is
       Buffer : in out Byte_Array;
       Start  : Index)
    is
-      Result : System.Address with Unreferenced;
+      subtype Bytes is Byte_Array (1 .. 8);
+      Buffer_Overlay : Bytes with Address => Buffer (Start)'Address;
+      function As_Bytes is new Ada.Unchecked_Conversion (Source => Inserted, Target => Bytes);
    begin
       pragma Compile_Time_Error (Inserted'Object_Size /= 8 * Storage_Unit, "Generic actual param should be 8 bytes");
-      Result := MemCopy (Source => Value'Address, Destination => Buffer (Start)'Address, Count => 8);
+      Buffer_Overlay := As_Bytes (Value);
       if Standard'Default_Scalar_Storage_Order /= System.High_Order_First then -- we're not on a Big Endinan machine
          GNAT.Byte_Swapping.Swap8 (Buffer (Start)'Address);
       end if;
@@ -234,10 +241,12 @@ package body AVTAS.LMCP.ByteBuffers is
       Buffer : Byte_Array;
       Start  : Index)
    is
-      Result : System.Address with Unreferenced;
-   begin
+      subtype Bytes is Byte_Array (1 .. 2);
+      Buffer_Overlay : Bytes with Address => Buffer (Start)'Address;
+      function As_Retrieved is new Ada.Unchecked_Conversion (Source => Bytes, Target => Retrieved);
+    begin
       pragma Compile_Time_Error (Retrieved'Object_Size /= 2 * Storage_Unit, "Generic actual param should be 2 bytes");
-      Result := MemCopy (Source => Buffer (Start)'Address, Destination => Value'Address, Count => 2);
+      Value := As_Retrieved (Buffer_Overlay);
       if Standard'Default_Scalar_Storage_Order /= System.High_Order_First then -- we're not on a Big Endinan machine
          GNAT.Byte_Swapping.Swap2 (Value'Address);
       end if;
@@ -252,10 +261,12 @@ package body AVTAS.LMCP.ByteBuffers is
       Buffer : Byte_Array;
       Start  : Index)
    is
-      Result : System.Address with Unreferenced;
+      subtype Bytes is Byte_Array (1 .. 4);
+      Buffer_Overlay : Bytes with Address => Buffer (Start)'Address;
+      function As_Retrieved is new Ada.Unchecked_Conversion (Source => Bytes, Target => Retrieved);
    begin
       pragma Compile_Time_Error (Retrieved'Object_Size /= 4 * Storage_Unit, "Generic actual param should be 4 bytes");
-      Result := MemCopy (Source => Buffer (Start)'Address, Destination => Value'Address, Count => 4);
+      Value := As_Retrieved (Buffer_Overlay);
       if Standard'Default_Scalar_Storage_Order /= System.High_Order_First then -- we're not on a Big Endinan machine
          GNAT.Byte_Swapping.Swap4 (Value'Address);
       end if;
@@ -270,14 +281,18 @@ package body AVTAS.LMCP.ByteBuffers is
       Buffer : Byte_Array;
       Start  : Index)
    is
-      Result : System.Address with Unreferenced;
+      subtype Bytes is Byte_Array (1 .. 8);
+      Buffer_Overlay : Bytes with Address => Buffer (Start)'Address;
+      function As_Retrieved is new Ada.Unchecked_Conversion (Source => Bytes, Target => Retrieved);
    begin
       pragma Compile_Time_Error (Retrieved'Object_Size /= 8 * Storage_Unit, "Generic actual param should be 8 bytes");
-      Result := MemCopy (Source => Buffer (Start)'Address, Destination => Value'Address, Count => 8);
+      Value := As_Retrieved (Buffer_Overlay);
       if Standard'Default_Scalar_Storage_Order /= System.High_Order_First then -- we're not on a Big Endinan machine
          GNAT.Byte_Swapping.Swap8 (Value'Address);
       end if;
    end Retrieve_8_Bytes;
+
+   --  Instances
 
    procedure Insert_UInt16 is new Insert_2_Bytes (UInt16) with Inline;
 
@@ -435,18 +450,22 @@ package body AVTAS.LMCP.ByteBuffers is
       Last  : out Natural)
    is
       Result : System.Address with Unreferenced;
-      Length : Index;
+      Length : UInt32;
    begin
       Retrieve_Int16 (Int16 (Length), This.Content, Start => This.Position);
       This.Position := This.Position + 2;
-      if This.Position + Length > This.Capacity then
-         Length := This.Capacity;
+      if Length > This.Length then
+         Length := This.Length;
       end if;
-      Result := MemCopy (Source      => This.Content (This.Position)'Address,
-                         Destination => Value'Address,
-                         Count       => Storage_Count (Length));
-      This.Position := This.Position + Length;
-      Last := Value'First + Natural (Length) - 1;
+      if Length = 0 then
+         Last := Value'First - 1;
+      else
+         Result := MemCopy (Source      => This.Content (This.Position)'Address,
+                            Destination => Value'Address,
+                            Count       => Storage_Count (Length));
+         This.Position := This.Position + Length;
+         Last := Value'First + Natural (Length) - 1;
+      end if;
    end Get_String;
 
    --------------------------
@@ -457,17 +476,27 @@ package body AVTAS.LMCP.ByteBuffers is
      (This  : in out ByteBuffer;
       Value : out Unbounded_String)
    is
-      Length : Index;
+      Result : System.Address with Unreferenced;
+      Length : UInt16;
    begin
-      Retrieve_Int16 (Int16 (Length), This.Content, Start => This.Position);
-      declare
-         S : String (1 .. Integer (Length));
-         Last : Natural;
-      begin
-         This.Get_String (S, Last);
-         pragma Assert (Last = Integer (Length));
-         Value := To_Unbounded_String (S);
-      end;
+      Retrieve_UInt16 (Length, This.Content, Start => This.Position);
+      This.Position := This.Position + 2;
+      if Length > UInt16 (This.Length) then
+         Length := UInt16 (This.Length);
+      end if;
+      if Length = 0 then
+         Value := Null_Unbounded_String;
+      else
+         declare
+            S : String (1 .. Integer (Length));
+         begin
+            Result := MemCopy (Source      => This.Content (This.Position)'Address,
+                               Destination => S'Address,
+                               Count       => Storage_Count (Length));
+            This.Position := This.Position + Index (Length);
+            Value := To_Unbounded_String (S);
+         end;
+      end if;
    end Get_Unbounded_String;
 
    --------------
