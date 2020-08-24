@@ -9,16 +9,16 @@ package body AVTAS.LMCP.ByteBuffers is
    ---------------
 
    function Raw_Bytes (This : ByteBuffer) return Byte_Array is
-     (This.Content (1 .. This.Length));
+     (This.Content (1 .. This.Total_Bytes_Used));
 
    ---------------
    -- Raw_Bytes --
    ---------------
 
    function Raw_Bytes (This : ByteBuffer) return String is
-      Result : String (1 .. Positive (This.Length));
+      Result : String (1 .. Positive (This.Total_Bytes_Used));
    begin
-      for K in 1 .. This.Length loop
+      for K in 1 .. This.Total_Bytes_Used loop
          Result (Positive (K)) := Character'Val (This.Content (K));
       end loop;
       return Result;
@@ -40,22 +40,22 @@ package body AVTAS.LMCP.ByteBuffers is
    procedure Clear (This : in out ByteBuffer) is
    begin
       This.Rewind;
-      This.Length := 0;
+      This.Total_Bytes_Used := 0;
    end Clear;
 
-   ---------------
-   -- Remaining --
-   ---------------
+   ---------------------
+   -- Space_Available --
+   ---------------------
 
-   function Remaining (This : ByteBuffer) return UInt32 is
+   function Space_Available (This : ByteBuffer) return UInt32 is
       (This.Capacity - This.Position + 1);
 
-   -------------------
-   -- Has_Remaining --
-   -------------------
+   -------------------------
+   -- Msg_Bytes_Remaining --
+   -------------------------
 
-   function Has_Remaining (This : ByteBuffer) return Boolean is
-     (Remaining (This) > 0);
+   function Msg_Bytes_Remaining (This : ByteBuffer) return UInt32 is
+      (This.Total_Bytes_Used - This.Position + 1);
 
    --------------
    -- Position --
@@ -69,7 +69,7 @@ package body AVTAS.LMCP.ByteBuffers is
    ------------
 
    function Length (This : ByteBuffer) return UInt32 is
-      (This.Length);
+      (This.Total_Bytes_Used);
 
    --------------
    -- Checksum --
@@ -111,6 +111,16 @@ package body AVTAS.LMCP.ByteBuffers is
    --  designated by Destination. Note the order of the address parameters is
    --  critical so use the named association format for specifying actuals in
    --  calls.
+
+   procedure Insert_Arbitrary_Bytes
+     (This   : in out ByteBuffer;
+      Source : System.Address;
+      Count  : UInt32)
+   with Pre  => Source /= Null_Address and
+                Count > 0              and
+                Space_Available (This) >= Count,
+        Post => This.Position = This.Position'Old + Count and
+                This.Total_Bytes_Used = This.Total_Bytes_Used'Old + Count;
 
    generic
       type Inserted is private;
@@ -232,6 +242,24 @@ package body AVTAS.LMCP.ByteBuffers is
       end if;
    end Insert_8_Bytes;
 
+   ----------------------------
+   -- Insert_Arbitrary_Bytes --
+   ----------------------------
+
+   procedure Insert_Arbitrary_Bytes
+     (This   : in out ByteBuffer;
+      Source : System.Address;
+      Count  : UInt32)
+   is
+      Result : System.Address with Unreferenced;
+   begin
+      Result := MemCopy (Destination => This.Content (This.Position)'Address,
+                         Source      => Source,
+                         Count       => Storage_Count (Count));
+      This.Position := This.Position + Index (Count);
+      This.Total_Bytes_Used := This.Total_Bytes_Used + Count;
+   end Insert_Arbitrary_Bytes;
+
    ----------------------
    -- Retrieve_2_Bytes --
    ----------------------
@@ -244,7 +272,7 @@ package body AVTAS.LMCP.ByteBuffers is
       subtype Bytes is Byte_Array (1 .. 2);
       Buffer_Overlay : Bytes with Address => Buffer (Start)'Address;
       function As_Retrieved is new Ada.Unchecked_Conversion (Source => Bytes, Target => Retrieved);
-    begin
+   begin
       pragma Compile_Time_Error (Retrieved'Object_Size /= 2 * Storage_Unit, "Generic actual param should be 2 bytes");
       Value := As_Retrieved (Buffer_Overlay);
       if Standard'Default_Scalar_Storage_Order /= System.High_Order_First then -- we're not on a Big Endinan machine
@@ -428,7 +456,7 @@ package body AVTAS.LMCP.ByteBuffers is
    begin
       Retrieve_Float (Value, This.Content, Start => This.Position);
       This.Position := This.Position + 4;
-  end Get_Real32;
+   end Get_Real32;
 
    ----------------
    -- Get_Real64 --
@@ -438,7 +466,7 @@ package body AVTAS.LMCP.ByteBuffers is
    begin
       Retrieve_Double (Value, This.Content, Start => This.Position);
       This.Position := This.Position + 8;
-  end Get_Real64;
+   end Get_Real64;
 
    ----------------
    -- Get_String --
@@ -449,22 +477,23 @@ package body AVTAS.LMCP.ByteBuffers is
       Value : out String;
       Last  : out Natural)
    is
-      Result : System.Address with Unreferenced;
-      Length : UInt32;
+      Result        : System.Address with Unreferenced;  -- checked by MemCopy postcondition
+      String_Length : UInt32;
    begin
-      Retrieve_Int16 (Int16 (Length), This.Content, Start => This.Position);
-      This.Position := This.Position + 2;
-      if Length > This.Length then
-         Length := This.Length;
+      This.Get_UInt16 (UInt16 (String_Length));
+      if String_Length > Msg_Bytes_Remaining (This) then
+         --  We don't have that many data bytes logically remaining in the
+         --  buffer to be fetched
+         raise Runtime_Length_Error;
       end if;
-      if Length = 0 then
+      if String_Length = 0 then
          Last := Value'First - 1;
       else
          Result := MemCopy (Source      => This.Content (This.Position)'Address,
                             Destination => Value'Address,
-                            Count       => Storage_Count (Length));
-         This.Position := This.Position + Length;
-         Last := Value'First + Natural (Length) - 1;
+                            Count       => Storage_Count (String_Length));
+         This.Position := This.Position + String_Length;
+         Last := Value'First + Natural (String_Length) - 1;
       end if;
    end Get_String;
 
@@ -476,24 +505,27 @@ package body AVTAS.LMCP.ByteBuffers is
      (This  : in out ByteBuffer;
       Value : out Unbounded_String)
    is
-      Result : System.Address with Unreferenced;
-      Length : UInt16;
+      Result        : System.Address with Unreferenced;  -- checked by MemCopy postcondition
+      String_Length : UInt32;  -- the length indicated by the message data in the buffer
    begin
-      Retrieve_UInt16 (Length, This.Content, Start => This.Position);
-      This.Position := This.Position + 2;
-      if Length > UInt16 (This.Length) then
-         Length := UInt16 (This.Length);
+      This.Get_UInt16 (UInt16 (String_Length));
+      if String_Length > Msg_Bytes_Remaining (This) then
+         --  We don't have that many data bytes logically remaining in the
+         --  buffer to be fetched.
+         raise Runtime_Length_Error;
       end if;
-      if Length = 0 then
+      if String_Length = 0 then
          Value := Null_Unbounded_String;
       else
          declare
-            S : String (1 .. Integer (Length));
+            S : String (1 .. Integer (String_Length));
+            --  converting to Integer is safe because we read it as a UInt16, which
+            --  is itself safe because the Put* routines only write it as a UInt16
          begin
             Result := MemCopy (Source      => This.Content (This.Position)'Address,
                                Destination => S'Address,
-                               Count       => Storage_Count (Length));
-            This.Position := This.Position + Index (Length);
+                               Count       => Storage_Count (String_Length));
+            This.Position := This.Position + Index (String_Length);
             Value := To_Unbounded_String (S);
          end;
       end if;
@@ -507,7 +539,7 @@ package body AVTAS.LMCP.ByteBuffers is
    begin
       This.Content (This.Position) := Value;
       This.Position := This.Position + 1;
-      This.Length := This.Length + 1;
+      This.Total_Bytes_Used := This.Total_Bytes_Used + 1;
    end Put_Byte;
 
    -----------------
@@ -518,7 +550,7 @@ package body AVTAS.LMCP.ByteBuffers is
    begin
       This.Content (This.Position) := (if Value then 1 else 0);
       This.Position := This.Position + 1;
-      This.Length := This.Length + 1;
+      This.Total_Bytes_Used := This.Total_Bytes_Used + 1;
    end Put_Boolean;
 
    ---------------
@@ -529,7 +561,7 @@ package body AVTAS.LMCP.ByteBuffers is
    begin
       Insert_Int16 (Value, This.Content, Start => This.Position);
       This.Position := This.Position + 2;
-      This.Length := This.Length + 2;
+      This.Total_Bytes_Used := This.Total_Bytes_Used + 2;
    end Put_Int16;
 
    ----------------
@@ -540,7 +572,7 @@ package body AVTAS.LMCP.ByteBuffers is
    begin
       Insert_UInt16 (Value, This.Content, Start => This.Position);
       This.Position := This.Position + 2;
-      This.Length := This.Length + 2;
+      This.Total_Bytes_Used := This.Total_Bytes_Used + 2;
    end Put_UInt16;
 
    ---------------
@@ -551,7 +583,7 @@ package body AVTAS.LMCP.ByteBuffers is
    begin
       Insert_Int32 (Value, This.Content, Start => This.Position);
       This.Position := This.Position + 4;
-      This.Length := This.Length + 4;
+      This.Total_Bytes_Used := This.Total_Bytes_Used + 4;
    end Put_Int32;
 
    ----------------
@@ -562,7 +594,7 @@ package body AVTAS.LMCP.ByteBuffers is
    begin
       Insert_UInt32 (Value, This.Content, Start => This.Position);
       This.Position := This.Position + 4;
-      This.Length := This.Length + 4;
+      This.Total_Bytes_Used := This.Total_Bytes_Used + 4;
    end Put_UInt32;
 
    ---------------
@@ -573,7 +605,7 @@ package body AVTAS.LMCP.ByteBuffers is
    begin
       Insert_Int64 (Value, This.Content, Start => This.Position);
       This.Position := This.Position + 8;
-      This.Length := This.Length + 8;
+      This.Total_Bytes_Used := This.Total_Bytes_Used + 8;
    end Put_Int64;
 
    ----------------
@@ -584,7 +616,7 @@ package body AVTAS.LMCP.ByteBuffers is
    begin
       Insert_UInt64 (Value, This.Content, Start => This.Position);
       This.Position := This.Position + 8;
-      This.Length := This.Length + 8;
+      This.Total_Bytes_Used := This.Total_Bytes_Used + 8;
    end Put_UInt64;
 
    ---------------
@@ -595,7 +627,7 @@ package body AVTAS.LMCP.ByteBuffers is
    begin
       Insert_Float (Value, This.Content, Start => This.Position);
       This.Position := This.Position + 4;
-      This.Length := This.Length + 4;
+      This.Total_Bytes_Used := This.Total_Bytes_Used + 4;
   end Put_Real32;
 
    ----------------
@@ -606,7 +638,7 @@ package body AVTAS.LMCP.ByteBuffers is
    begin
       Insert_Double (Value, This.Content, Start => This.Position);
       This.Position := This.Position + 8;
-      This.Length := This.Length + 8;
+      This.Total_Bytes_Used := This.Total_Bytes_Used + 8;
   end Put_Real64;
 
    ----------------
@@ -614,29 +646,27 @@ package body AVTAS.LMCP.ByteBuffers is
    ----------------
 
    procedure Put_String (This : in out ByteBuffer;  Value : String) is
-      Result : System.Address with Unreferenced;
    begin
-      Insert_Int16 (Value'Length, This.Content, Start => This.Position);
-      This.Position := This.Position + 2;
-      Result := MemCopy (Destination => This.Content (This.Position)'Address,
-                         Source      => Value'Address,
-                         Count       => Storage_Count (Value'Length));
-      This.Position := This.Position + Value'Length;
-      This.Length := This.Length + 2 + Value'Length;
+      This.Put_UInt16 (Value'Length);
+      This.Put_Raw_Bytes (Value);
    end Put_String;
 
    -------------------
    -- Put_Raw_Bytes --
    -------------------
 
-   procedure Put_Raw_Bytes ( This : in out ByteBuffer; Value : String) is
-      Result : System.Address with Unreferenced;
+   procedure Put_Raw_Bytes (This : in out ByteBuffer; Value : String) is
    begin
-      Result := MemCopy (Destination => This.Content (This.Position)'Address,
-                         Source      => Value'Address,
-                         Count       => Storage_Count (Value'Length));
-      This.Position := This.Position + Value'Length;
-      This.Length := This.Length + Value'Length;
+      Insert_Arbitrary_Bytes (This, Source => Value'Address, Count => Value'Length);
+   end Put_Raw_Bytes;
+
+   -------------------
+   -- Put_Raw_Bytes --
+   -------------------
+
+   procedure Put_Raw_Bytes (This : in out ByteBuffer; Value : Byte_Array) is
+   begin
+      Insert_Arbitrary_Bytes (This, Source => Value'Address, Count => Value'Length);
    end Put_Raw_Bytes;
 
    --------------------------

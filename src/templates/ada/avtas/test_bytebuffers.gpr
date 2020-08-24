@@ -1,0 +1,49 @@
+project Test_ByteBuffers is
+
+   for Source_Dirs use (".", "lmcp");
+
+   for Main use ("test_bytebuffers.adb");
+
+   type Modes is ("debug", "release");
+   Mode : Modes := external ("MODE", "debug");
+
+   for Object_Dir use "objs/" & Mode;
+
+   Unconditional_Compiler_Switches :=
+     ("-gnatyO",    -- check that overriding subprograms are explicitly marked as such
+      "-gnat2020"   -- enable Ada 202x
+      );
+
+   Debug_Switches := ("-g",
+                      "-gnateA",     -- check subprogram call for aliased actual parameters
+                      "-gnata",      -- enable assertions
+                      --"-gnatwe",     -- treat warnings as errors
+                      "-gnatwa",     -- turn on (almost) all warnings
+                      "-gnatwf",     -- warn on unreferenced formal parameters
+                      "-O0"
+                      );
+
+   Release_Switches := ("-O2",
+                        "-gnatp"   -- disable runtime check generation
+                        );
+
+   package Compiler is
+      case Mode is
+         when "debug" =>
+            for Default_Switches ("ada") use Debug_Switches & Unconditional_Compiler_Switches;
+         when "release" =>
+            for Default_Switches ("ada") use Release_Switches & Unconditional_Compiler_Switches;
+      end case;
+   end Compiler;
+
+   package Builder is
+      case Mode is
+         when "debug" =>
+            for Default_Switches ("ada") use ("-g");
+         when "release" =>
+            for Default_Switches ("ada") use ("");
+      end case;
+   end Builder;
+
+end Test_ByteBuffers;
+
