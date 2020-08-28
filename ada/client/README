@@ -1,7 +1,0 @@
-- Use the libzmq 4.2.3 release for compatibility with UxAS (https://github.com/zeromq/libzmq/releases/tag/v4.2.3)
-  - configure, make, install
-- Clone the zeromq Ada bindings (https://github.com/persan/zeromq-Ada.git) into this folder
-  - (Examples/Tests) Follow 'Build and installation' instructions from http://zeromq.org/bindings:ada
-    - As configured, need libsodium-dev package installed
-- Build lmcp.gpr for sample client program
-  - See src/lmcp-client.adb for required UxAS bridge configuration details
