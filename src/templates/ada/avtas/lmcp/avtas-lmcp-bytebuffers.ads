@@ -103,7 +103,7 @@ package AVTAS.LMCP.ByteBuffers is
                    Length (This) = Length (This)'Old and
                    Msg_Bytes_Remaining (This) = Msg_Bytes_Remaining (This)'Old;
    --  Gets a UInt32 value from This buffer, at indexes First .. First + 3
-   --  rather than from This.Position .. This.Positon + 3
+   --  rather than from This.Position .. This.Position + 3
 
    procedure Get_UInt32 (This : in out ByteBuffer;  Value : out UInt32) with
      Pre'Class  => Msg_Bytes_Remaining (This) >= 4,
