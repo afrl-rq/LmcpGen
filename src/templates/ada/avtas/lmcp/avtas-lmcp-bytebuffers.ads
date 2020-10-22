@@ -327,11 +327,11 @@ package AVTAS.LMCP.ByteBuffers is
 
    function Checksum (This : ByteBuffer;  From, To : Index) return UInt32 with
      Pre'Class =>
-       From <= To                and   -- only useful ranges
-       From <= This.Capacity     and   -- physically possible
-       To   <= This.Capacity     and   --     "         "
-       From <= This.Length       and   -- logically possible
-       To   <= This.Length;            --     "        "
+       From <= To             and   -- only useful ranges
+       From <= This.Capacity  and   -- physically possible
+       To   <= This.Capacity  and   --     "         "
+       From <= This.Length    and   -- logically possible
+       To   <= This.Length;         --     "        "
    --  Computes the checksum of the slice of the internal byte array From .. To.
 
 private
