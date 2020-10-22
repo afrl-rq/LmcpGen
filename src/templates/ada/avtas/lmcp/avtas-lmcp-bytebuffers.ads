@@ -300,7 +300,7 @@ package AVTAS.LMCP.ByteBuffers is
    --  and reading back out meaningful objects. The input Value is a String
    --  because that's the most convenient choice, based on client usage.
    --
-   --  NB: these routines dosn't write the length into the buffer because
+   --  NB: these routines don't write the length into the buffer because
    --  the content of the input string is an encoded (serialized) message
    --  already. That also means that there is no two-byte length restriction.
 
