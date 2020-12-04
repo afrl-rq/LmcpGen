@@ -1,8 +1,8 @@
-with avtas.lmcp.types;       use avtas.lmcp.types;
-with avtas.lmcp.byteBuffers; use avtas.lmcp.byteBuffers;
-with avtas.lmcp.object;      use avtas.lmcp.object;
+with AVTAS.LMCP.Types;       use AVTAS.LMCP.Types;
+with AVTAS.LMCP.ByteBuffers; use AVTAS.LMCP.ByteBuffers;
+with AVTAS.LMCP.Object;      use AVTAS.LMCP.Object;
 
-package avtas.lmcp.factory is
+package AVTAS.LMCP.Factory is
 
    HEADER_SIZE      : constant UInt32 := 8;
    CHECKSUM_SIZE    : constant UInt32 := 4;
@@ -25,4 +25,4 @@ package avtas.lmcp.factory is
    --  previously computed checksum value stored with the message
    --  in the buffer. Assumes the buffer is in Big Endian byte order.
 
-end avtas.lmcp.factory;
+end AVTAS.LMCP.Factory;

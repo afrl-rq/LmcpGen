@@ -1,4 +1,4 @@
-package body avtas.lmcp.object is
+package body AVTAS.LMCP.Object is
 
    procedure XML_Output (this  : Object'Class;
                          S     : access Ada.Streams.Root_Stream_Type'Class;
@@ -9,5 +9,5 @@ package body avtas.lmcp.object is
       String'Write (S, LeftPad ("</" & this.getLmcpTypeName & ">" & ASCII.LF, Level));
    end XML_Output;
 
-end avtas.lmcp.object;
+end AVTAS.LMCP.Object;
 

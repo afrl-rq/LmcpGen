@@ -50,6 +50,7 @@ package body AVTAS.LMCP.ByteBuffers is
    function Space_Available (This : ByteBuffer) return UInt32 is
       (if This.Position > This.Capacity then 0
        else This.Capacity - This.Position + 1);
+   -- NB: we need to prove no wraparound; the if-statement may suffice...
 
    -------------------------
    -- Msg_Bytes_Remaining --

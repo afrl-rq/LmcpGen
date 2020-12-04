@@ -1,7 +1,7 @@
 -<include_all_factories>-
 with Ada.Unchecked_Conversion;
 
-package body avtas.lmcp.factory is
+package body AVTAS.LMCP.Factory is
 
    function PackMessage (RootObject : in Avtas.Lmcp.Object.Object_Any; EnableChecksum : in Boolean) return ByteBuffer is
       -- Allocate space for message, with 15 extra bytes for
@@ -99,5 +99,5 @@ package body avtas.lmcp.factory is
       end if;
    end Validate;
 
-end avtas.lmcp.factory;
+end AVTAS.LMCP.Factory;
 

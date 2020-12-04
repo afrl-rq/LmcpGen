@@ -1,8 +1,8 @@
-with avtas.lmcp.byteBuffers; use avtas.lmcp.byteBuffers;
+with AVTAS.LMCP.ByteBuffers; use AVTAS.LMCP.ByteBuffers;
 
-package -<full_series_name_dots>-.object is
+package -<full_series_name_dots>-.Object is
 
-   type Object is abstract new avtas.lmcp.object.Object with private;
+   type Object is abstract new AVTAS.LMCP.Object.Object with private;
    type Object_Acc is access all Object;
    type Object_Any is access all Object'Class;
 
@@ -12,7 +12,7 @@ package -<full_series_name_dots>-.object is
 
  private
 
-   type Object is abstract new avtas.lmcp.object.Object with null record;
+   type Object is abstract new AVTAS.LMCP.Object.Object with null record;
 
-end -<full_series_name_dots>-.object;
+end -<full_series_name_dots>-.Object;
 

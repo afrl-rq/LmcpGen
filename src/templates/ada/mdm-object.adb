@@ -1,4 +1,4 @@
-package body -<full_series_name_dots>-.object is
+package body -<full_series_name_dots>-.Object is
 
    procedure pack (this: in Object_Any; buf: in out ByteBuffer) is
    begin
@@ -10,4 +10,4 @@ package body -<full_series_name_dots>-.object is
       null;
    end unpack;
 
-end -<full_series_name_dots>-.object;
+end -<full_series_name_dots>-.Object;
