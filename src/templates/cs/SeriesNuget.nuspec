@@ -13,8 +13,8 @@
     -<get_nuget_mdm_dependencies>-
   </metadata>
   <files>
-    <file src="Bin\Release\Lmcp-<cs_series_name>-.dll" target="lib\net452"/>
-    <file src="Bin\Release\Lmcp-<cs_series_name>-.xml" target="lib\net452"/>
-    <file src="..\-<series_name>-.xml" target="tools"/>
+    <file src="Bin\Release\netstandard2.0\Lmcp-<cs_series_name>-.dll" target="lib\netstandard2.0"/>
+    <file src="Bin\Release\netstandard2.0\Lmcp-<cs_series_name>-.xml" target="lib\netstandard2.0"/>
+    <file src="..\..\-<series_name>-.xml" target="tools"/>
   </files>
 </package>
