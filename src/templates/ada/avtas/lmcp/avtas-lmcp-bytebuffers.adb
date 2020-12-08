@@ -48,7 +48,9 @@ package body AVTAS.LMCP.ByteBuffers is
    ---------------------
 
    function Space_Available (This : ByteBuffer) return UInt32 is
-      (This.Capacity - This.Position + 1);
+      (if This.Position > This.Capacity then 0
+       else This.Capacity - This.Position + 1);
+   -- NB: we need to prove no wraparound; the if-statement may suffice...
 
    -------------------------
    -- Msg_Bytes_Remaining --
@@ -256,7 +258,7 @@ package body AVTAS.LMCP.ByteBuffers is
       Result := MemCopy (Destination => This.Content (This.Position)'Address,
                          Source      => Source,
                          Count       => Storage_Count (Count));
-      This.Position := This.Position + Index (Count);
+      This.Position := This.Position + Count;
       This.Total_Bytes_Used := This.Total_Bytes_Used + Count;
    end Insert_Arbitrary_Bytes;
 
@@ -619,9 +621,9 @@ package body AVTAS.LMCP.ByteBuffers is
       This.Total_Bytes_Used := This.Total_Bytes_Used + 8;
    end Put_UInt64;
 
-   ---------------
+   ----------------
    -- Put_Real32 --
-   ---------------
+   ----------------
 
    procedure Put_Real32 (This : in out ByteBuffer; Value : Real32) is
    begin
@@ -647,8 +649,14 @@ package body AVTAS.LMCP.ByteBuffers is
 
    procedure Put_String (This : in out ByteBuffer;  Value : String) is
    begin
+      --  We need to put the length in any case, including when zero, so that
+      --  the deserialization routine will have a length to read. That routine
+      --  will then read that many bytes, so a zero length will work on that
+      --  side.
       This.Put_UInt16 (Value'Length);
-      This.Put_Raw_Bytes (Value);
+      if Value'Length > 0 then
+         This.Put_Raw_Bytes (Value);
+      end if;
    end Put_String;
 
    -------------------

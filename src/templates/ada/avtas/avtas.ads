@@ -1,3 +1,3 @@
-package avtas is
+package AVTAS is
 
-end avtas;
+end AVTAS;

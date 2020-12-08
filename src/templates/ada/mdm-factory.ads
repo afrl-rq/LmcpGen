@@ -1,6 +1,6 @@
-with avtas.lmcp.byteBuffers;  use avtas.lmcp.byteBuffers;
+with AVTAS.LMCP.ByteBuffers;  use AVTAS.LMCP.ByteBuffers;
 
-package -<full_series_name_dots>-.factory is
+package -<full_series_name_dots>-.Factory is
 
    HEADER_SIZE      : constant := 8;
    CHECKSUM_SIZE    : constant := 4;
@@ -26,5 +26,5 @@ package -<full_series_name_dots>-.factory is
    --  previously computed checksum value stored with the message
    --  in the buffer. Assumes the buffer is in Big Endian byte order.
 
-end -<full_series_name_dots>-.factory;
+end -<full_series_name_dots>-.Factory;
 

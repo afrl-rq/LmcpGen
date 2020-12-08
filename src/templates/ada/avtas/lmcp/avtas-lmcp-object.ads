@@ -1,9 +1,9 @@
-with avtas.lmcp.types; use avtas.lmcp.types;
-with avtas.lmcp.byteBuffers; use avtas.lmcp.byteBuffers;
+with AVTAS.LMCP.Types;       use AVTAS.LMCP.Types;
+with AVTAS.LMCP.ByteBuffers; use AVTAS.LMCP.ByteBuffers;
 with Ada.Streams;
 with Utilities;
 
-package avtas.lmcp.object is
+package AVTAS.LMCP.Object is
 
    type Object is abstract tagged null record;
    type Object_Acc is access all Object;
@@ -43,5 +43,5 @@ package avtas.lmcp.object is
                         S     : access Ada.Streams.Root_Stream_Type'Class;
                         Level : Natural) is null;
    
-end avtas.lmcp.object;
+end AVTAS.LMCP.Object;
 

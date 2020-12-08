@@ -103,7 +103,7 @@ package AVTAS.LMCP.ByteBuffers is
                    Length (This) = Length (This)'Old and
                    Msg_Bytes_Remaining (This) = Msg_Bytes_Remaining (This)'Old;
    --  Gets a UInt32 value from This buffer, at indexes First .. First + 3
-   --  rather than from This.Position .. This.Positon + 3
+   --  rather than from This.Position .. This.Position + 3
 
    procedure Get_UInt32 (This : in out ByteBuffer;  Value : out UInt32) with
      Pre'Class  => Msg_Bytes_Remaining (This) >= 4,
@@ -300,7 +300,7 @@ package AVTAS.LMCP.ByteBuffers is
    --  and reading back out meaningful objects. The input Value is a String
    --  because that's the most convenient choice, based on client usage.
    --
-   --  NB: these routines dosn't write the length into the buffer because
+   --  NB: these routines don't write the length into the buffer because
    --  the content of the input string is an encoded (serialized) message
    --  already. That also means that there is no two-byte length restriction.
 
@@ -327,11 +327,11 @@ package AVTAS.LMCP.ByteBuffers is
 
    function Checksum (This : ByteBuffer;  From, To : Index) return UInt32 with
      Pre'Class =>
-       From <= To                and   -- only useful ranges
-       From <= This.Capacity     and   -- physically possible
-       To   <= This.Capacity     and   --     "         "
-       From <= This.Length       and   -- logically possible
-       To   <= This.Length;            --     "        "
+       From <= To             and   -- only useful ranges
+       From <= This.Capacity  and   -- physically possible
+       To   <= This.Capacity  and   --     "         "
+       From <= This.Length    and   -- logically possible
+       To   <= This.Length;         --     "        "
    --  Computes the checksum of the slice of the internal byte array From .. To.
 
 private

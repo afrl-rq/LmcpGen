@@ -1,7 +1,7 @@
 -<include_all_series_headers>-
 with Ada.Unchecked_Conversion;
 
-package body -<full_series_name_dots>-.factory is
+package body -<full_series_name_dots>-.Factory is
 
    procedure PutObject (Object : in Avtas.Lmcp.Object.Object_Any; Buffer : in out ByteBuffer);
    
@@ -105,5 +105,5 @@ package body -<full_series_name_dots>-.factory is
       end if;
    end Validate;
 
-end -<full_series_name_dots>-.factory;
+end -<full_series_name_dots>-.Factory;
 

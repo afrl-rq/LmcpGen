@@ -12,14 +12,13 @@ package avtas.lmcp.lmcpgen;
 
 import java.io.File;
 import java.nio.file.Files;
-import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-import java.util.Vector;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class AdaMethods {
@@ -80,10 +79,80 @@ public class AdaMethods {
         return AdaTypeCategory.FIXED_ARRAY_LEAF_STRUCT;
     }
 
-    public static final Set<String> adaReservedWords = new HashSet<String>(Arrays.asList("loop", "record", "task", "range"));
+    /**
+     * A partial set of Ada reserved words, to be used in identifier renaming to
+     * ensure Ada compatibility.
+     */
+    public static final Set<String> ADA_RESERVED_WORDS = new HashSet<String>(
+            Arrays.asList("loop", "record", "task", "range"));
 
+    /**
+     * A {@link Map} from String to String where the key is the all-lowercase name
+     * of the identifier and the value is the preferred casing for the identifier.
+     *
+     * <p>
+     * The idea here is to provider a general means to get from the package-name
+     * representation of an identifier to the preferred variable-name representation
+     * of the identifier. For example, for UxAS, we would like the package name to
+     * be <code>uxas</code> but we would like the variable name to be
+     * <code>UxAS</code>.
+     * </p>
+     *
+     * <p>
+     * This is important for allowing us to gracefully support target-language
+     * naming conventions in a uniform and easy-to-maintain way. For now, the map is
+     * statically defined here in the class. A possible future enhancement is to
+     * make the map data-driven based on some sort of simple configuration file that
+     * would be loaded during generation.
+     * </p>
+     */
+    private static final Map<String, String> SPECIAL_CASING;
+
+    /*
+     * Static initialization of the specialCasing map. This could be replaced by a
+     * method that initializes the map from the contents of a configuration file.
+     */
+    static {
+        SPECIAL_CASING = new HashMap<String, String>();
+        SPECIAL_CASING.put("afrl",     "AFRL");
+        SPECIAL_CASING.put("cmasi",    "CMASI");
+        SPECIAL_CASING.put("vehicles", "Vehicles");
+        SPECIAL_CASING.put("uxas",     "UxAS");
+        SPECIAL_CASING.put("messages", "Messages");
+        SPECIAL_CASING.put("route",    "Route");
+        SPECIAL_CASING.put("uxnative", "UxNative");
+        SPECIAL_CASING.put("impact",   "Impact");
+     }
+
+    /**
+     * <p>
+     * Given an identifier, return a new identifier that:
+     * </p>
+     *
+     * <ul>
+     * <li>has proper casing for an identifier, using the {@link #SPECIAL_CASING} map
+     * (e.g., <code>uxas</code> becomes <code>UxAS</code>); and</li>
+     * <li>includes the prefix "lmcp" if the identifier is an Ada reserved word,
+     * using the {@link #ADA_RESERVED_WORDS} set (e.g., <code>task</code> becomes
+     * <code>lmcptask</code>).</li>
+     * </ul>
+     *
+     * <p>
+     * The identifer can be provided with any casing: the method will downcase the
+     * identifier before testing against the map or set.
+     * </p>
+     *
+     * @param name the identifier to deconflict
+     * @return the deconflicted identifier
+     */
     private static String getDeconflictedName(String name) {
-        return (adaReservedWords.contains(name.toLowerCase()) ? "lmcp" + name : name );
+        final String downcased = name.toLowerCase();
+
+        if (SPECIAL_CASING.containsKey(downcased)) {
+           return SPECIAL_CASING.get(downcased);
+        } else {         
+           return (ADA_RESERVED_WORDS.contains(downcased) ? "lmcp" + name : name );
+        }
     }
 
     public static String series_name(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
@@ -102,11 +171,11 @@ public class AdaMethods {
     }
 
     public static String series_dir(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
-        return ws + info.namespace;  // do we want to use deconflicted name for this too???
+        return ws + info.namespace;
     }
 
     public static String full_series_name_dashes(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
-        return ws + getDeconflictedNamespace(info.namespace).replaceAll("/", "-");
+        return ws + getDeconflictedNamespace(info.namespace).toLowerCase().replaceAll("/", "-");
     }
 
     public static String full_series_name_dots(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
@@ -147,9 +216,10 @@ public class AdaMethods {
         String [] Parts = input.split ("/");
         StringBuffer buffer = new StringBuffer();
         for (int k = 0; k < Parts.length; k++) {
-           buffer.append (getDeconflictedName (Parts [k]));
+           buffer.append(getDeconflictedName(Parts[k]));
+
            if (k < Parts.length - 1) {
-              buffer.append ("/");  // put the delimiter back in; we only change the names
+              buffer.append("/");  // put the delimiter back in; we only change the names
            }
         }
         return buffer.toString();
@@ -172,15 +242,15 @@ public class AdaMethods {
     }
 
     public static String full_parent_datatype_package(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
-        return ws + (st.extends_name.length() == 0 ? getDeconflictedNamespace (info.namespace).replaceAll("/", ".") + ".object" : getSeriesNamespaceDots(infos, st.extends_series) + getDeconflictedName(st.extends_name));
+        return ws + (st.extends_name.length() == 0 ? getDeconflictedNamespace (info.namespace).replaceAll("/", ".") + ".Object" : getSeriesNamespaceDots(infos, st.extends_series) + getDeconflictedName(st.extends_name));
     }
 
     public static String full_parent_datatype(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
-        return ws + (st.extends_name.length() == 0 ? getDeconflictedNamespace (info.namespace).replaceAll("/", ".") + ".object.Object" : ws + getSeriesNamespaceDots(infos, st.extends_series) + getDeconflictedName(st.extends_name) + "." + getDeconflictedName(st.extends_name));
+        return ws + (st.extends_name.length() == 0 ? getDeconflictedNamespace (info.namespace).replaceAll("/", ".") + ".Object.Object" : ws + getSeriesNamespaceDots(infos, st.extends_series) + getDeconflictedName(st.extends_name) + "." + getDeconflictedName(st.extends_name));
     }
 
     public static String getFullParentDatatype(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
-        return (st.extends_name.length() == 0 ? getDeconflictedNamespace (info.namespace).replaceAll("/", ".") + ".object.Object" : getSeriesNamespaceDots(infos, st.extends_series) + getDeconflictedName(st.extends_name) + "." + getDeconflictedName(st.extends_name));
+        return (st.extends_name.length() == 0 ? getDeconflictedNamespace (info.namespace).replaceAll("/", ".") + ".Object.Object" : getSeriesNamespaceDots(infos, st.extends_series) + getDeconflictedName(st.extends_name) + "." + getDeconflictedName(st.extends_name));
     }
 
     public static String enum_name(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
@@ -322,49 +392,68 @@ public class AdaMethods {
         return str;
     }
 
+    /**
+     * Recursively build packages and directories for a namespace.
+     *
+     * @param infos
+     * @param info
+     * @param outfile
+     * @param st
+     * @param en
+     * @param ws
+     * @return
+     * @throws Exception
+     */
     public static String descending_namespace_spec(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
-
         // For <namespace_1>/<namespace_2>/ ... <namespace_n>, create files with empty package definitions for
         // <namespace_1>, <namespace_1>.<namespace_2>, through <namespace_1>.<namespace_2> ... .<namespace_n-1>
         // and return basic package definition for <namespace_1>.<namespace_2> ... .<namespace_n>
 
-        String str = "";
-        String[] words = info.namespace.split("/");
+        final String namespace = getDeconflictedNamespace(info.namespace);
+        final String[] namespaceParts = namespace.split("/");
+        
+        // We treat this a bit like a stack, grabbing the parent at each pass through the loop below.
         File packageFileDir = outfile.getParentFile();
 
         // Packages before the lowest-level package, starting at n-1
-        for(int i = words.length - 2; i >= 0 ; i--) {
+        for(int i = namespaceParts.length - 2; i >= 0 ; i--) {
 
-            String packageName = "";
+            final StringBuilder packageNameBuilder = new StringBuilder();
             for(int j = 0; j < i; j++) {
-                packageName += getDeconflictedName (words[j]) + ".";
+                packageNameBuilder.append(namespaceParts[j]);
+                packageNameBuilder.append(".");
             }
-            packageName += getDeconflictedName (words[i]);
-            str = "package " + packageName + " is\n\nend " + packageName + ";\n";
+            packageNameBuilder.append(namespaceParts[i]);
 
-            packageName = packageName.replaceAll("\\.", "-");
+            final String packageName = packageNameBuilder.toString();
+            final String packageFileName = packageName.replaceAll("\\.", "-");
             packageFileDir = packageFileDir.getParentFile();
             packageFileDir.mkdirs();
-            File packageFile = new File(packageFileDir, packageName + ".ads");
-            
+
+            final File packageFile = new File(packageFileDir, packageFileName.toLowerCase() + ".ads");
+
             // We do not want to write the package file if it already exists,
             // because we may have previously written it, with necessary withs,
             // on an earlier mdm. (This is particularly true for CMASI MDMs.)
             if (!packageFile.exists()) {
-            	packageFile.createNewFile();
-            	Files.write(packageFile.toPath(), str.getBytes());
+                packageFile.createNewFile();
+
+                final String packageDeclaration = MessageFormat.format(
+                          "package {0} is\n"
+                        + "\n"
+                        + "end {0};\n", packageName);
+
+                Files.write(packageFile.toPath(), packageDeclaration.getBytes());
             }
         }
 
-        // Lowest level package definition text, returned as str
-        String packageName = "";
-        packageName = getDeconflictedNamespace (info.namespace).replaceAll("/", ".");
-
-        str = "with avtas.lmcp.object; use avtas.lmcp.object;\n";
-        str += "with avtas.lmcp.types; use avtas.lmcp.types;\n\n";
-        str += "package " + packageName + " is\n\nend " + packageName + ";\n";
-
-        return str;
+        return MessageFormat.format(
+                  "with AVTAS.LMCP.Object; use AVTAS.LMCP.Object;\n"
+                + "with AVTAS.LMCP.types;  use AVTAS.LMCP.types;\n"
+                + "\n"
+                + "package {0} is\n"
+                + "\n"
+                + "end {0};\n", namespace.replaceAll("/", "."));
     }
 
     private static String getAdaPrimativeType(MDMInfo[] infos, FieldInfo field) {
@@ -796,7 +885,7 @@ public class AdaMethods {
             {
                 continue;
             }
-            buf.append(ws + "   when " + i.seriesNameAsLong + " => return " + getDeconflictedNamespace(i.namespace).replaceAll("/", ".") + ".factory.createObject(seriesId, msgType, version);\n");
+            buf.append(ws + "   when " + i.seriesNameAsLong + " => return " + getDeconflictedNamespace(i.namespace).replaceAll("/", ".") + ".Factory.createObject(seriesId, msgType, version);\n");
         }
         buf.append(ws + "   when others => return null;\n");
         buf.append(ws + "end case;");
@@ -828,15 +917,15 @@ public class AdaMethods {
             {
                 continue;
             }
-            buf.append(ws + "with " + getDeconflictedNamespace(i.namespace).replaceAll("/", ".") + "." + "factory;\n");
+            buf.append(ws + "with " + getDeconflictedNamespace(i.namespace).replaceAll("/", ".") + "." + "Factory;\n");
         }
         return buf.toString();
     }
 
     public static String include_all_series_headers(MDMInfo[] infos, MDMInfo info, File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
         String str = "";
-        str += ws + "with " + getDeconflictedNamespace (info.namespace).replaceAll("/", ".") + ".enumerations;\n";
-        str += ws + "with " + getDeconflictedNamespace (info.namespace).replaceAll("/", ".") + ".object;\n";
+        str += ws + "with " + getDeconflictedNamespace (info.namespace).replaceAll("/", ".") + ".Enumerations;\n";
+        str += ws + "with " + getDeconflictedNamespace (info.namespace).replaceAll("/", ".") + ".Object;\n";
         for (int i = 0; i < info.structs.length; i++) {
             str += ws + "with " + getDeconflictedNamespace (info.namespace).replaceAll("/", ".") + "." + getDeconflictedName(info.structs[i].name) + ";\n";
         }
@@ -861,7 +950,7 @@ public class AdaMethods {
                     break;
                 case SINGLE_NODE_STRUCT:
                 case SINGLE_LEAF_STRUCT:
-                    str += ws + "   avtas.lmcp.factory.putObject(avtas.lmcp.object.Object_Any(This." + fieldname + "), Buffer);\n";
+                    str += ws + "   AVTAS.LMCP.Factory.putObject(AVTAS.LMCP.Object.Object_Any(This." + fieldname + "), Buffer);\n";
                     break;
                 case VECTOR_PRIMITIVE:
                     if (st.fields[i].isLargeArray) {
@@ -894,7 +983,7 @@ public class AdaMethods {
                         str += ws + "   Buffer.Put_UInt16(UInt16(This." + fieldname + ".Length));\n";
                     }
                     str += ws + "   for i of This." + fieldname + ".all loop\n";
-                    str += ws + "      avtas.lmcp.factory.putObject(avtas.lmcp.object.Object_Any(i), Buffer);\n";
+                    str += ws + "      AVTAS.LMCP.Factory.putObject(AVTAS.LMCP.Object.Object_Any(i), Buffer);\n";
                     str += ws + "   end loop;\n";
                     break;
                 case FIXED_ARRAY_PRIMITIVE:
@@ -913,7 +1002,7 @@ public class AdaMethods {
                 case FIXED_ARRAY_LEAF_STRUCT:
                     // str += ws + "   Put_UInt32(UInt32(This." + fieldname + "'Length), Buffer);\n";
                     str += ws + "   for i of This." + fieldname + ".all loop\n";
-                    str += ws + "      avtas.lmcp.factory.putObject(avtas.lmcp.object.Object_Any(i), Buffer);\n";
+                    str += ws + "      AVTAS.LMCP.Factory.putObject(AVTAS.LMCP.Object.Object_Any(i), Buffer);\n";
                     str += ws + "   end loop;\n";
                     break;
                 default:
@@ -962,7 +1051,7 @@ public class AdaMethods {
                     str += ws + "         Buffer.Get_Int64(seriesId);\n";
                     str += ws + "         Buffer.Get_UInt32(msgType);\n";
                     str += ws + "         Buffer.Get_UInt16(version);\n";
-                    str += ws + "         " + component_name + " := " + fieldtype + "(avtas.lmcp.factory.createObject(seriesId, msgType, version));\n";
+                    str += ws + "         " + component_name + " := " + fieldtype + "(AVTAS.LMCP.Factory.createObject(seriesId, msgType, version));\n";
                     str += ws + "         " + component_name + ".Unpack (Buffer);\n";
                     str += ws + "      end if;\n";
                     str += ws + "   end;\n";
@@ -1028,7 +1117,7 @@ public class AdaMethods {
                     str += ws + "            Buffer.Get_Int64(seriesId);\n";
                     str += ws + "            Buffer.Get_UInt32(msgType);\n";
                     str += ws + "            Buffer.Get_UInt16(version);\n";
-                    str += ws + "            item := " + fieldType + "(avtas.lmcp.factory.createObject(seriesId, msgType, version));\n";
+                    str += ws + "            item := " + fieldType + "(AVTAS.LMCP.Factory.createObject(seriesId, msgType, version));\n";
                     str += ws + "            item.unpack(Buffer);\n";
                     str += ws + "         end if;\n";
                     str += ws + "         This.get" + fieldname + ".Append(item);\n";
@@ -1073,7 +1162,7 @@ public class AdaMethods {
                     str += ws + "            Buffer.Get_Int64(seriesId);\n";
                     str += ws + "            Buffer.Get_UInt32(msgType);\n";
                     str += ws + "            Buffer.Get_UInt16(version);\n";
-                    str += ws + "            item := " + fieldType + "(avtas.lmcp.factory.createObject(seriesId, msgType, version));\n";
+                    str += ws + "            item := " + fieldType + "(AVTAS.LMCP.Factory.createObject(seriesId, msgType, version));\n";
                     str += ws + "            item.unpack(Buffer);\n";
                     str += ws + "         else\n";
                     str += ws + "            item := null;\n";

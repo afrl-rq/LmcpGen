@@ -1,6 +1,6 @@
 with Interfaces; use Interfaces;
 
-package avtas.lmcp.types is
+package AVTAS.LMCP.Types is
 
    -- C/C++ compatible integer types
    type Byte   is new Interfaces.Unsigned_8;
@@ -13,4 +13,4 @@ package avtas.lmcp.types is
    type Real32 is new Interfaces.IEEE_Float_32;
    type Real64 is new Interfaces.IEEE_Float_64;
 
-end avtas.lmcp.types;
+end AVTAS.LMCP.Types;

@@ -21,7 +21,7 @@ begin
       Put_Line ("failed (should have raised Assertion_Error)");
    exception
       when Assertion_Error =>
-         Put_Line ("passed (raised Assertion_Error)");
+         Put_Line ("passed");
       when Error : others =>
          Put_Line (Exception_Information (Error));
    end;
@@ -50,7 +50,7 @@ begin
       Put_Line ("failed (should have raised Assertion_Error)");
    exception
       when Assertion_Error =>
-         Put_Line ("passed (raised Assertion_Error)");
+         Put_Line ("passed");
       when Error : others =>
          Put_Line (Exception_Information (Error));
    end;
@@ -89,7 +89,7 @@ begin
       Put_Line ("failed (should have raised Runtime_Length_Error)");
    exception
       when Runtime_Length_Error =>
-         Put_Line ("passed (raised Runtime_Length_Error)");
+         Put_Line ("passed");
       when Error : others =>
          Put_Line (Exception_Information (Error));
    end;
@@ -107,7 +107,7 @@ begin
       Put_Line ("failed (should have raised Assertion_Error)");
    exception
       when Assertion_Error =>
-         Put_Line ("passed (raised Assertion_Error)");
+         Put_Line ("passed");
       when Error : others =>
          Put_Line (Exception_Information (Error));
    end;
@@ -137,7 +137,39 @@ begin
       Put_Line ("failed (should have raised Assertion_Error)");
    exception
       when Assertion_Error =>
-         Put_Line ("passed (raised Assertion_Error)");
+         Put_Line ("passed");
+      when Error : others =>
+         Put_Line (Exception_Information (Error));
+   end;
+
+   declare
+      C : constant := 2;  -- the 2 bytes for the string's bounds
+      B : ByteBuffer (Capacity => C);
+      L : constant := 0;
+      S : constant Unbounded_String := To_Unbounded_String (Source => String'(1 .. L => 'x'));
+   begin
+      Put ("Inserting unbounded string with length = 0, with sufficient capacity ");
+      B.Put_Unbounded_String (S);
+      Put_Line ("passed");
+   exception
+      when Assertion_Error =>
+         Put_Line ("failed (raised Assertion_Error)");
+      when Error : others =>
+         Put_Line (Exception_Information (Error));
+   end;
+
+   declare
+      C : constant := 1;  -- less than the 2 bytes for the string's bounds
+      B : ByteBuffer (Capacity => C);
+      L : constant := 0;
+      S : constant Unbounded_String := To_Unbounded_String (Source => String'(1 .. L => 'x'));
+   begin
+      Put ("Inserting unbounded string with length = 0, without sufficient capacity ");
+      B.Put_Unbounded_String (S);
+      Put_Line ("failed");  -- we didn't have room for the bounds
+   exception
+      when Assertion_Error =>
+         Put_Line ("passed");
       when Error : others =>
          Put_Line (Exception_Information (Error));
    end;
@@ -168,7 +200,7 @@ begin
       Put_Line ("failed (should have raised Assertion_Error)");
    exception
       when Assertion_Error =>
-         Put_Line ("passed (raised Assertion_Error)");
+         Put_Line ("passed");
       when Error : others =>
          Put_Line (Exception_Information (Error));
    end;

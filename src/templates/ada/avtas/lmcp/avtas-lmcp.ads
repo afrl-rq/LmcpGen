@@ -1,3 +1,3 @@
-package avtas.lmcp is
+package AVTAS.LMCP is
    
-end avtas.lmcp;
+end AVTAS.LMCP;
