@@ -312,7 +312,7 @@ namespace Avtas.Lmcp
         Write(true);
         Write(obj.SeriesNameAsLong);
         Write(obj.LmcpType);
-        Write(obj.Version);
+        Write(obj.SeriesVersion);
         obj.Pack(this.BaseStream);
       }
     }
