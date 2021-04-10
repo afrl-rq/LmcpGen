@@ -10,14 +10,12 @@ project Test_ByteBuffers is
    for Object_Dir use "objs/" & Mode;
 
    Unconditional_Compiler_Switches :=
-     ("-gnatyO",    -- check that overriding subprograms are explicitly marked as such
-      "-gnat2020"   -- enable Ada 202x
+     ("-gnatyO"    -- check that overriding subprograms are explicitly marked as such
       );
 
    Debug_Switches := ("-g",
                       "-gnateA",     -- check subprogram call for aliased actual parameters
                       "-gnata",      -- enable assertions
-                      --"-gnatwe",     -- treat warnings as errors
                       "-gnatwa",     -- turn on (almost) all warnings
                       "-gnatwf",     -- warn on unreferenced formal parameters
                       "-O0"
@@ -34,16 +32,21 @@ project Test_ByteBuffers is
          when "release" =>
             for Default_Switches ("ada") use Release_Switches & Unconditional_Compiler_Switches;
       end case;
+
+      for Switches ("a-strunb.adb") use ("-gnatg", "-O0", "-g", "-gnata");
    end Compiler;
 
+   package Linker is
+      for Default_Switches ("Ada") use ("-Wl,--stack=0x1000000000");
+   end Linker;
+
    package Builder is
-      case Mode is
-         when "debug" =>
-            for Default_Switches ("ada") use ("-g");
-         when "release" =>
-            for Default_Switches ("ada") use ("");
-      end case;
+      for Switches ("Ada") use ("-g");
    end Builder;
+
+   package Prove is
+      for Proof_Switches ("Ada") use ("--level=4", "--checks-as-errors", "--proof-warnings");
+   end Prove;
 
 end Test_ByteBuffers;
 
