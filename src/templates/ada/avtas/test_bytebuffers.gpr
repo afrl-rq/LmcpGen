@@ -5,7 +5,12 @@ project Test_ByteBuffers is
    for Main use ("test_bytebuffers.adb");
 
    type Modes is ("debug", "release");
-   Mode : Modes := external ("MODE", "debug");
+   Mode : Modes := external ("Build", "debug");
+   
+   
+   type Copying_Modes is ("proof", "performance");
+   Copying_Mode : Copying_Modes := external ("Copy_Mode", "proof");   
+   
 
    for Object_Dir use "objs/" & Mode;
 
@@ -35,6 +40,15 @@ project Test_ByteBuffers is
 
       for Switches ("a-strunb.adb") use ("-gnatg", "-O0", "-g", "-gnata");
    end Compiler;
+
+   package Naming is
+      case Copying_Mode is
+         when "proof" =>
+            for Implementation ("avtas.lmcp.bytebuffers.copying") use "avtas-lmcp-bytebuffers-copying-provable.adb";
+         when "performance" =>
+            for Implementation ("avtas.lmcp.bytebuffers.copying") use "avtas-lmcp-bytebuffers-copying-performant.adb";
+      end case;
+   end Naming;
 
    package Linker is
       for Default_Switches ("Ada") use ("-Wl,--stack=0x1000000000");

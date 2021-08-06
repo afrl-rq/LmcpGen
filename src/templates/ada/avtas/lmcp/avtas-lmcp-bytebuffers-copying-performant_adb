@@ -1,0 +1,108 @@
+with System.Storage_Elements;  use System.Storage_Elements;
+
+package body AVTAS.LMCP.ByteBuffers.Copying with
+   SPARK_Mode => Off
+is
+
+   -----------------
+   -- Overlapping --
+   -----------------
+
+   function Overlapping (Destination, Source : Address; Count : Storage_Count) return Boolean is
+     (for some Location in To_Integer (Destination) .. To_Integer (Destination + Count - 1) =>
+        Location in To_Integer (Source) .. To_Integer (Source + Count - 1))
+   with Pre => Source /= Null_Address and
+               Destination /= Null_Address;
+
+   -------------
+   -- MemCopy --
+   -------------
+
+   function MemCopy (Destination, Source : Address; Length : Storage_Count) return Address with
+     Inline,
+     Import,
+     Convention => C,
+     Link_Name => "memcpy",
+     Pre => Source /= Null_Address and then
+            Destination /= Null_Address and then
+            Source /= Destination and then  --- covered by Overlapping but aids comprehension
+            not Overlapping (Destination, Source, Length),
+     Post => MemCopy'Result = Destination;
+   --  Copies Length bytes from the object designated by Source to the object
+   --  designated by Destination. Note the order of the address parameters is
+   --  critical so use the named association format for specifying actuals in
+   --  calls.
+
+   ---------------------------
+   -- Copy_Buffer_To_String --
+   ---------------------------
+   
+   procedure Copy_Buffer_To_String
+     (This        : in out ByteBuffer'Class;
+      Length      : Index;
+      Destination : in out String)
+   is
+      Result : System.Address with Unreferenced;
+   begin
+      Result := MemCopy (Source      => This.Content (This.Position)'Address,
+                         Destination => Destination'Address,
+                         Length      => Storage_Count (Length));
+      This.Position := This.Position + Length;
+   end Copy_Buffer_To_String;   
+   
+   -------------------------------------
+   -- Copy_Buffer_To_Unbounded_String --
+   -------------------------------------
+
+   procedure Copy_Buffer_To_Unbounded_String
+     (This        : in out ByteBuffer'Class;
+      Length      : Index;
+      Destination : out Unbounded_String)
+   is
+      Temp    : String (1 .. Integer (Length));
+      Old_Pos : constant Index := This.Position with Ghost;
+      Result  : System.Address with Unreferenced;
+   begin
+      Result := MemCopy (Source      => This.Content (This.Position)'Address,
+                         Destination => Temp'Address,
+                         Length      => Storage_Count (Length));
+      This.Position := This.Position + Length;
+      pragma Assert (Equal (Raw_Bytes (This) (Old_Pos .. Position (This) - 1), Temp));
+      Destination := To_Unbounded_String (Temp);
+   end Copy_Buffer_To_Unbounded_String;   
+     
+   ---------------------------
+   -- Copy_String_To_Buffer --
+   ---------------------------
+   
+   procedure Copy_String_To_Buffer
+     (This : in out ByteBuffer'Class;
+      From : String)
+   is
+      Result : System.Address with Unreferenced;
+   begin
+      Result := MemCopy (Source      => From'Address,
+                         Destination => This.Content (This.Position)'Address,
+                         Length      => Storage_Count (From'Length));
+      This.Highest_Write_Pos := This.Highest_Write_Pos + From'Length;
+      This.Position := This.Position + From'Length;
+   end Copy_String_To_Buffer;
+   
+   --------------------------
+   -- Copy_Bytes_To_Buffer --
+   --------------------------
+   
+   procedure Copy_Bytes_To_Buffer
+     (This : in out ByteBuffer'Class;
+      From : Byte_Array)
+   is
+      Result : System.Address with Unreferenced;
+   begin
+      Result := MemCopy (Source      => From'Address,
+                         Destination => This.Content (This.Position)'Address,
+                         Length      => Storage_Count (From'Length));
+      This.Highest_Write_Pos := This.Highest_Write_Pos + From'Length;
+      This.Position := This.Position + From'Length;
+   end Copy_Bytes_To_Buffer;
+   
+end AVTAS.LMCP.ByteBuffers.Copying;

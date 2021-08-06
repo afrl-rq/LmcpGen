@@ -11,20 +11,17 @@ package -<full_series_name_dots>-.Factory is
    procedure getObject(buffer : in out ByteBuffer; output : out avtas.lmcp.object.Object_Any);
    function createObject(seriesId : in Int64;  msgType : in UInt32; version: in UInt16) return avtas.lmcp.object.Object_Any;
 
-   function CalculateChecksum (Buffer : in ByteBuffer) return UInt32;
-   --  Computes the modular checksum for the Buffer contents. Assumes
-   --  Big Endian order.
-   --
-   --  The checksum calculation does not include those bytes that either will,
-   --  or already do hold the UInt32 checksum stored at the very end of the
-   --  buffer
+   function CalculatedChecksum (Buffer : in ByteBuffer; Size : Index) return UInt32;
+   --  Computes the modular checksum for the Buffer contents, ignoring the
+   --  last 4 bytes in which the checksum may or may not be stored. Assumes
+   --  Big Endian byte order.
 
    function getObjectSize(buffer : in ByteBuffer) return UInt32;
 
-   function Validate (Buffer : in ByteBuffer) return Boolean;
-   --  Validates a buffer by comparing a newly computed checksum with the
-   --  previously computed checksum value stored with the message
-   --  in the buffer. Assumes the buffer is in Big Endian byte order.
+   function Validated (Buffer : in ByteBuffer) return Boolean;
+   --  Returns whether a newly computed checksum equals the previously computed
+   --  checksum value stored with the message in the buffer. Assumes the buffer
+   --  is in Big Endian byte order.
 
 end -<full_series_name_dots>-.Factory;
 

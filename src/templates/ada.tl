@@ -9,6 +9,11 @@ ONCE ada/avtas/lmcp/avtas-lmcp-bytebuffers.ads src/avtas/lmcp/avtas-lmcp-bytebuf
 ONCE ada/avtas/lmcp/avtas-lmcp-bytebuffers.adb src/avtas/lmcp/avtas-lmcp-bytebuffers.adb
 ONCE ada/avtas/lmcp/avtas-lmcp-factory.ads src/avtas/lmcp/avtas-lmcp-factory.ads
 ONCE ada/avtas/lmcp/avtas-lmcp-factory.adb src/avtas/lmcp/avtas-lmcp-factory.adb
+ONCE ada/avtas/lmcp/avtas-lmcp-bytebuffers-copying-performant_adb src/avtas/lmcp/avtas-lmcp-bytebuffers-copying-performant_adb
+ONCE ada/avtas/lmcp/avtas-lmcp-bytebuffers-copying-provable_adb src/avtas/lmcp/avtas-lmcp-bytebuffers-copying-provable_adb
+ONCE ada/avtas/lmcp/avtas-lmcp-bytebuffers-copying.ads src/avtas/lmcp/avtas-lmcp-bytebuffers-copying.ads
+ONCE ada/avtas/lmcp/conversion_equality_lemmas.adb src/avtas/lmcp/conversion_equality_lemmas.adb
+ONCE ada/avtas/lmcp/conversion_equality_lemmas.ads src/avtas/lmcp/conversion_equality_lemmas.ads
 ONCE ada/utilities.ads src/utilities.ads
 ONCE ada/utilities.adb src/utilities.adb
 ONCE ada/lmcp_generated_messages.gpr  lmcp_generated_messages.gpr

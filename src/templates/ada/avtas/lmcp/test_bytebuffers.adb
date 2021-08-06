@@ -11,22 +11,22 @@ procedure Test_ByteBuffers with SPARK_Mode is
    package ASU renames Ada.Strings.Unbounded;
 begin
 
+--  get from relative index --------------------------------------------------
+
    declare
       C : constant := 100; -- arbitrary
       B : ByteBuffer (Capacity => C);
       V : UInt16 := 42;
    begin
-      Put ("Inserting 2-byte integer with sufficient capacity: ");
+      Put ("Get UInt16 at absolute index: ");
       B.Put_Uint16 (V);
-      Put_Line ("passed");
-
       B.Rewind;
       V := 0;
       B.Get_UInt16 (V);
       if V = 42 then
-         Put_Line ("Get UInt16 relative: passed");
+         Put_Line ("passed");
       else
-         Put_Line ("Get UInt16 relative: failed, wrong value read");
+         Put_Line ("failed, wrong value read");
       end if;
    exception
       when Assertion_Error =>
@@ -34,6 +34,89 @@ begin
          Failed := Failed + 1;
       when Error : others =>
          Put_Line (Exception_Information (Error));
+         Failed := Failed + 1;
+   end;
+
+--  get from absolute index --------------------------------------------------
+
+   declare
+      --                                  123456789ABC
+      String_Input  : constant String := "Hello World!";
+      Index_After_String : constant := 2 + String_Input'Length;
+      --  the 2-byte length of the string precedes the actual string content so
+      --  we add 2
+
+      UInt32_Input  : constant UInt32 := 42;
+      Byte_Input    : constant Byte := 42;
+      
+      Expected_High_Water_Mark : constant := 2 + String_Input'Length + 4 + 1;
+      --  2-bytes for string length + length of string + 4 bytes for uint32 + 1 byte for boolean
+
+      Buffer : ByteBuffer (Capacity => 100);
+   begin
+      Put ("Get_UInt32 from absolute index > position and <= high water mark: ");
+      Buffer.Put_String (String_Input);
+      Buffer.Put_UInt32 (UInt32_Input);
+      Buffer.Put_Byte (Byte_Input);
+
+      Buffer.Rewind;
+
+      Assert (Position (Buffer) = 0, "Invalid position in test Get_UInt32 absolute");
+      Assert (High_Water_Mark (Buffer) = Expected_High_Water_Mark, "Invalid high water mark in test Get_UInt32 absolute");
+
+      --  now we read back one of the written values at an absolute position
+      --  that is greater than the current position but not greater than the
+      --  high water mark, which should succeed
+      declare
+         Output : UInt32;
+      begin
+         Buffer.Get_UInt32 (Output, First => Index_After_String);
+         if Output = UInt32_Input then
+            Put_Line ("passed");
+         else
+            Put_Line ("FAILED (value read /= value written)");
+            Failed := Failed + 1;
+         end if;
+      end;
+   exception
+      when Error : others =>
+         Put_Line (Exception_Message (Error));
+         Failed := Failed + 1;
+   end;
+
+   declare
+      String_Input  : constant String := "Hello World!";
+
+      Expected_High_Water_Mark : constant := 2 + String_Input'Length;
+      --  2-bytes for string length + length of string
+      
+      Invalid_Index : constant Index := Expected_High_Water_Mark + 1;
+      
+      Buffer : ByteBuffer (Capacity => 100);
+   begin
+      Put ("Get_UInt32 from absolute index > position and > high water mark: ");
+      Buffer.Put_String (String_Input);
+
+      Buffer.Rewind;
+
+      Assert (Position (Buffer) = 0, "Invalid position in test Get_UInt32 absolute > high water mark");
+      Assert (High_Water_Mark (Buffer) = Expected_High_Water_Mark, 
+              "Invalid high water mark in test Get_UInt32 absolute > high water mark");
+
+      --  now we read back from an index greater than the high water mark, which should fail
+      declare
+         Output : UInt32;
+      begin
+         Buffer.Get_UInt32 (Output, First => Invalid_Index);
+         Put_Line ("FAILED (should have raised Assertion_Error)");
+         Failed := Failed + 1;
+      exception
+         when Assertion_Error =>
+            Put_Line ("passed");
+      end;
+   exception
+      when Error : others =>
+         Put_Line (Exception_Message (Error));
          Failed := Failed + 1;
    end;
 
