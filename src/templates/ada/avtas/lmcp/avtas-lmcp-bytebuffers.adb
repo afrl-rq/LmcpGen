@@ -1,25 +1,22 @@
-with System.Storage_Elements; use System.Storage_Elements;
-with GNAT.Byte_Swapping;
-with Ada.Unchecked_Conversion;
+with Conversion_Equality_Lemmas;     use Conversion_Equality_Lemmas;
+with AVTAS.LMCP.ByteBuffers.Copying; use AVTAS.LMCP.ByteBuffers.Copying;
 
-package body AVTAS.LMCP.ByteBuffers is
+package body AVTAS.LMCP.ByteBuffers with
+  SPARK_Mode
+is
 
-   ---------------
-   -- Raw_Bytes --
-   ---------------
-
-   function Raw_Bytes (This : ByteBuffer) return Byte_Array is
-     (This.Content (1 .. This.Total_Bytes_Used));
+   pragma Unevaluated_Use_Of_Old (Allow);
 
    ---------------
    -- Raw_Bytes --
    ---------------
 
-   function Raw_Bytes (This : ByteBuffer) return String is
-      Result : String (1 .. Positive (This.Total_Bytes_Used));
+   function Raw_Bytes (This : ByteBuffer'Class) return String is
+      Length : constant Natural := Natural (Index'Min (Max_String_Length, This.Highest_Write_Pos));
+      Result : String (1 .. Length);
    begin
-      for K in 1 .. This.Total_Bytes_Used loop
-         Result (Positive (K)) := Character'Val (This.Content (K));
+      for K in Result'Range loop
+         Result (K) := Character'Val (This.Content (Index (K - 1)));
       end loop;
       return Result;
    end Raw_Bytes;
@@ -28,339 +25,43 @@ package body AVTAS.LMCP.ByteBuffers is
    -- Rewind --
    ------------
 
-   procedure Rewind (This : in out ByteBuffer) is
+   procedure Rewind (This : in out ByteBuffer'Class) is
    begin
-      This.Position := 1;
+      This.Position := 0;
    end Rewind;
 
    -----------
-   -- Clear --
+   -- Reset --
    -----------
 
-   procedure Clear (This : in out ByteBuffer) is
+   procedure Reset (This : in out ByteBuffer'Class) is
    begin
-      This.Rewind;
-      This.Total_Bytes_Used := 0;
-   end Clear;
-
-   ---------------------
-   -- Space_Available --
-   ---------------------
-
-   function Space_Available (This : ByteBuffer) return UInt32 is
-      (if This.Position > This.Capacity then 0
-       else This.Capacity - This.Position + 1);
-   -- NB: we need to prove no wraparound; the if-statement may suffice...
-
-   -------------------------
-   -- Msg_Bytes_Remaining --
-   -------------------------
-
-   function Msg_Bytes_Remaining (This : ByteBuffer) return UInt32 is
-      (This.Total_Bytes_Used - This.Position + 1);
-
-   --------------
-   -- Position --
-   --------------
-
-   function Position (This : ByteBuffer) return UInt32 is
-     (This.Position);
-
-   ------------
-   -- Length --
-   ------------
-
-   function Length (This : ByteBuffer) return UInt32 is
-      (This.Total_Bytes_Used);
+      Rewind (This);
+      This.Highest_Write_Pos := 0;
+   end Reset;
 
    --------------
    -- Checksum --
    --------------
 
-   function Checksum (This : ByteBuffer;  From, To : Index) return UInt32 is
+   function Checksum (This : ByteBuffer'Class;  Last : Index) return UInt32 is
       Result : UInt32 := 0;
    begin
-      for K in Index range From .. To loop
+      for K in Index range This.Content'First .. Last loop
          Result := Result + UInt32 (This.Content (K));
+         pragma Annotate (GNATProve,
+                          Intentional,
+                          "overflow check might fail",
+                          "Wrap-around semantics are required in this function.");
       end loop;
       return Result;
    end Checksum;
-
-   -----------------
-   -- Overlapping --
-   -----------------
-
-   function Overlapping (Destination, Source : Address; Count : Storage_Count) return Boolean is
-     (for some Location in To_Integer (Destination) .. To_Integer (Destination + Count - 1) =>
-           Location in To_Integer (Source) .. To_Integer (Source + Count - 1))
-   with Pre => Source /= Null_Address and
-               Destination /= Null_Address;
-
-   -------------
-   -- MemCopy --
-   -------------
-
-   function MemCopy (Destination, Source : Address; Count : Storage_Count) return Address with
-     Import,
-     Convention => C,
-     Link_Name => "memcpy",
-     Pre => Source /= Null_Address and then
-            Destination /= Null_Address and then
-            Source /= Destination and then  --- covered by Overlapping test but aids comprehension
-            not Overlapping (Destination, Source, Count),
-     Post => MemCopy'Result = Destination;
-   --  Copies Count bytes from the object designated by Source to the object
-   --  designated by Destination. Note the order of the address parameters is
-   --  critical so use the named association format for specifying actuals in
-   --  calls.
-
-   procedure Insert_Arbitrary_Bytes
-     (This   : in out ByteBuffer;
-      Source : System.Address;
-      Count  : UInt32)
-   with Pre  => Source /= Null_Address and
-                Count > 0              and
-                Space_Available (This) >= Count,
-        Post => This.Position = This.Position'Old + Count and
-                This.Total_Bytes_Used = This.Total_Bytes_Used'Old + Count;
-
-   generic
-      type Inserted is private;
-   procedure Insert_2_Bytes
-     (Value  : Inserted;
-      Buffer : in out Byte_Array;
-      Start  : Index)
-   with
-      Pre => Start in Buffer'Range and then
-             Start + 2 - 1 in Buffer'Range;
-
-   generic
-      type Inserted is private;
-   procedure Insert_4_Bytes
-     (Value  : Inserted;
-      Buffer : in out Byte_Array;
-      Start  : Index)
-   with
-      Pre => Start in Buffer'Range and then
-             Start + 4 - 1 in Buffer'Range;
-
-    generic
-      type Inserted is private;
-   procedure Insert_8_Bytes
-     (Value  : Inserted;
-      Buffer : in out Byte_Array;
-      Start  : Index)
-   with
-      Pre => Start in Buffer'Range and then
-             Start + 8 - 1 in Buffer'Range;
-
-   generic
-      type Retrieved is private;
-   procedure Retrieve_2_Bytes
-     (Value  : out Retrieved;
-      Buffer : Byte_Array;
-      Start  : Index)
-   with
-     Pre => Start in Buffer'Range and then
-            Start + 2 - 1 in Buffer'Range;
-
-   generic
-      type Retrieved is private;
-   procedure Retrieve_4_Bytes
-     (Value  : out Retrieved;
-      Buffer : Byte_Array;
-      Start  : Index)
-   with
-     Pre => Start in Buffer'Range and then
-            Start + 4 - 1 in Buffer'Range;
-
-   generic
-      type Retrieved is private;
-   procedure Retrieve_8_Bytes
-     (Value  : out Retrieved;
-      Buffer : Byte_Array;
-      Start  : Index)
-   with
-     Pre => Start in Buffer'Range and then
-            Start + 8 - 1 in Buffer'Range;
-
-   --------------------
-   -- Insert_2_Bytes --
-   --------------------
-
-   procedure Insert_2_Bytes
-     (Value  : Inserted;
-      Buffer : in out Byte_Array;
-      Start  : Index)
-   is
-      subtype Bytes is Byte_Array (1 .. 2);
-      Buffer_Overlay : Bytes with Address => Buffer (Start)'Address;
-      function As_Bytes is new Ada.Unchecked_Conversion (Source => Inserted, Target => Bytes);
-   begin
-      pragma Compile_Time_Error (Inserted'Object_Size /= 2 * Storage_Unit, "Generic actual param should be 2 bytes");
-      Buffer_Overlay := As_Bytes (Value);
-      if Standard'Default_Scalar_Storage_Order /= System.High_Order_First then -- we're not on a Big Endinan machine
-         GNAT.Byte_Swapping.Swap2 (Buffer (Start)'Address);
-      end if;
-   end Insert_2_Bytes;
-
-   --------------------
-   -- Insert_4_Bytes --
-   --------------------
-
-   procedure Insert_4_Bytes
-     (Value  : Inserted;
-      Buffer : in out Byte_Array;
-      Start  : Index)
-   is
-      subtype Bytes is Byte_Array (1 .. 4);
-      Buffer_Overlay : Bytes with Address => Buffer (Start)'Address;
-      function As_Bytes is new Ada.Unchecked_Conversion (Source => Inserted, Target => Bytes);
-   begin
-      pragma Compile_Time_Error (Inserted'Object_Size /= 4 * Storage_Unit, "Generic actual param should be 4 bytes");
-      Buffer_Overlay := As_Bytes (Value);
-      if Standard'Default_Scalar_Storage_Order /= System.High_Order_First then -- we're not on a Big Endinan machine
-         GNAT.Byte_Swapping.Swap4 (Buffer (Start)'Address);
-      end if;
-   end Insert_4_Bytes;
-
-   --------------------
-   -- Insert_8_Bytes --
-   --------------------
-
-   procedure Insert_8_Bytes
-     (Value  : Inserted;
-      Buffer : in out Byte_Array;
-      Start  : Index)
-   is
-      subtype Bytes is Byte_Array (1 .. 8);
-      Buffer_Overlay : Bytes with Address => Buffer (Start)'Address;
-      function As_Bytes is new Ada.Unchecked_Conversion (Source => Inserted, Target => Bytes);
-   begin
-      pragma Compile_Time_Error (Inserted'Object_Size /= 8 * Storage_Unit, "Generic actual param should be 8 bytes");
-      Buffer_Overlay := As_Bytes (Value);
-      if Standard'Default_Scalar_Storage_Order /= System.High_Order_First then -- we're not on a Big Endinan machine
-         GNAT.Byte_Swapping.Swap8 (Buffer (Start)'Address);
-      end if;
-   end Insert_8_Bytes;
-
-   ----------------------------
-   -- Insert_Arbitrary_Bytes --
-   ----------------------------
-
-   procedure Insert_Arbitrary_Bytes
-     (This   : in out ByteBuffer;
-      Source : System.Address;
-      Count  : UInt32)
-   is
-      Result : System.Address with Unreferenced;
-   begin
-      Result := MemCopy (Destination => This.Content (This.Position)'Address,
-                         Source      => Source,
-                         Count       => Storage_Count (Count));
-      This.Position := This.Position + Count;
-      This.Total_Bytes_Used := This.Total_Bytes_Used + Count;
-   end Insert_Arbitrary_Bytes;
-
-   ----------------------
-   -- Retrieve_2_Bytes --
-   ----------------------
-
-   procedure Retrieve_2_Bytes
-     (Value  : out Retrieved;
-      Buffer : Byte_Array;
-      Start  : Index)
-   is
-      subtype Bytes is Byte_Array (1 .. 2);
-      Buffer_Overlay : Bytes with Address => Buffer (Start)'Address;
-      function As_Retrieved is new Ada.Unchecked_Conversion (Source => Bytes, Target => Retrieved);
-   begin
-      pragma Compile_Time_Error (Retrieved'Object_Size /= 2 * Storage_Unit, "Generic actual param should be 2 bytes");
-      Value := As_Retrieved (Buffer_Overlay);
-      if Standard'Default_Scalar_Storage_Order /= System.High_Order_First then -- we're not on a Big Endinan machine
-         GNAT.Byte_Swapping.Swap2 (Value'Address);
-      end if;
-   end Retrieve_2_Bytes;
-
-   ----------------------
-   -- Retrieve_4_Bytes --
-   ----------------------
-
-   procedure Retrieve_4_Bytes
-     (Value  : out Retrieved;
-      Buffer : Byte_Array;
-      Start  : Index)
-   is
-      subtype Bytes is Byte_Array (1 .. 4);
-      Buffer_Overlay : Bytes with Address => Buffer (Start)'Address;
-      function As_Retrieved is new Ada.Unchecked_Conversion (Source => Bytes, Target => Retrieved);
-   begin
-      pragma Compile_Time_Error (Retrieved'Object_Size /= 4 * Storage_Unit, "Generic actual param should be 4 bytes");
-      Value := As_Retrieved (Buffer_Overlay);
-      if Standard'Default_Scalar_Storage_Order /= System.High_Order_First then -- we're not on a Big Endinan machine
-         GNAT.Byte_Swapping.Swap4 (Value'Address);
-      end if;
-   end Retrieve_4_Bytes;
-
-   ----------------------
-   -- Retrieve_8_Bytes --
-   ----------------------
-
-   procedure Retrieve_8_Bytes
-     (Value  : out Retrieved;
-      Buffer : Byte_Array;
-      Start  : Index)
-   is
-      subtype Bytes is Byte_Array (1 .. 8);
-      Buffer_Overlay : Bytes with Address => Buffer (Start)'Address;
-      function As_Retrieved is new Ada.Unchecked_Conversion (Source => Bytes, Target => Retrieved);
-   begin
-      pragma Compile_Time_Error (Retrieved'Object_Size /= 8 * Storage_Unit, "Generic actual param should be 8 bytes");
-      Value := As_Retrieved (Buffer_Overlay);
-      if Standard'Default_Scalar_Storage_Order /= System.High_Order_First then -- we're not on a Big Endinan machine
-         GNAT.Byte_Swapping.Swap8 (Value'Address);
-      end if;
-   end Retrieve_8_Bytes;
-
-   --  Instances
-
-   procedure Insert_UInt16 is new Insert_2_Bytes (UInt16) with Inline;
-
-   procedure Retrieve_UInt16 is new Retrieve_2_Bytes (UInt16) with Inline;
-
-   procedure Insert_UInt32 is new Insert_4_Bytes (UInt32) with Inline;
-
-   procedure Retrieve_UInt32 is new Retrieve_4_Bytes (UInt32) with Inline;
-
-   procedure Insert_UInt64 is new Insert_8_Bytes (UInt64) with Inline;
-
-   procedure Retrieve_UInt64 is new Retrieve_8_Bytes (UInt64) with Inline;
-
-   procedure Insert_Int16 is new Insert_2_Bytes (Int16) with Inline;
-
-   procedure Retrieve_Int16 is new Retrieve_2_Bytes (Int16) with Inline;
-
-   procedure Insert_Int32 is new Insert_4_Bytes (Int32) with Inline;
-
-   procedure Retrieve_Int32 is new Retrieve_4_Bytes (Int32) with Inline;
-
-   procedure Insert_Int64 is new Insert_8_Bytes (Int64) with Inline;
-
-   procedure Retrieve_Int64 is new Retrieve_8_Bytes (Int64) with Inline;
-
-   procedure Insert_Float is new Insert_4_Bytes (Real32) with Inline;
-
-   procedure Retrieve_Float is new Retrieve_4_Bytes (Real32) with Inline;
-
-   procedure Insert_Double is new Insert_8_Bytes (Real64) with Inline;
-
-   procedure Retrieve_Double is new Retrieve_8_Bytes (Real64) with Inline;
 
    --------------
    -- Get_Byte --
    --------------
 
-   procedure Get_Byte (This : in out ByteBuffer; Value : out Byte) is
+   procedure Get_Byte (This : in out ByteBuffer'Class; Value : out Byte) is
    begin
       Value := This.Content (This.Position);
       This.Position := This.Position + 1;
@@ -370,7 +71,7 @@ package body AVTAS.LMCP.ByteBuffers is
    -- Get_Boolean --
    -----------------
 
-   procedure Get_Boolean (This : in out ByteBuffer; Value : out Boolean) is
+   procedure Get_Boolean (This : in out ByteBuffer'Class; Value : out Boolean) is
    begin
       Value := This.Content (This.Position) /= 0;
       This.Position := This.Position + 1;
@@ -380,9 +81,21 @@ package body AVTAS.LMCP.ByteBuffers is
    -- Get_Int16 --
    ---------------
 
-   procedure Get_Int16 (This : in out ByteBuffer; Value : out Int16) is
+   procedure Get_Int16 (This : in out ByteBuffer'Class; Value : out Int16) is
+
+     procedure Lemma_Two_Bytes_Equal_Int16 is new Lemma_Conversion_Equality
+        (Numeric    => Int16,
+         Byte       => Byte,
+         Index      => Index,
+         Bytes      => Byte_Array,
+         To_Numeric => As_Int16,
+         To_Bytes   => As_Two_Bytes);
+
    begin
-      Retrieve_Int16 (Value, This.Content, Start => This.Position);
+      Value := As_Int16 (This.Content (This.Position .. This.Position + 1));
+      Lemma_Two_Bytes_Equal_Int16
+        (This_Numeric => Value,
+         These_Bytes  => This.Content (This.Position .. This.Position + 1));
       This.Position := This.Position + 2;
    end Get_Int16;
 
@@ -390,9 +103,21 @@ package body AVTAS.LMCP.ByteBuffers is
    -- Get_UInt16 --
    ----------------
 
-   procedure Get_UInt16 (This : in out ByteBuffer; Value : out UInt16) is
+   procedure Get_UInt16 (This : in out ByteBuffer'Class; Value : out UInt16) is
+
+     procedure Lemma_Two_Bytes_Equal_UInt16 is new Lemma_Conversion_Equality
+        (Numeric    => UInt16,
+         Byte       => Byte,
+         Index      => Index,
+         Bytes      => Byte_Array,
+         To_Numeric => As_UInt16,
+         To_Bytes   => As_Two_Bytes);
+
    begin
-      Retrieve_UInt16 (Value, This.Content, Start => This.Position);
+      Value := As_UInt16 (This.Content (This.Position .. This.Position + 1));
+      Lemma_Two_Bytes_Equal_UInt16
+        (This_Numeric => Value,
+         These_Bytes  => This.Content (This.Position .. This.Position + 1));
       This.Position := This.Position + 2;
    end Get_UInt16;
 
@@ -400,9 +125,21 @@ package body AVTAS.LMCP.ByteBuffers is
    -- Get_Int32 --
    ---------------
 
-   procedure Get_Int32 (This : in out ByteBuffer; Value : out Int32) is
+   procedure Get_Int32 (This : in out ByteBuffer'Class; Value : out Int32) is
+
+     procedure Lemma_Four_Bytes_Equal_Int32 is new Lemma_Conversion_Equality
+        (Numeric    => Int32,
+         Byte       => Byte,
+         Index      => Index,
+         Bytes      => Byte_Array,
+         To_Numeric => As_Int32,
+         To_Bytes   => As_Four_Bytes);
+
    begin
-      Retrieve_Int32 (Value, This.Content, Start => This.Position);
+      Value := As_Int32 (This.Content (This.Position .. This.Position + 3));
+      Lemma_Four_Bytes_Equal_Int32
+        (This_Numeric => Value,
+         These_Bytes  => This.Content (This.Position .. This.Position + 3));
       This.Position := This.Position + 4;
    end Get_Int32;
 
@@ -410,9 +147,21 @@ package body AVTAS.LMCP.ByteBuffers is
    -- Get_UInt32 --
    ----------------
 
-   procedure Get_UInt32 (This : in out ByteBuffer; Value : out UInt32) is
+   procedure Get_UInt32 (This : in out ByteBuffer'Class; Value : out UInt32) is
+
+     procedure Lemma_Four_Bytes_Equal_UInt32 is new Lemma_Conversion_Equality
+        (Numeric    => UInt32,
+         Byte       => Byte,
+         Index      => Index,
+         Bytes      => Byte_Array,
+         To_Numeric => As_UInt32,
+         To_Bytes   => As_Four_Bytes);
+
    begin
-      Retrieve_UInt32 (Value, This.Content, Start => This.Position);
+      Value := As_UInt32 (This.Content (This.Position .. This.Position + 3));
+      Lemma_Four_Bytes_Equal_UInt32
+        (This_Numeric => Value,
+         These_Bytes  => This.Content (This.Position .. This.Position + 3));
       This.Position := This.Position + 4;
    end Get_UInt32;
 
@@ -421,22 +170,45 @@ package body AVTAS.LMCP.ByteBuffers is
    ----------------
 
    procedure Get_UInt32
-     (This  : in ByteBuffer;
+     (This  : ByteBuffer'Class;
       Value : out UInt32;
       First : Index)
    is
+
+     procedure Lemma_Four_Bytes_Equal_UInt32 is new Lemma_Conversion_Equality
+        (Numeric    => UInt32,
+         Byte       => Byte,
+         Index      => Index,
+         Bytes      => Byte_Array,
+         To_Numeric => As_UInt32,
+         To_Bytes   => As_Four_Bytes);
+
    begin
-      Retrieve_UInt32 (Value, This.Content, Start => First);
-      --  Position is unchanged
+      Value := As_UInt32 (This.Content (First .. First + 3));
+      Lemma_Four_Bytes_Equal_UInt32
+        (This_Numeric => Value,
+         These_Bytes  => This.Content (First .. First + 3));
    end Get_UInt32;
 
    ---------------
    -- Get_Int64 --
    ---------------
 
-   procedure Get_Int64 (This : in out ByteBuffer; Value : out Int64) is
+   procedure Get_Int64 (This : in out ByteBuffer'Class; Value : out Int64) is
+
+     procedure Lemma_Eight_Bytes_Equal_Int64 is new Lemma_Conversion_Equality
+        (Numeric    => Int64,
+         Byte       => Byte,
+         Index      => Index,
+         Bytes      => Byte_Array,
+         To_Numeric => As_Int64,
+         To_Bytes   => As_Eight_Bytes);
+
    begin
-      Retrieve_Int64 (Value, This.Content, Start => This.Position);
+      Value := As_Int64 (This.Content (This.Position .. This.Position + 7));
+      Lemma_Eight_Bytes_Equal_Int64
+        (This_Numeric => Value,
+         These_Bytes  => This.Content (This.Position .. This.Position + 7));
       This.Position := This.Position + 8;
    end Get_Int64;
 
@@ -444,9 +216,21 @@ package body AVTAS.LMCP.ByteBuffers is
    -- Get_UInt64 --
    ----------------
 
-   procedure Get_UInt64 (This : in out ByteBuffer; Value : out UInt64) is
+   procedure Get_UInt64 (This : in out ByteBuffer'Class; Value : out UInt64) is
+
+     procedure Lemma_Eight_Bytes_Equal_UInt64 is new Lemma_Conversion_Equality
+        (Numeric    => UInt64,
+         Byte       => Byte,
+         Index      => Index,
+         Bytes      => Byte_Array,
+         To_Numeric => As_UInt64,
+         To_Bytes   => As_Eight_Bytes);
+
    begin
-      Retrieve_UInt64 (Value, This.Content, Start => This.Position);
+      Value := As_UInt64 (This.Content (This.Position .. This.Position + 7));
+      Lemma_Eight_Bytes_Equal_UInt64
+        (This_Numeric => Value,
+         These_Bytes  => This.Content (This.Position .. This.Position + 7));
       This.Position := This.Position + 8;
    end Get_UInt64;
 
@@ -454,9 +238,40 @@ package body AVTAS.LMCP.ByteBuffers is
    -- Get_Real32 --
    ---------------
 
-   procedure Get_Real32 (This : in out ByteBuffer; Value : out Real32) is
+   procedure Get_Real32 (This : in out ByteBuffer'Class; Value : out Real32) is
+
+      function To_Real32 is new Ada.Unchecked_Conversion (Source => UInt32, Target => Real32);
+      pragma Annotate
+        (GNATProve,
+         Intentional,
+         "type is unsuitable as a target for unchecked conversion",
+         "Per the C++ implementation, we assume the same or compatible floating-point" &
+         " format on each participating machine");
+      --  SPARK does not assume that the UC will produce valid bit
+      --  representations for floating-point values.
+
+      function As_Real32 (Value : Four_Bytes) return Real32 is
+        (To_Real32 (As_UInt32 (Value)));
+
+     procedure Lemma_Four_Bytes_Equal_Real32 is new Lemma_Conversion_Equality
+        (Numeric    => Real32,
+         Byte       => Byte,
+         Index      => Index,
+         Bytes      => Byte_Array,
+         To_Numeric => As_Real32,
+         To_Bytes   => As_Four_Bytes);
+
    begin
-      Retrieve_Float (Value, This.Content, Start => This.Position);
+      --  We get a suitably-sized integer value and then convert to the required
+      --  floating-point type, to ensure the compiler does not see the byte
+      --  swapping (in the As_UInt32 instance) as producing an invalid
+      --  floating-point value.
+      Value := As_Real32 (This.Content (This.Position .. This.Position + 3));
+
+      Lemma_Four_Bytes_Equal_Real32
+        (This_Numeric => Value,
+         These_Bytes  => This.Content (This.Position .. This.Position + 3));
+
       This.Position := This.Position + 4;
    end Get_Real32;
 
@@ -464,38 +279,75 @@ package body AVTAS.LMCP.ByteBuffers is
    -- Get_Real64 --
    ----------------
 
-   procedure Get_Real64 (This : in out ByteBuffer; Value : out Real64) is
+   procedure Get_Real64 (This : in out ByteBuffer'Class; Value : out Real64) is
+
+      function To_Real64 is new Ada.Unchecked_Conversion (Source => UInt64, Target => Real64);
+      pragma Annotate
+        (GNATProve,
+         Intentional,
+         "type is unsuitable as a target for unchecked conversion",
+         "Per the C++ implementation, we assume the same or compatible floating-point" &
+         " format on each participating machine");
+      --  SPARK does not assume that the UC will produce valid bit
+      --  representations for floating-point values.
+
+      function As_Real64 (Value : Eight_Bytes) return Real64 is
+        (To_Real64 (As_UInt64 (Value)));
+
+      procedure Lemma_Eight_Bytes_Equal_Real64 is new Lemma_Conversion_Equality
+        (Numeric    => Real64,
+         Byte       => Byte,
+         Index      => Index,
+         Bytes      => Byte_Array,
+         To_Numeric => As_Real64,
+         To_Bytes   => As_Eight_Bytes);
+
    begin
-      Retrieve_Double (Value, This.Content, Start => This.Position);
+      -- We get a suitably-sized integer value and then convert to the required
+      -- floating-point type, to ensure the compiler does not see the byte
+      -- swapping (in the As_UInt64 instance) as producing an invalid
+      -- floating-point value.
+      Value := As_Real64 (This.Content (This.Position .. This.Position + 7));
+
+      Lemma_Eight_Bytes_Equal_Real64
+        (This_Numeric => Value,
+         These_Bytes  => This.Content (This.Position .. This.Position + 7));
+
       This.Position := This.Position + 8;
    end Get_Real64;
 
    ----------------
    -- Get_String --
    ----------------
-
    procedure Get_String
-     (This  : in out ByteBuffer;
-      Value : out String;
-      Last  : out Natural)
+     (This          : in out ByteBuffer'Class;
+      Value         : in out String;
+      Last          : out Integer;
+      Stored_Length : out UInt32)
    is
-      Result        : System.Address with Unreferenced;  -- checked by MemCopy postcondition
-      String_Length : UInt32;
+      Result : System.Address with Unreferenced;
    begin
-      This.Get_UInt16 (UInt16 (String_Length));
-      if String_Length > Msg_Bytes_Remaining (This) then
-         --  We don't have that many data bytes logically remaining in the
-         --  buffer to be fetched
-         raise Runtime_Length_Error;
-      end if;
-      if String_Length = 0 then
+      This.Get_UInt16 (UInt16 (Stored_Length));
+      if Index (Stored_Length) > Remaining (This) then
+         --  We don't have that many bytes logically remaining in the buffer
+         --  to be consumed. Some corruption of the message has occurred.
+         Last := -1;
+      elsif Stored_Length > Value'Length then
+         --  The buffer has more string bytes than the arg Value can hold.
+         --  Silly client. Nothing wrong with the buffer though.
+         Last := -1;
+      elsif This.Highest_Write_Pos + Index (Stored_Length) > This.Capacity or else
+            This.Position + Index (Stored_Length) > This.Highest_Write_Pos
+      then
+         Last := -1;
+      elsif Stored_Length = 0 then
+         --  This is a normal case of an empty string in the buffer.
          Last := Value'First - 1;
       else
-         Result := MemCopy (Source      => This.Content (This.Position)'Address,
-                            Destination => Value'Address,
-                            Count       => Storage_Count (String_Length));
-         This.Position := This.Position + String_Length;
-         Last := Value'First + Natural (String_Length) - 1;
+         --  The normal, non-zero length case, and the client has passed a
+         --  sufficiently large string arg.
+         Copy_Buffer_To_String (This, Index (Stored_Length), Value);
+         Last := Value'First + (Positive (Stored_Length) - 1);
       end if;
    end Get_String;
 
@@ -504,32 +356,21 @@ package body AVTAS.LMCP.ByteBuffers is
    --------------------------
 
    procedure Get_Unbounded_String
-     (This  : in out ByteBuffer;
-      Value : out Unbounded_String)
+     (This          : in out ByteBuffer'Class;
+      Value         : out Unbounded_String;
+      Stored_Length : out UInt32)
    is
-      Result        : System.Address with Unreferenced;  -- checked by MemCopy postcondition
-      String_Length : UInt32;  -- the length indicated by the message data in the buffer
    begin
-      This.Get_UInt16 (UInt16 (String_Length));
-      if String_Length > Msg_Bytes_Remaining (This) then
-         --  We don't have that many data bytes logically remaining in the
-         --  buffer to be fetched.
-         raise Runtime_Length_Error;
-      end if;
-      if String_Length = 0 then
+      This.Get_UInt16 (UInt16 (Stored_Length));
+      if Stored_Length > Max_String_Length or else
+         Index (Stored_Length) > Remaining (This) or else
+         This.Position + Index (Stored_length) > This.Highest_Write_Pos
+      then
+         Value := To_Unbounded_String ("Corrupted buffer");
+      elsif Stored_Length = 0 then
          Value := Null_Unbounded_String;
       else
-         declare
-            S : String (1 .. Integer (String_Length));
-            --  converting to Integer is safe because we read it as a UInt16, which
-            --  is itself safe because the Put* routines only write it as a UInt16
-         begin
-            Result := MemCopy (Source      => This.Content (This.Position)'Address,
-                               Destination => S'Address,
-                               Count       => Storage_Count (String_Length));
-            This.Position := This.Position + Index (String_Length);
-            Value := To_Unbounded_String (S);
-         end;
+         Copy_Buffer_To_Unbounded_String (This, Index (Stored_Length), Value);
       end if;
    end Get_Unbounded_String;
 
@@ -537,119 +378,119 @@ package body AVTAS.LMCP.ByteBuffers is
    -- Put_Byte --
    --------------
 
-   procedure Put_Byte (This : in out ByteBuffer; Value : Byte) is
+   procedure Put_Byte (This : in out ByteBuffer'Class; Value : Byte) is
    begin
       This.Content (This.Position) := Value;
+      This.Highest_Write_Pos := This.Highest_Write_Pos + 1;
       This.Position := This.Position + 1;
-      This.Total_Bytes_Used := This.Total_Bytes_Used + 1;
    end Put_Byte;
 
    -----------------
    -- Put_Boolean --
    -----------------
 
-   procedure Put_Boolean (This : in out ByteBuffer; Value : Boolean) is
+   procedure Put_Boolean (This : in out ByteBuffer'Class; Value : Boolean) is
    begin
-      This.Content (This.Position) := (if Value then 1 else 0);
+      This.Content (This.Position) := Boolean'Pos (Value);
+      This.Highest_Write_Pos := This.Highest_Write_Pos + 1;
       This.Position := This.Position + 1;
-      This.Total_Bytes_Used := This.Total_Bytes_Used + 1;
    end Put_Boolean;
 
    ---------------
    -- Put_Int16 --
    ---------------
 
-   procedure Put_Int16 (This : in out ByteBuffer; Value : Int16) is
+   procedure Put_Int16 (This : in out ByteBuffer'Class; Value : Int16) is
    begin
-      Insert_Int16 (Value, This.Content, Start => This.Position);
+      This.Content (This.Position .. This.Position + 1) := As_Two_Bytes (Value);
+      This.Highest_Write_Pos := This.Highest_Write_Pos + 2;
       This.Position := This.Position + 2;
-      This.Total_Bytes_Used := This.Total_Bytes_Used + 2;
    end Put_Int16;
 
    ----------------
    -- Put_UInt16 --
    ----------------
 
-   procedure Put_UInt16 (This : in out ByteBuffer; Value : UInt16) is
+   procedure Put_UInt16 (This : in out ByteBuffer'Class; Value : UInt16) is
    begin
-      Insert_UInt16 (Value, This.Content, Start => This.Position);
+      This.Content (This.Position .. This.Position + 1) := As_Two_Bytes (Value);
+      This.Highest_Write_Pos := This.Highest_Write_Pos + 2;
       This.Position := This.Position + 2;
-      This.Total_Bytes_Used := This.Total_Bytes_Used + 2;
    end Put_UInt16;
 
    ---------------
    -- Put_Int32 --
    ---------------
 
-   procedure Put_Int32 (This : in out ByteBuffer; Value : Int32) is
+   procedure Put_Int32 (This : in out ByteBuffer'Class; Value : Int32) is
    begin
-      Insert_Int32 (Value, This.Content, Start => This.Position);
+      This.Content (This.Position .. This.Position + 3) := As_Four_Bytes (Value);
+      This.Highest_Write_Pos := This.Highest_Write_Pos + 4;
       This.Position := This.Position + 4;
-      This.Total_Bytes_Used := This.Total_Bytes_Used + 4;
    end Put_Int32;
 
    ----------------
    -- Put_UInt32 --
    ----------------
 
-   procedure Put_UInt32 (This : in out ByteBuffer; Value : UInt32) is
+   procedure Put_UInt32 (This : in out ByteBuffer'Class; Value : UInt32) is
    begin
-      Insert_UInt32 (Value, This.Content, Start => This.Position);
+      This.Content (This.Position .. This.Position + 3) := As_Four_Bytes (Value);
+      This.Highest_Write_Pos := This.Highest_Write_Pos + 4;
       This.Position := This.Position + 4;
-      This.Total_Bytes_Used := This.Total_Bytes_Used + 4;
    end Put_UInt32;
 
    ---------------
    -- Put_Int64 --
    ---------------
 
-   procedure Put_Int64 (This : in out ByteBuffer; Value : Int64) is
+   procedure Put_Int64 (This : in out ByteBuffer'Class; Value : Int64) is
    begin
-      Insert_Int64 (Value, This.Content, Start => This.Position);
+      This.Content (This.Position .. This.Position + 7) := As_Eight_Bytes (Value);
+      This.Highest_Write_Pos := This.Highest_Write_Pos + 8;
       This.Position := This.Position + 8;
-      This.Total_Bytes_Used := This.Total_Bytes_Used + 8;
    end Put_Int64;
 
    ----------------
    -- Put_UInt64 --
    ----------------
 
-   procedure Put_UInt64 (This : in out ByteBuffer; Value : UInt64) is
+   procedure Put_UInt64 (This : in out ByteBuffer'Class; Value : UInt64) is
    begin
-      Insert_UInt64 (Value, This.Content, Start => This.Position);
+      This.Content (This.Position .. This.Position + 7) := As_Eight_Bytes (Value);
+      This.Highest_Write_Pos := This.Highest_Write_Pos + 8;
       This.Position := This.Position + 8;
-      This.Total_Bytes_Used := This.Total_Bytes_Used + 8;
    end Put_UInt64;
 
    ----------------
    -- Put_Real32 --
    ----------------
 
-   procedure Put_Real32 (This : in out ByteBuffer; Value : Real32) is
+   procedure Put_Real32 (This : in out ByteBuffer'Class; Value : Real32) is
    begin
-      Insert_Float (Value, This.Content, Start => This.Position);
+      This.Content (This.Position .. This.Position + 3) := As_Four_Bytes (Value);
+      This.Highest_Write_Pos := This.Highest_Write_Pos + 4;
       This.Position := This.Position + 4;
-      This.Total_Bytes_Used := This.Total_Bytes_Used + 4;
   end Put_Real32;
 
    ----------------
    -- Put_Real64 --
    ----------------
 
-   procedure Put_Real64 (This : in out ByteBuffer; Value : Real64) is
+   procedure Put_Real64 (This : in out ByteBuffer'Class; Value : Real64) is
    begin
-      Insert_Double (Value, This.Content, Start => This.Position);
+      This.Content (This.Position .. This.Position + 7) := As_Eight_Bytes (Value);
+      This.Highest_Write_Pos := This.Highest_Write_Pos + 8;
       This.Position := This.Position + 8;
-      This.Total_Bytes_Used := This.Total_Bytes_Used + 8;
   end Put_Real64;
 
    ----------------
    -- Put_String --
    ----------------
 
-   procedure Put_String (This : in out ByteBuffer;  Value : String) is
+   procedure Put_String (This : in out ByteBuffer'Class;  Value : String) is
    begin
-      --  We need to put the length in any case, including when zero, so that
+      --  We need to insert the length in any case, including when zero, so that
       --  the deserialization routine will have a length to read. That routine
       --  will then read that many bytes, so a zero length will work on that
       --  side.
@@ -663,25 +504,29 @@ package body AVTAS.LMCP.ByteBuffers is
    -- Put_Raw_Bytes --
    -------------------
 
-   procedure Put_Raw_Bytes (This : in out ByteBuffer; Value : String) is
+   procedure Put_Raw_Bytes (This : in out ByteBuffer'Class; Value : String) is
    begin
-      Insert_Arbitrary_Bytes (This, Source => Value'Address, Count => Value'Length);
+      if Value'Length > 0 then
+         Copy_String_To_Buffer (This, From => Value);
+      end if;
    end Put_Raw_Bytes;
 
    -------------------
    -- Put_Raw_Bytes --
    -------------------
 
-   procedure Put_Raw_Bytes (This : in out ByteBuffer; Value : Byte_Array) is
+   procedure Put_Raw_Bytes (This : in out ByteBuffer'Class; Value : Byte_Array) is
    begin
-      Insert_Arbitrary_Bytes (This, Source => Value'Address, Count => Value'Length);
+      if Value'Length > 0 then
+         Copy_Bytes_To_Buffer (This, From => Value);
+      end if;
    end Put_Raw_Bytes;
 
    --------------------------
    -- Put_Unbounded_String --
    --------------------------
 
-   procedure Put_Unbounded_String (This : in out ByteBuffer;  Value : Unbounded_String) is
+   procedure Put_Unbounded_String (This : in out ByteBuffer'Class;  Value : Unbounded_String) is
    begin
       This.Put_String (To_String (Value));
    end Put_Unbounded_String;

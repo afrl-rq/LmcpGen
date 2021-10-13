@@ -1025,7 +1025,15 @@ public class AdaMethods {
             String fieldname = getDeconflictedName(st.fields[i].name);
             switch (getAdaTypeCategory(infos,st.fields[i])) {
                 case SINGLE_PRIMITIVE:
+                    if (getAdaPrimativeType(infos, st.fields[i]).equals ("Unbounded_String")) {
+                        str += ws + "   declare\n";
+                        str += ws + "      Unused : UInt32;\n";
+                        str += ws + "   begin\n";
+                        str += ws + "      Buffer.Get_Unbounded_String (This." + fieldname + ", Unused);\n";
+                        str += ws + "   end;\n";
+                    } else {
                         str += ws + "   Buffer.Get_" + getAdaPrimativeType(infos, st.fields[i]) + "(This." + fieldname + ");\n";
+                    }
                     break;
                 case SINGLE_ENUM:
                     str += ws + "   declare\n";
