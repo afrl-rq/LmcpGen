@@ -6,6 +6,10 @@ project LMCP_Generated_Messages is
    Generated_Msgs_Mode : Modes := external ("GEN_MSGS_MODE", "debug");
 
    for Object_Dir use "objs/" & Generated_Msgs_Mode;
+   
+   type Copying_Modes is ("proof", "performance");
+   Copying_Mode : Copying_Modes := external ("Copy_Mode", "performance");   
+   
 
    package Compiler is
       case Generated_Msgs_Mode is
@@ -23,5 +27,14 @@ project LMCP_Generated_Messages is
                "-ffunction-sections");
       end case;
    end Compiler;
+   
+   package Naming is
+      case Copying_Mode is
+         when "proof" =>
+            for Implementation ("avtas.lmcp.bytebuffers.copying") use "avtas-lmcp-bytebuffers-copying-provable_adb";
+         when "performance" =>
+            for Implementation ("avtas.lmcp.bytebuffers.copying") use "avtas-lmcp-bytebuffers-copying-performant_adb";
+      end case;
+   end Naming;
 
 end LMCP_Generated_Messages;

@@ -1,347 +1,783 @@
-with System;                use System;
 with AVTAS.LMCP.Types;      use AVTAS.LMCP.Types;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with System;                use System;
+with Ada.Unchecked_Conversion;
+with GNAT.Byte_Swapping;
+with Interfaces;
 
-package AVTAS.LMCP.ByteBuffers is
+package AVTAS.LMCP.ByteBuffers with
+   SPARK_Mode
+is
 
-   pragma Assertion_Policy (Check);
-   --  This pragma overrides the effect of the -gnata switch
+   pragma Assertion_Policy (Pre => Check);
+   --  The preconditions are required unless the clients are proved too. This
+   --  pragma overrides the effect of the -gnata switch.
 
-   Maximum_Length : constant := UInt32'Last - 1;
+   pragma Unevaluated_Use_Of_Old (Allow);
 
-   subtype Index is UInt32 range 1 .. Maximum_Length;
+   Maximum_Length : constant := UInt32'Last - 8;
+   --  The largest value that we insert/remove (that is not an array) is eight
+   --  bytes wide, therefore the max length is 8 less than 'Last in order to
+   --  avoid overflow.
 
-   type ByteBuffer (Capacity : Index) is tagged private with
+   type Index is new Interfaces.Integer_64 range 0 .. Interfaces.Integer_64 (Maximum_Length);
+
+   subtype NonZero_Index is Index range 1 .. Index'Last;
+
+   type ByteBuffer (Capacity : NonZero_Index) is tagged private with
      Default_Initial_Condition =>
-       Position (ByteBuffer) = 1 and
-       Length (ByteBuffer) = 0   and
-       Space_Available (ByteBuffer) = Capacity;
+       Position (ByteBuffer) = 0 and
+       Remaining (ByteBuffer) = Capacity;
 
-   function Space_Available (This : ByteBuffer) return UInt32;
-   --  The number of unused bytes physically available remaining in This
-   --  buffer. These bytes are not currently allocated to a message. A
-   --  function of This.Capacity and Position (This).
+   function Remaining (This : ByteBuffer'Class) return Index;
+   --  Returns the number of unused bytes remaining available in This
 
-   function Msg_Bytes_Remaining (This : ByteBuffer) return UInt32;
-   --  The number of bytes allocated to a message that remain as yet unread
-   --  (by a call to Get_*) in This buffer. A function of Length (This) and
-   --  Position (This).
+   function Position (This : ByteBuffer'Class) return Index;
+   --  Returns the next place within This buffer for reading or writing
 
-   function Position (This : ByteBuffer) return UInt32;
-   --  Position always returns the next place within the buffer for reading or
-   --  for writing.
-   --
-   --  Both Put_* and Get_* routines affect the value of Position. Only the
-   --  Put_* routines affect the Length.
+   function High_Water_Mark (This : ByteBuffer'Class) return Index;
+   --  Returns the number of data bytes currently written into This buffer.
+   --  This value is never decremented by a Get_* routine, and is only set
+   --  back to 0 by a call to Reset.
 
-   function Length (This : ByteBuffer) return UInt32;
-   --  The number of data bytes currently contained in This buffer, i.e., the
-   --  "high water mark" for values placed into the buffer by the various
-   --  Put_* routines. Not affected by the Get_* routines (unlike Position).
+   procedure Rewind (This : in out ByteBuffer'Class) with
+     Post => Position (This) = 0 and
+             High_Water_Mark (This) = High_Water_Mark (This)'Old;
+   --  Rewinding the buffer position allows reading of existing content from
+   --  the beginning, presumably after writing values into it (via the Put_*
+   --  routines).
 
-   procedure Rewind (This : in out ByteBuffer) with
-     Post'Class => Position (This) = 1 and
-                   Length (This) = Length (This)'Old;
-   --  For reading, resetting the buffer position would allow reading of
-   --  existing content from the beginning, presumably after writing
-   --  values into it (via the Put_* routines).
-   --
-   --  For writing, resetting the buffer position would make subsequent calls
-   --  to Put_* start over at the beginning, overwriting any existing values,
-   --  but NOTE that this does not reset the length, i.e., new Put_* calls
-   --  would increase the Length determined by any Put_* calls made prior
-   --  to Rewind. As a result, for writing you probably want to call Clear
-   --  instead.
+   procedure Reset (This : in out ByteBuffer'Class) with
+     Post => Position (This) = 0 and
+             High_Water_Mark (This) = 0;
 
-   procedure Clear (This : in out ByteBuffer) with
-     Post'Class => Position (This) = 1 and
-                   Length (This) = 0;
+   procedure Get_Byte (This : in out ByteBuffer'Class;  Value : out Byte) with
+     Pre  => Remaining (This) >= 1 and then
+             Position (This) <= High_Water_Mark (This) - 1,
+     Post => Position (This) = Position (This)'Old + 1           and then
+             High_Water_Mark (This) = High_Water_Mark (This)'Old and then
+             Remaining (This) + 1 = Remaining (This)'Old         and then
+             Raw_Bytes (This) (Position (This)'Old) = Value      and then
+             Prior_Content_Unchanged (This, This'Old);
 
-   procedure Get_Byte (This : in out ByteBuffer;  Value : out Byte) with
-     Pre'Class  => Msg_Bytes_Remaining (This) >= 1,
-     Post'Class => Position (This) = Position (This)'Old + 1 and
-                   Length (This) = Length (This)'Old and
-                   Msg_Bytes_Remaining (This) = Msg_Bytes_Remaining (This)'Old - 1;
+   procedure Get_Boolean (This : in out ByteBuffer'Class;  Value : out Boolean) with
+     Pre  => Remaining (This) >= 1 and then
+             Position (This) <= High_Water_Mark (This) - 1,
+     Post => Position (This) = Position (This)'Old + 1             and then
+             High_Water_Mark (This) = High_Water_Mark (This)'Old   and then
+             Remaining (This) + 1 = Remaining (This)'Old           and then
+             (Raw_Bytes (This) (Position (This)'Old) /= 0) = Value and then
+             Prior_Content_Unchanged (This, This'Old);
 
-   procedure Get_Boolean (This : in out ByteBuffer;  Value : out Boolean) with
-     Pre'Class  => Msg_Bytes_Remaining (This) >= 1,
-     Post'Class => Position (This) = Position (This)'Old + 1 and
-                   Length (This) = Length (This)'Old and
-                   Msg_Bytes_Remaining (This) = Msg_Bytes_Remaining (This)'Old - 1;
+   procedure Get_Int16 (This : in out ByteBuffer'Class;  Value : out Int16) with
+     Pre  => Remaining (This) >= 2 and then
+             Position (This) <= High_Water_Mark (This) - 2,
+     Post => Position (This) = Position (This)'Old + 2           and then
+             High_Water_Mark (This) = High_Water_Mark (This)'Old and then
+             Remaining (This) + 2 = Remaining (This)'Old         and then
+             Raw_Bytes (This) (Position (This)'Old .. Position (This) - 1) = As_Two_Bytes (Value) and then
+             Prior_Content_Unchanged (This, This'Old);
 
-   procedure Get_Int16 (This : in out ByteBuffer;  Value : out Int16) with
-     Pre'Class  => Msg_Bytes_Remaining (This) >= 2,
-     Post'Class => Position (This) = Position (This)'Old + 2 and
-                   Length (This) = Length (This)'Old and
-                   Msg_Bytes_Remaining (This) = Msg_Bytes_Remaining (This)'Old - 2;
+   procedure Get_UInt16 (This : in out ByteBuffer'Class;  Value : out UInt16) with
+     Pre  => Remaining (This) >= 2 and then
+             Position (This) <= High_Water_Mark (This) - 2,
+     Post => Position (This) = Position (This)'Old + 2           and then
+             High_Water_Mark (This) = High_Water_Mark (This)'Old and then
+             Remaining (This) + 2 = Remaining (This)'Old         and then
+             Raw_Bytes (This) (Position (This)'Old .. Position (This) - 1) = As_Two_Bytes (Value) and then
+             Prior_Content_Unchanged (This, This'Old);
 
-   procedure Get_Short (This : in out ByteBuffer;  Value : out Int16) renames Get_Int16;
-
-   procedure Get_UInt16 (This : in out ByteBuffer;  Value : out UInt16) with
-     Pre'Class  => Msg_Bytes_Remaining (This) >= 2,
-     Post'Class => Position (This) = Position (This)'Old + 2 and
-                   Length (This) = Length (This)'Old and
-                   Msg_Bytes_Remaining (This) = Msg_Bytes_Remaining (This)'Old - 2;
-
-   procedure Get_UShort (This : in out ByteBuffer;  Value : out UInt16) renames Get_UInt16;
-
-   procedure Get_Int32 (This : in out ByteBuffer;  Value : out Int32) with
-     Pre'Class  => Msg_Bytes_Remaining (This) >= 4,
-     Post'Class => Position (This) = Position (This)'Old + 4 and
-                   Length (This) = Length (This)'Old and
-                   Msg_Bytes_Remaining (This) = Msg_Bytes_Remaining (This)'Old - 4;
-
-   procedure Get_Int (This : in out ByteBuffer;  Value : out Int32) renames Get_Int32;
+   procedure Get_Int32 (This : in out ByteBuffer'Class;  Value : out Int32) with
+     Pre  => Remaining (This) >= 4 and then
+             Position (This) <= High_Water_Mark (This) - 4,
+     Post => Position (This) = Position (This)'Old + 4           and then
+             High_Water_Mark (This) = High_Water_Mark (This)'Old and then
+             Remaining (This) + 4 = Remaining (This)'Old         and then
+             Raw_Bytes (This) (Position (This)'Old .. Position (This) - 1) = As_Four_Bytes (Value) and then
+             Prior_Content_Unchanged (This, This'Old);
 
    procedure Get_UInt32
-     (This  : in ByteBuffer;
+     (This  : ByteBuffer'Class;
       Value : out UInt32;
       First : Index)
    with
-     Pre'Class  => First <= Length (This) - 3,
-     Post'Class => Position (This) = Position (This)'Old and
-                   Length (This) = Length (This)'Old and
-                   Msg_Bytes_Remaining (This) = Msg_Bytes_Remaining (This)'Old;
-   --  Gets a UInt32 value from This buffer, at indexes First .. First + 3
-   --  rather than from This.Position .. This.Position + 3
+     Pre  => First <= This.Capacity      and then
+             High_Water_Mark (This) >= First + 3,
+             --  First <= High_Water_Mark (This) - 4,
+     Post => Position (This) = Position (This)'Old                         and then
+             High_Water_Mark (This) = High_Water_Mark (This)'Old           and then
+             Remaining (This) = Remaining (This)'Old                       and then
+             --  Raw_Bytes (This) (First .. First + 3) = As_Four_Bytes (Value) and then
+             Raw_Bytes (This) = Raw_Bytes (This)'Old;
+   --  Gets the four bytes comprising a UInt32 value from This buffer, starting
+   --  at absolute index First (rather than from This.Position)
 
-   procedure Get_UInt32 (This : in out ByteBuffer;  Value : out UInt32) with
-     Pre'Class  => Msg_Bytes_Remaining (This) >= 4,
-     Post'Class => Position (This) = Position (This)'Old + 4 and
-                   Length (This) = Length (This)'Old and
-                   Msg_Bytes_Remaining (This) = Msg_Bytes_Remaining (This)'Old - 4;
+   procedure Get_UInt32 (This : in out ByteBuffer'Class;  Value : out UInt32) with
+     Pre  => Remaining (This) >= 4 and then
+             Position (This) <= High_Water_Mark (This) - 4,
+     Post => Position (This) = Position (This)'Old + 4           and then
+             High_Water_Mark (This) = High_Water_Mark (This)'Old and then
+             Remaining (This) + 4 = Remaining (This)'Old         and then
+             Raw_Bytes (This) (Position (This)'Old .. Position (This) - 1) = As_Four_Bytes (Value) and then
+             Prior_Content_Unchanged (This, This'Old);
 
-   procedure Get_UInt (This : in out ByteBuffer;  Value : out UInt32) renames Get_UInt32;
+   procedure Get_Int64  (This : in out ByteBuffer'Class;  Value : out Int64) with
+     Pre  => Remaining (This) >= 8 and then
+             Position (This) <= High_Water_Mark (This) - 8,
+     Post => Position (This) = Position (This)'Old + 8           and then
+             High_Water_Mark (This) = High_Water_Mark (This)'Old and then
+             Remaining (This) + 8 = Remaining (This)'Old         and then
+             Raw_Bytes (This) (Position (This)'Old .. Position (This) - 1) = As_Eight_Bytes (Value) and then
+             Prior_Content_Unchanged (This, This'Old);
 
-   procedure Get_Int64  (This : in out ByteBuffer;  Value : out Int64) with
-     Pre'Class  => Msg_Bytes_Remaining (This) >= 8,
-     Post'Class => Position (This) = Position (This)'Old + 8 and
-                   Length (This) = Length (This)'Old and
-                   Msg_Bytes_Remaining (This) = Msg_Bytes_Remaining (This)'Old - 8;
+   procedure Get_UInt64 (This : in out ByteBuffer'Class;  Value : out UInt64) with
+     Pre  => Remaining (This) >= 8 and then
+             Position (This) <= High_Water_Mark (This) - 8,
+     Post => Position (This) = Position (This)'Old + 8           and then
+             High_Water_Mark (This) = High_Water_Mark (This)'Old and then
+             Remaining (This) + 8 = Remaining (This)'Old         and then
+             Raw_Bytes (This) (Position (This)'Old .. Position (This) - 1) = As_Eight_Bytes (Value) and then
+             Prior_Content_Unchanged (This, This'Old);
 
-   procedure Get_Long (This : in out ByteBuffer;  Value : out Int64) renames Get_Int64;
+   procedure Get_Real32 (This : in out ByteBuffer'Class;  Value : out Real32) with
+     Pre  => Remaining (This) >= 4 and then
+             Position (This) <= High_Water_Mark (This) - 4,
+     Post => Position (This) = Position (This)'Old + 4           and then
+             High_Water_Mark (This) = High_Water_Mark (This)'Old and then
+             Remaining (This) + 4 = Remaining (This)'Old         and then
+             Raw_Bytes (This) (Position (This)'Old .. Position (This) - 1) = As_Four_Bytes (Value) and then
+             Prior_Content_Unchanged (This, This'Old);
 
-   procedure Get_UInt64 (This : in out ByteBuffer;  Value : out UInt64) with
-      Pre'Class  => Msg_Bytes_Remaining (This) >= 8,
-      Post'Class => Position (This) = Position (This)'Old + 8 and
-                    Length (This) = Length (This)'Old and
-                    Msg_Bytes_Remaining (This) = Msg_Bytes_Remaining (This)'Old - 8;
+   procedure Get_Real64 (This : in out ByteBuffer'Class;  Value : out Real64) with
+     Pre  => Remaining (This) >= 8 and then
+             Position (This) <= High_Water_Mark (This) - 8,
+     Post => Position (This) = Position (This)'Old + 8           and then
+             High_Water_Mark (This) = High_Water_Mark (This)'Old and then
+             Remaining (This) + 8 = Remaining (This)'Old         and then
+             Raw_Bytes (This) (Position (This)'Old .. Position (This) - 1) = As_Eight_Bytes (Value) and then
+             Prior_Content_Unchanged (This, This'Old);
 
-   procedure Get_ULong (This : in out ByteBuffer;  Value : out UInt64) renames Get_UInt64;
-
-   procedure Get_Real32 (This : in out ByteBuffer;  Value : out Real32) with
-     Pre'Class  => Msg_Bytes_Remaining (This) >= 4,
-     Post'Class => Position (This) = Position (This)'Old + 4 and
-                   Length (This) = Length (This)'Old and
-                   Msg_Bytes_Remaining (This) = Msg_Bytes_Remaining (This)'Old - 4;
-
-   procedure Get_Real64 (This : in out ByteBuffer;  Value : out Real64) with
-     Pre'Class  => Msg_Bytes_Remaining (This) >= 8,
-     Post'Class => Position (This) = Position (This)'Old + 8 and
-                   Length (This) = Length (This)'Old and
-                   Msg_Bytes_Remaining (This) = Msg_Bytes_Remaining (This)'Old - 8;
-
-   Runtime_Length_Error : exception;
-   --  Raised by Get_String and Get_Unbounded_String when the string length
-   --  read from the buffer is greater than the number of actual bytes remaining
-   --  in the buffer to be fetched. This can only happen if a message coming into
-   --  a buffer is somehow truncated during reception or corrupted, or if we are
-   --  deserializing the buffer content incorrectly.
+   Max_String_Length : constant := 65_535;
+   --  Like the C++ version, we write strings' lengths as a UInt16 during
+   --  serialization.
 
    procedure Get_String
-     (This  : in out ByteBuffer;
-      Value : out String;
-      Last  : out Natural)
+     (This          : in out ByteBuffer'Class;
+      Value         : in out String;
+      Last          : out Integer;
+      Stored_Length : out UInt32)
+      --  The length indicated by the message data in the buffer, not
+      --  necessarily the length of the result.
    with
-     Pre'Class  =>
-       Msg_Bytes_Remaining (This) >= 2,
+     Pre  =>
+       Value'First  in Positive               and then
+       Value'Last   in Positive               and then
+       Value'Length in 1 .. Max_String_Length and then
+       Remaining (This) >= 2                  and then
+       Position (This) <= High_Water_Mark (This) - 2,
        --  The string content is preceded in the buffer by a two-byte length,
-       --  even when zero, so the precondition checks that there are least
-       --  two bytes available for the length. (If the length is zero there
-       --  will be no further string bytes to read.)
-       --
-       --  NB: At run-time, Runtime_Length_Error is raised if the serialized
-       --  length value in the buffer indicates a length greater than the
-       --  number of message bytes remaining in the buffer. This ensures we
-       --  don't use a corrupted length (e.g., to read past the buffer).
-     Post'Class =>
-       --  Last is Value'First - 1 when the number of characters is read as
-       --  zero, otherwise it is in Value'Range
-       Last in Value'First - 1 .. Value'Last and
-       --  we read the length, which was zero, so nothing else was read
-       (if Last = Value'First - 1  then Position (This) = Position (This'Old) + 2) and
-       --  we read the length, which was nonzero, and then that many characters
-       (if Last /= Value'First - 1 then Position (This) = Position (This'Old) + 2 + UInt32(Last - Value'First + 1)) and
-       Length (This) = Length (This)'Old;
+       --  even when the string length is zero (ie when the string is empty).
+
+     Post =>
+       High_Water_Mark (This) = High_Water_Mark (This)'Old and then
+       Stored_Length <= Max_String_Length                  and then
+       Raw_Bytes (This) (Position (This)'Old .. Position (This)'Old + 1) = As_Two_Bytes (UInt16 (Stored_Length)) and then
+       (if Index (Stored_Length) > Remaining (This)'Old - 2 then
+           --  This is a corrupted buffer: there are too few remaining bytes
+           --  available in the buffer to be assigned to the String Value.
+           Last = -1 and
+           Position (This) = Position (This)'Old + 2
+        elsif Stored_Length > Value'Length then
+           --  Presumably client error; the buffer is not necessarily corrupted.
+           Last = -1 and
+           Position (This) = Position (This)'Old + 2
+        elsif High_Water_Mark (This) + Index (Stored_length) > This.Capacity then
+           Last = -1 and
+           Position (This) = Position (This)'Old + 2
+        elsif Position (This)'Old + 2 + Index (Stored_Length) > High_Water_Mark (This)'Old then
+           Last = -1 and
+           Position (This) = Position (This)'Old + 2
+        elsif Stored_Length = 0 then
+           --  This is a normal case, specifically for an empty string.
+           Last = Value'First - 1 and then
+           Position (This) = Position (This)'Old + 2
+        else
+           --  This is a normal case for a non-empty string in the buffer. If
+           --  the stored length is <= Value'Length we only read Stored_Length
+           --  number of chars from the buffer, potentially leaving some of
+           --  Value unassigned (hence the need for Last).
+           Last = Value'First + (Positive (Stored_Length) - 1)               and then
+           Position (This) = Position (This)'Old + 2 + Index (Stored_Length) and then
+           Equal (Raw_Bytes (This) (Position (This)'Old + 2 .. Position (This) - 1),
+                  Value (Value'First .. Last)));
 
    procedure Get_Unbounded_String
-     (This  : in out ByteBuffer;
-      Value : out Unbounded_String)
+     (This          : in out ByteBuffer'Class;
+      Value         : out Unbounded_String;
+      Stored_Length : out UInt32)
    with
-     Pre'Class  =>
-       Msg_Bytes_Remaining (This) >= 2,
-       --  The string content is preceded in the buffer by a two-byte length,
-       --  even when zero, so the precondition checks that there are least
-       --  two bytes available for the length. (If the length is zero there
-       --  will be no further string bytes to read.)
-       --
-       --  NB: At run-time, Runtime_Length_Error is raised if the serialized
-       --  length value in the buffer indicates a length greater than the
-       --  number of message bytes remaining in the buffer. This ensures we
-       --  don't use a corrupted length (e.g., to read past the buffer).
-     Post'Class =>
-       --  we read the length, which was zero, so nothing else was read
-       (if Value = Null_Unbounded_String  then Position (This) = Position (This'Old) + 2) and
-       --  we read the length, which was nonzero, and then that many characters
-       (if Value /= Null_Unbounded_String then Position (This) = Position (This'Old) + 2 + UInt32 (Length (Value))) and
-       Length (This) = Length (This)'Old;
+     Pre  => Remaining (This) >= 2  and then
+             Position (This) <= High_Water_Mark (This) - 2,
+             --  The string content is preceded in the buffer by a two-byte length,
+             --  even when the string length is zero (ie when the string is empty).
+     Post => High_Water_Mark (This) = High_Water_Mark (This)'Old and then
+             Stored_Length <= UInt32 (UInt16'Last)               and then
+             Raw_Bytes (This) (Position (This)'Old .. Position (This)'Old + 1) = As_Two_Bytes (UInt16 (Stored_Length)) and then
+             (if Index (Stored_Length) > Remaining (This)'Old - 2 or else
+                 Position (This)'Old + 2 + Index (Stored_length) > High_Water_Mark (This)
+              then
+                 To_String (Value) = "Corrupted buffer" and then
+                 Position (This) = Position (This)'Old + 2
+              elsif Stored_Length = 0 then
+                 Position (This) = Position (This)'Old + 2
+              else
+                 Position (This) = Position (This)'Old + 2 + Index (Stored_Length) and then
+                 Equal (Raw_Bytes (This) (Position (This)'Old + 2 .. Position (This) - 1),
+                        To_String (Value)));
 
-   procedure Put_Byte (This : in out ByteBuffer;  Value : Byte) with
-     Pre'Class  => Space_Available (This) >= 1,
-     Post'Class => Position (This) = Position (This)'Old + 1 and
-                   Length (This) = Length (This)'Old + 1 and
-                   Space_Available (This) = Space_Available (This)'Old - 1;
+   procedure Put_Byte (This : in out ByteBuffer'Class;  Value : Byte) with
+     Pre  => Remaining (This) >= 1 and then
+             High_Water_Mark (This) <= This.Capacity - 1,
+     Post => Position (This) = Position (This)'Old + 1               and then
+             High_Water_Mark (This) = High_Water_Mark (This)'Old + 1 and then
+             Remaining (This) + 1 = Remaining (This)'Old             and then
+             Raw_Bytes (This) (Position (This)'Old) = Value          and then
+             Prior_Content_Unchanged (This, This'Old);
 
-   procedure Put_Boolean (This : in out ByteBuffer;  Value : Boolean) with
-     Pre'Class  => Space_Available (This) >= 1,
-     Post'Class => Position (This) = Position (This)'Old + 1 and
-                   Length (This) = Length (This)'Old + 1 and
-                   Space_Available (This) = Space_Available (This)'Old - 1;
+   procedure Put_Boolean (This : in out ByteBuffer'Class;  Value : Boolean) with
+     Pre  => Remaining (This) >= 1 and then
+             High_Water_Mark (This) <= This.Capacity - 1,
+     Post => Position (This) = Position (This)'Old + 1                    and then
+             High_Water_Mark (This) = High_Water_Mark (This)'Old + 1      and then
+             Remaining (This) + 1 = Remaining (This)'Old                  and then
+             Raw_Bytes (This) (Position (This)'Old) = Boolean'Pos (Value) and then
+             Prior_Content_Unchanged (This, This'Old);
 
-   procedure Put_Int16 (This : in out ByteBuffer;  Value : Int16) with
-     Pre'Class  => Space_Available (This) >= 2,
-     Post'Class => Position (This) = Position (This)'Old + 2 and
-                   Length (This) = Length (This)'Old + 2 and
-                   Space_Available (This) = Space_Available (This)'Old - 2;
+   procedure Put_Int16 (This : in out ByteBuffer'Class;  Value : Int16) with
+     Pre  => Remaining (This) >= 2 and then
+             High_Water_Mark (This) <= This.Capacity - 2,
+     Post => Position (This) = Position (This)'Old + 2               and then
+             High_Water_Mark (This) = High_Water_Mark (This)'Old + 2 and then
+             Remaining (This) + 2 = Remaining (This)'Old             and then
+             Raw_Bytes (This) (Position (This)'Old .. Position (This) - 1) = As_Two_Bytes (Value) and then
+             Prior_Content_Unchanged (This, This'Old);
 
-   procedure Put_Short (This : in out ByteBuffer;  Value : Int16) renames Put_Int16;
+   procedure Put_UInt16 (This : in out ByteBuffer'Class;  Value : UInt16) with
+     Pre  => Remaining (This) >= 2 and then
+             High_Water_Mark (This) <= This.Capacity - 2,
+     Post => Position (This) = Position (This)'Old + 2               and then
+             High_Water_Mark (This) = High_Water_Mark (This)'Old + 2 and then
+             Remaining (This) + 2 = Remaining (This)'Old             and then
+             Raw_Bytes (This) (Position (This)'Old .. Position (This) - 1) = As_Two_Bytes (Value) and then
+             Prior_Content_Unchanged (This, This'Old);
 
-   procedure Put_UInt16 (This : in out ByteBuffer;  Value : UInt16) with
-     Pre'Class  => Space_Available (This) >= 2,
-     Post'Class => Position (This) = Position (This)'Old + 2 and
-                   Length (This) = Length (This)'Old + 2 and
-                   Space_Available (This) = Space_Available (This)'Old - 2;
+   procedure Put_Int32 (This : in out ByteBuffer'Class;  Value : Int32) with
+     Pre  => Remaining (This) >= 4 and then
+             High_Water_Mark (This) <= This.Capacity - 4,
+     Post => Position (This) = Position (This)'Old + 4               and then
+             High_Water_Mark (This) = High_Water_Mark (This)'Old + 4 and then
+             Remaining (This) + 4 = Remaining (This)'Old             and then
+             Raw_Bytes (This) (Position (This)'Old .. Position (This) - 1) = As_Four_Bytes (Value) and then
+             Prior_Content_Unchanged (This, This'Old);
 
-   procedure Put_UShort (This : in out ByteBuffer;  Value : UInt16) renames Put_UInt16;
+   procedure Put_UInt32 (This : in out ByteBuffer'Class;  Value : UInt32) with
+     Pre  => Remaining (This) >= 4 and then
+             High_Water_Mark (This) <= This.Capacity - 4,
+     Post => Position (This) = Position (This)'Old + 4               and then
+             High_Water_Mark (This) = High_Water_Mark (This)'Old + 4 and then
+             Remaining (This) + 4 = Remaining (This)'Old             and then
+             Raw_Bytes (This) (Position (This)'Old .. Position (This) - 1) = As_Four_Bytes (Value) and then
+             Prior_Content_Unchanged (This, This'Old);
 
-   procedure Put_Int32 (This : in out ByteBuffer;  Value : Int32) with
-     Pre'Class  => Space_Available (This) >= 4,
-     Post'Class => Position (This) = Position (This)'Old + 4 and
-                   Length (This) = Length (This)'Old + 4 and
-                   Space_Available (This) = Space_Available (This)'Old - 4;
+   procedure Put_Int64 (This : in out ByteBuffer'Class;  Value : Int64) with
+     Pre  => Remaining (This) >= 8 and then
+             High_Water_Mark (This) <= This.Capacity - 8,
+     Post => Position (This) = Position (This)'Old + 8               and then
+             High_Water_Mark (This) = High_Water_Mark (This)'Old + 8 and then
+             Remaining (This) + 8 = Remaining (This)'Old             and then
+             Raw_Bytes (This) (Position (This)'Old .. Position (This) - 1) = As_Eight_Bytes (Value) and then
+             Prior_Content_Unchanged (This, This'Old);
 
-   procedure Put_Int (This : in out ByteBuffer;  Value : Int32) renames Put_Int32;
+   procedure Put_UInt64 (This : in out ByteBuffer'Class;  Value : UInt64) with
+     Pre  => Remaining (This) >= 8 and then
+             High_Water_Mark (This) <= This.Capacity - 8,
+     Post => Position (This) = Position (This)'Old + 8               and then
+             High_Water_Mark (This) = High_Water_Mark (This)'Old + 8 and then
+             Remaining (This) + 8 = Remaining (This)'Old             and then
+             Raw_Bytes (This) (Position (This)'Old .. Position (This) - 1) = As_Eight_Bytes (Value) and then
+             Prior_Content_Unchanged (This, This'Old);
 
-   procedure Put_UInt32 (This : in out ByteBuffer;  Value : UInt32) with
-     Pre'Class  => Space_Available (This) >= 4,
-     Post'Class => Position (This) = Position (This)'Old + 4 and
-                   Length (This) = Length (This)'Old + 4 and
-                   Space_Available (This) = Space_Available (This)'Old - 4;
+   procedure Put_Real32 (This : in out ByteBuffer'Class;  Value : Real32) with
+     Pre  => Remaining (This) >= 4 and then
+             High_Water_Mark (This) <= This.Capacity - 4,
+     Post => Position (This) = Position (This)'Old + 4               and then
+             High_Water_Mark (This) = High_Water_Mark (This)'Old + 4 and then
+             Remaining (This) + 4 = Remaining (This)'Old             and then
+             Raw_Bytes (This) (Position (This)'Old .. Position (This) - 1) = As_Four_Bytes (Value) and then
+             Prior_Content_Unchanged (This, This'Old);
 
-   procedure Put_UInt (This : in out ByteBuffer;  Value : UInt32) renames Put_UInt32;
+   procedure Put_Real64 (This : in out ByteBuffer'Class;  Value : Real64) with
+     Pre  => Remaining (This) >= 8 and then
+             High_Water_Mark (This) <= This.Capacity - 8,
+     Post => Position (This) = Position (This)'Old + 8               and then
+             High_Water_Mark (This) = High_Water_Mark (This)'Old + 8 and then
+             Remaining (This) + 8 = Remaining (This)'Old             and then
+             Raw_Bytes (This) (Position (This)'Old .. Position (This) - 1) = As_Eight_Bytes (Value) and then
+             Prior_Content_Unchanged (This, This'Old);
 
-   procedure Put_Int64 (This : in out ByteBuffer;  Value : Int64) with
-     Pre'Class  => Space_Available (This) >= 8,
-     Post'Class => Position (This) = Position (This)'Old + 8 and
-                   Length (This) = Length (This)'Old + 8 and
-                   Space_Available (This) = Space_Available (This)'Old - 8;
+   procedure Put_String (This : in out ByteBuffer'Class;  Value : String) with
+     Pre  => Value'First = 1                      and then
+             Value'Length <= Max_String_Length    and then
+             Remaining (This) >= Value'Length + 2 and then  -- 2 bytes for the length
+             High_Water_Mark (This) <= This.Capacity - Value'Length - 2,
+     Post => Position (This) = Position (This)'Old + Value'Length + 2               and then
+             High_Water_Mark (This) = High_Water_Mark (This)'Old + Value'Length + 2 and then
+             Remaining (This) = Remaining (This)'Old - Value'Length - 2             and then
+             New_Content_Equal (This, This.Position'Old + 2, Value)                 and then
+             Prior_Content_Unchanged (This, Old_Value => This'Old);
 
-   procedure Put_Long (This : in out ByteBuffer;  Value : Int64) renames Put_Int64;
-
-   procedure Put_UInt64 (This : in out ByteBuffer;  Value : UInt64) with
-     Pre'Class  => Space_Available (This) >= 8,
-     Post'Class => Position (This) = Position (This)'Old + 8 and
-                   Length (This) = Length (This)'Old + 8 and
-                   Space_Available (This) = Space_Available (This)'Old - 8;
-
-   procedure Put_ULong (This : in out ByteBuffer;  Value : UInt64) renames Put_UInt64;
-
-   procedure Put_Real32 (This : in out ByteBuffer;  Value : Real32) with
-     Pre'Class  => Space_Available (This) >= 4,
-     Post'Class => Position (This) = Position (This)'Old + 4 and
-                   Length (This) = Length (This)'Old + 4 and
-                   Space_Available (This) = Space_Available (This)'Old - 4;
-
-   procedure Put_Real64 (This : in out ByteBuffer;  Value : Real64) with
-     Pre'Class  => Space_Available (This) >= 8,
-     Post'Class => Position (This) = Position (This)'Old + 8 and
-                   Length (This) = Length (This)'Old + 8 and
-                   Space_Available (This) = Space_Available (This)'Old - 8;
-
-   Max_String_Length : constant := UInt16'Last;
-   --  Like the C++ version, we write strings lengths as a UInt16 during
-   --  serialization, so we allow at most a length of UInt16'Last. The C++
-   --  version truncates and prints an error msg at run-time for lengths
-   --  greater than UInt16'Last. With the precondition we will get an
-   --  exception, a more robust approach than losing message content
-   --  silently without any functional notification of such.
-
-   procedure Put_String (This : in out ByteBuffer;  Value : String) with
-     Pre'Class  =>
-       Value'Length <= Max_String_Length and then
-       Space_Available (This) >= Value'Length + 2,  -- 2 bytes for the length
-     Post'Class =>
-       Position (This) = Position (This)'Old + Value'Length + 2 and
-       Length (This) = Length (This)'Old + Value'Length + 2     and
-       Space_Available (This) = Space_Available (This)'Old - Value'Length - 2;
-
-   procedure Put_Unbounded_String (This : in out ByteBuffer; Value : Unbounded_String) with
-     Pre'Class  =>
-       Length (Value) <= Max_String_Length and then
-       Space_Available (This) >= UInt32 (Length (Value)) + 2,  -- 2 bytes for the length
-     Post'Class =>
-       Position (This) = Position (This)'Old + UInt32 (Length (Value)) + 2 and
-       Length (This) = Length (This)'Old + UInt32 (Length (Value)) + 2     and
-       Space_Available (This) = Space_Available (This)'Old - UInt32 (Length (Value)) - 2;
+   procedure Put_Unbounded_String (This : in out ByteBuffer'Class; Value : Unbounded_String) with
+     Pre  => Length (Value) <= Max_String_Length and then
+             Remaining (This) >= Index (Length (Value)) + 2 and then  -- 2 bytes for the length
+             High_Water_Mark (This) <= This.Capacity - Index (Length (Value)) - 2,
+     Post => Position (This) = Position (This)'Old + Index (Length (Value)) + 2               and then
+             High_Water_Mark (This) = High_Water_Mark (This)'Old + Index (Length (Value)) + 2 and then
+             Remaining (This) = Remaining (This)'Old - Index (Length (Value)) - 2             and then
+             New_Content_Equal (This, This.Position'Old + 2, To_String (Value))               and then
+             Prior_Content_Unchanged (This, Old_Value => This'Old);
 
    --  The following two Put_Raw_Bytes routines populate the ByteBuffer from
    --  the bytes in an array. One of the input array types is a String, the
    --  other just an array of bytes. These are useful for then rewinding
-   --  and reading back out meaningful objects. The input Value is a String
+   --  and reading back out meaningful objects. The type String is supported
    --  because that's the most convenient choice, based on client usage.
    --
    --  NB: these routines don't write the length into the buffer because
    --  the content of the input string is an encoded (serialized) message
    --  already. That also means that there is no two-byte length restriction.
 
-   procedure Put_Raw_Bytes (This : in out ByteBuffer; Value : String) with
-     Pre'Class  => Space_Available (This) >= Value'Length,
-     Post'Class => Position (This) = Position (This)'Old + Value'Length and
-                   Length (This) = Length (This)'Old + Value'Length     and
-                   Space_Available (This) = Space_Available (This)'Old - Value'Length;
+   procedure Put_Raw_Bytes (This : in out ByteBuffer'Class; Value : String) with
+     Pre  => Value'Length <= Max_String_Length and then
+             Remaining (This) >= Value'Length  and then
+             High_Water_Mark (This) + Value'Length <= This.Capacity,
+     Post => Position (This) = Position (This)'Old + Value'Length               and then
+             High_Water_Mark (This) = High_Water_Mark (This)'Old + Value'Length and then
+             Remaining (This) = Remaining (This)'Old - Value'Length             and then
+             New_Content_Equal (This, This.Position'Old, Value)                 and then
+             Prior_Content_Unchanged (This, Old_Value => This'Old);
 
-   type Byte_Array is array (Index range <>) of Byte
-     with Component_Size => 1 * Storage_Unit;
+   type Byte_Array is array (Index range <>) of aliased Byte with
+     Component_Size => Byte'Size;
 
-   procedure Put_Raw_Bytes (This : in out ByteBuffer; Value : Byte_Array) with
-     Pre'Class  => Space_Available (This) >= Value'Length,
-     Post'Class => Position (This) = Position (This)'Old + Value'Length and
-                   Length (This) = Length (This)'Old + Value'Length     and
-                   Space_Available (This) = Space_Available (This)'Old - Value'Length;
+   procedure Put_Raw_Bytes (This : in out ByteBuffer'Class; Value : Byte_Array) with
+     Pre  => Remaining (This) >= Value'Length and then
+             High_Water_Mark (This) + Value'Length <= This.Capacity,
+     Post => Position (This) = Position (This)'Old + Value'Length               and then
+             High_Water_Mark (This) = High_Water_Mark (This)'Old + Value'Length and then
+             Remaining (This) = Remaining (This)'Old - Value'Length             and then
+             New_Content_Equal (This, This.Position'Old, Value)                 and then
+             Prior_Content_Unchanged (This, Old_Value => This'Old);
 
-   function Raw_Bytes (This : ByteBuffer) return Byte_Array;
-   --  Returns the full internal byte array content
+   function Raw_Bytes (This : ByteBuffer'Class) return Byte_Array;
+   --  Returns the internal byte array content, up to High_Water_Mark (This)
 
-   function Raw_Bytes (This : ByteBuffer) return String;
-   --  Returns the full internal byte array content as a String
+   function Raw_Bytes (This : ByteBuffer'Class) return String with
+     Post => Raw_Bytes'Result'First = 1 and then
+             Raw_Bytes'Result'Length = Index'Min (Max_String_Length, High_Water_Mark (This));
+   --  Returns the internal byte array content, up to High_Water_Mark (This),
+   --  as a String
 
-   function Checksum (This : ByteBuffer;  From, To : Index) return UInt32 with
-     Pre'Class =>
-       From <= To             and   -- only useful ranges
-       From <= This.Capacity  and   -- physically possible
-       To   <= This.Capacity  and   --     "         "
-       From <= This.Length    and   -- logically possible
-       To   <= This.Length;         --     "        "
-   --  Computes the checksum of the slice of the internal byte array From .. To.
+   function Checksum (This : ByteBuffer'Class;  Last : Index) return UInt32 with
+     Pre => Last <= This.Capacity;
+   --  Computes the checksum of the slice of the internal byte array from the
+   --  first byte up to Last
+
+   subtype Two_Bytes   is Byte_Array (0 .. 1) with Object_Size => 16;
+   subtype Four_Bytes  is Byte_Array (0 .. 3) with Object_Size => 32;
+   subtype Eight_Bytes is Byte_Array (0 .. 7) with Object_Size => 64;
+
+   function As_Two_Bytes (Value : Int16)  return Two_Bytes;
+   --  Returns Value, with bytes swapped if necessary, as Two_Bytes
+   function As_Two_Bytes (Value : UInt16) return Two_Bytes;
+   --  Returns Value, with bytes swapped if necessary, as Two_Bytes
+
+   function As_Four_Bytes (Value : Real32) return Four_Bytes;
+   --  Returns Value, with bytes swapped if necessary, as Four_Bytes
+   function As_Four_Bytes (Value : Int32)  return Four_Bytes;
+   --  Returns Value, with bytes swapped if necessary, as Four_Bytes
+   function As_Four_Bytes (Value : UInt32) return Four_Bytes;
+   --  Returns Value, with bytes swapped if necessary, as Four_Bytes
+
+   function As_Eight_Bytes (Value : Real64) return Eight_Bytes;
+   --  Returns Value, with bytes swapped if necessary, as Eight_Bytes
+   function As_Eight_Bytes (Value : Int64)  return Eight_Bytes;
+   --  Returns Value, with bytes swapped if necessary, as Eight_Bytes
+   function As_Eight_Bytes (Value : UInt64) return Eight_Bytes;
+   --  Returns Value, with bytes swapped if necessary, as Eight_Bytes
+
+   ----------------------
+   --  Ghost routines  --
+   ----------------------
+
+   function Prior_Content_Unchanged (New_Value, Old_Value : ByteBuffer'Class) return Boolean with
+     Ghost,
+     Pre  => New_Value.Capacity = Old_Value.Capacity;
+     --  Post => (if Length (Old_Value) = 0 then Prior_Content_Unchanged'Result);
+   --  Returns whether the content of Old_Value was unchanged in New_Value
+
+   function New_Content_Equal
+     (This      : ByteBuffer'Class;
+      Start     : Index;
+      Comparand : String)
+   return
+      Boolean
+   with
+     Ghost,
+     Pre => Comparand'Length <= Max_String_Length  and then
+            This.Capacity >= Comparand'Length      and then
+            Start <= Index'Last - Comparand'Length and then
+            Start <= This.Capacity - Comparand'Length;
+   --  Returns whether the slice of This, starting at Start, equals the
+   --  Comparand of type String
+
+   function New_Content_Equal
+     (This      : ByteBuffer'Class;
+      Start     : Index;
+      Comparand : Byte_Array)
+   return
+      Boolean
+   with
+     Ghost,
+     Pre => Comparand'Length <= Position (This)         and then
+            This.Capacity >= Comparand'Length           and then
+            Start <= Index'Last - Comparand'Length      and then
+            Start <= Position (This) - Comparand'Length and then
+            Start <= This.Capacity - Comparand'Length;
+   --  Returns whether the slice of This, starting at Start, equals the
+   --  Comparand of type Byte_Array
+
+   function Equal (Left : Byte_Array; Right : String) return Boolean with
+     Ghost;
+   --  Returns whether the individual bytes of the Left Byte_Array, when
+   --  considered as Character values, equal the individual characters of
+   --  the Right String
 
 private
 
-   subtype Counter is UInt32 range 0 .. Maximum_Length;
+   type ByteBuffer (Capacity : NonZero_Index) is tagged record
+      Content           : Byte_Array (0 .. Capacity) := (others => 0);
+      Position          : Index := 0;
+      Highest_Write_Pos : Index := 0;
+   end record with
+      Predicate => Position <= Capacity          and then
+                   Highest_Write_Pos <= Capacity and then
+                   Position <= Highest_Write_Pos;
 
-   type ByteBuffer (Capacity : Index) is tagged record
-      Content          : Byte_Array (1 .. Capacity) := (others => 0);
-      Position         : Index   := 1;   -- reset to 1 by Rewind
-      Total_Bytes_Used : Counter := 0;   -- reset to 0 by Clear
-   end record;
+   ---------------
+   -- Raw_Bytes --
+   ---------------
+
+   function Raw_Bytes (This : ByteBuffer'Class) return Byte_Array is
+     (if This.Highest_Write_Pos > 0
+      then This.Content (0 .. This.Highest_Write_Pos - 1)
+      else This.Content (1 .. 0));
+
+   ---------------
+   -- Remaining --
+   ---------------
+
+   function Remaining (This : ByteBuffer'Class) return Index is
+      (This.Capacity - This.Position);
+
+   --------------
+   -- Position --
+   --------------
+
+   function Position (This : ByteBuffer'Class) return Index is
+     (This.Position);
+
+   ---------------------
+   -- High_Water_Mark --
+   ---------------------
+
+   function High_Water_Mark (This : ByteBuffer'Class) return Index is
+     (This.Highest_Write_Pos);
+
+   --------------------------------------------------------------------
+   --  internal routines used in the following expression functions  --
+   --------------------------------------------------------------------
+
+   function To_Eight_Bytes is new Ada.Unchecked_Conversion
+     (Source => Real64, Target => Eight_Bytes);
+
+   function To_Eight_Bytes is new Ada.Unchecked_Conversion
+     (Source => Int64, Target => Eight_Bytes);
+
+   function To_Eight_Bytes is new Ada.Unchecked_Conversion
+     (Source => UInt64, Target => Eight_Bytes);
+
+   function To_Four_Bytes is new Ada.Unchecked_Conversion
+     (Source => Real32, Target => Four_Bytes);
+
+   function To_Four_Bytes is new Ada.Unchecked_Conversion
+     (Source => Int32, Target => Four_Bytes);
+
+   function To_Four_Bytes is new Ada.Unchecked_Conversion
+     (Source => UInt32, Target => Four_Bytes);
+
+   function To_Two_Bytes is new Ada.Unchecked_Conversion
+     (Source => Int16, Target => Two_Bytes);
+
+   function To_Two_Bytes is new Ada.Unchecked_Conversion
+     (Source => UInt16, Target => Two_Bytes);
+
+   function To_Int16 is new Ada.Unchecked_Conversion
+     (Source => Two_Bytes, Target => Int16);
+
+   function To_UInt16 is new Ada.Unchecked_Conversion
+     (Source => Two_Bytes, Target => UInt16);
+
+   function To_Int32 is new Ada.Unchecked_Conversion
+     (Source => Four_Bytes, Target => Int32);
+
+   function To_UInt32 is new Ada.Unchecked_Conversion
+     (Source => Four_Bytes, Target => UInt32);
+
+   function To_Int64 is new Ada.Unchecked_Conversion
+     (Source => Eight_Bytes, Target => Int64);
+
+   function To_UInt64 is new Ada.Unchecked_Conversion
+     (Source => Eight_Bytes, Target => UInt64);
+
+   function Swapped is new GNAT.Byte_Swapping.Swapped8 (Real64);
+
+   function Swapped is new GNAT.Byte_Swapping.Swapped8 (Int64);
+
+   function Swapped is new GNAT.Byte_Swapping.Swapped8 (UInt64);
+
+   function Swapped is new GNAT.Byte_Swapping.Swapped4 (Real32);
+
+   function Swapped is new GNAT.Byte_Swapping.Swapped4 (Int32);
+
+   function Swapped is new GNAT.Byte_Swapping.Swapped4 (UInt32);
+
+   function Swapped is new GNAT.Byte_Swapping.Swapped2 (Int16);
+
+   function Swapped is new GNAT.Byte_Swapping.Swapped2 (UInt16);
+
+   --------------------
+   -- As_Eight_Bytes --
+   --------------------
+
+   pragma Warnings (Off, "Unreachable branch");
+   function As_Eight_Bytes (Value : Real64) return Eight_Bytes is
+     (if Standard'Default_Scalar_Storage_Order /= High_Order_First then -- not a Big Endian machine
+        To_Eight_Bytes (Swapped (Value))
+      else
+        To_Eight_Bytes (Value));
+   pragma Warnings (On, "Unreachable branch");
+
+   --------------------
+   -- As_Eight_Bytes --
+   --------------------
+
+   pragma Warnings (Off, "Unreachable branch");
+   function As_Eight_Bytes (Value : Int64) return Eight_Bytes is
+     (if Standard'Default_Scalar_Storage_Order /= High_Order_First then -- not a Big Endian machine
+        To_Eight_Bytes (Swapped (Value))
+      else
+        To_Eight_Bytes (Value));
+   pragma Warnings (On, "Unreachable branch");
+
+   --------------------
+   -- As_Eight_Bytes --
+   --------------------
+
+   pragma Warnings (Off, "Unreachable branch");
+   function As_Eight_Bytes (Value : UInt64) return Eight_Bytes is
+     (if Standard'Default_Scalar_Storage_Order /= High_Order_First then -- not a Big Endian machine
+        To_Eight_Bytes (Swapped (Value))
+      else
+        To_Eight_Bytes (Value));
+   pragma Warnings (On, "Unreachable branch");
+
+   -------------------
+   -- As_Four_Bytes --
+   -------------------
+
+   pragma Warnings (Off, "Unreachable branch");
+   function As_Four_Bytes (Value : Real32) return Four_Bytes is
+     (if Standard'Default_Scalar_Storage_Order /= High_Order_First then -- not a Big Endian machine
+        To_Four_Bytes (Swapped (Value))
+      else
+        To_Four_Bytes (Value));
+   pragma Warnings (On, "Unreachable branch");
+
+   -------------------
+   -- As_Four_Bytes --
+   -------------------
+
+   pragma Warnings (Off, "Unreachable branch");
+   function As_Four_Bytes (Value : Int32) return Four_Bytes is
+     (if Standard'Default_Scalar_Storage_Order /= High_Order_First then -- not a Big Endian machine
+        To_Four_Bytes (Swapped (Value))
+      else
+        To_Four_Bytes (Value));
+   pragma Warnings (On, "Unreachable branch");
+
+   -------------------
+   -- As_Four_Bytes --
+   -------------------
+
+   pragma Warnings (Off, "Unreachable branch");
+   function As_Four_Bytes (Value : UInt32) return Four_Bytes is
+     (if Standard'Default_Scalar_Storage_Order /= High_Order_First then -- not a Big Endian machine
+        To_Four_Bytes (Swapped (Value))
+      else
+        To_Four_Bytes (Value));
+   pragma Warnings (On, "Unreachable branch");
+
+
+   ------------------
+   -- As_Two_Bytes --
+   ------------------
+
+   pragma Warnings (Off, "Unreachable branch");
+   function As_Two_Bytes (Value : Int16) return Two_Bytes is
+     (if Standard'Default_Scalar_Storage_Order /= High_Order_First then -- not a Big Endian machine
+        To_Two_Bytes (Swapped (Value))
+      else
+        To_Two_Bytes (Value));
+   pragma Warnings (On, "Unreachable branch");
+
+   ------------------
+   -- As_Two_Bytes --
+   ------------------
+
+   pragma Warnings (Off, "Unreachable branch");
+   function As_Two_Bytes (Value : UInt16) return Two_Bytes is
+     (if Standard'Default_Scalar_Storage_Order /= High_Order_First then -- not a Big Endian machine
+        To_Two_Bytes (Swapped (Value))
+      else
+        To_Two_Bytes (Value));
+   pragma Warnings (On, "Unreachable branch");
+
+   --------------
+   -- As_Int16 --
+   --------------
+
+   pragma Warnings (Off, "Unreachable branch");
+   function As_Int16 (Value : Two_Bytes) return Int16 is
+     (if Standard'Default_Scalar_Storage_Order /= High_Order_First then -- not a Big Endian machine
+        Swapped (To_Int16 (Value))
+      else
+        To_Int16 (Value));
+   pragma Warnings (On, "Unreachable branch");
+
+   ---------------
+   -- As_UInt16 --
+   ---------------
+
+   pragma Warnings (Off, "Unreachable branch");
+   function As_UInt16 (Value : Two_Bytes) return UInt16 is
+     (if Standard'Default_Scalar_Storage_Order /= High_Order_First then -- not a Big Endian machine
+        Swapped (To_UInt16 (Value))
+      else
+        To_UInt16 (Value));
+   pragma Warnings (On, "Unreachable branch");
+
+   --------------
+   -- As_Int32 --
+   --------------
+
+   pragma Warnings (Off, "Unreachable branch");
+   function As_Int32 (Value : Four_Bytes) return Int32 is
+     (if Standard'Default_Scalar_Storage_Order /= High_Order_First then -- not a Big Endian machine
+        Swapped (To_Int32 (Value))
+      else
+        To_Int32 (Value));
+   pragma Warnings (On, "Unreachable branch");
+
+   ---------------
+   -- As_UInt32 --
+   ---------------
+
+   pragma Warnings (Off, "Unreachable branch");
+   function As_UInt32 (Value : Four_Bytes) return UInt32 is
+     (if Standard'Default_Scalar_Storage_Order /= High_Order_First then -- not a Big Endian machine
+        Swapped (To_UInt32 (Value))
+      else
+        To_UInt32 (Value));
+   pragma Warnings (On, "Unreachable branch");
+
+   --------------
+   -- As_Int64 --
+   --------------
+
+   pragma Warnings (Off, "Unreachable branch");
+   function As_Int64 (Value : Eight_Bytes) return Int64 is
+     (if Standard'Default_Scalar_Storage_Order /= High_Order_First then -- not a Big Endian machine
+        Swapped (To_Int64 (Value))
+      else
+        To_Int64 (Value));
+   pragma Warnings (On, "Unreachable branch");
+
+   ---------------
+   -- As_UInt64 --
+   ---------------
+
+   pragma Warnings (Off, "Unreachable branch");
+   function As_UInt64 (Value : Eight_Bytes) return UInt64 is
+     (if Standard'Default_Scalar_Storage_Order /= High_Order_First then -- not a Big Endian machine
+        Swapped (To_UInt64 (Value))
+      else
+        To_UInt64 (Value));
+   pragma Warnings (On, "Unreachable branch");
+
+   -----------------------------
+   -- Prior_Content_Unchanged --
+   -----------------------------
+
+   function Prior_Content_Unchanged (New_Value, Old_Value : ByteBuffer'Class) return Boolean is
+     (if Old_Value.Position > 0 then  -- not empty, otherwise Unchanged'Result is trivially true
+       (New_Value.Content (0 .. Old_Value.Position - 1) = Old_Value.Content (0 .. Old_Value.Position - 1)));
+
+   -----------------------
+   -- New_Content_Equal --
+   -----------------------
+
+   function New_Content_Equal
+     (This      : ByteBuffer'Class;
+      Start     : Index;
+      Comparand : String)
+   return
+      Boolean
+   is
+     (if Comparand'Length > 0 then
+       (for all K in 1 .. Comparand'Length =>
+          This.Content (Start + Index (K) - 1) = Character'Pos (Comparand (Comparand'First - 1 + K))));
+
+   -----------------------
+   -- New_Content_Equal --
+   -----------------------
+
+   function New_Content_Equal
+     (This      : ByteBuffer'Class;
+      Start     : Index;
+      Comparand : Byte_Array)
+   return
+      Boolean
+   is
+     (if Comparand'Length > 0 then
+         This.Content (Start .. Start + Comparand'Length - 1) = Comparand);
+
+   -----------
+   -- Equal --
+   -----------
+
+   function Equal (Left : Byte_Array; Right : String) return Boolean is
+     (Left'Length = Right'Length and then
+      (for all K in Integer range 0 .. Left'Length - 1 =>
+          Character'Val (Left (Left'First + Index (K))) = Right (Right'First + K)));
 
 end AVTAS.LMCP.ByteBuffers;
