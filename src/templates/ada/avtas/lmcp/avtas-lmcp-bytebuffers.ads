@@ -103,11 +103,9 @@ is
    with
      Pre  => First <= This.Capacity      and then
              High_Water_Mark (This) >= First + 3,
-             --  First <= High_Water_Mark (This) - 4,
      Post => Position (This) = Position (This)'Old                         and then
              High_Water_Mark (This) = High_Water_Mark (This)'Old           and then
              Remaining (This) = Remaining (This)'Old                       and then
-             --  Raw_Bytes (This) (First .. First + 3) = As_Four_Bytes (Value) and then
              Raw_Bytes (This) = Raw_Bytes (This)'Old;
    --  Gets the four bytes comprising a UInt32 value from This buffer, starting
    --  at absolute index First (rather than from This.Position)
@@ -422,7 +420,6 @@ is
    function Prior_Content_Unchanged (New_Value, Old_Value : ByteBuffer'Class) return Boolean with
      Ghost,
      Pre  => New_Value.Capacity = Old_Value.Capacity;
-     --  Post => (if Length (Old_Value) = 0 then Prior_Content_Unchanged'Result);
    --  Returns whether the content of Old_Value was unchanged in New_Value
 
    function New_Content_Equal
