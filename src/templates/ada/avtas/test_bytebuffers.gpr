@@ -6,11 +6,11 @@ project Test_ByteBuffers is
 
    type Modes is ("debug", "release");
    Mode : Modes := external ("Build", "debug");
-   
-   
+
+
    type Copying_Modes is ("proof", "performance");
-   Copying_Mode : Copying_Modes := external ("Copy_Mode", "proof");   
-   
+   Copying_Mode : Copying_Modes := external ("Copy_Mode", "proof");
+
 
    for Object_Dir use "objs/" & Mode;
 
@@ -44,9 +44,9 @@ project Test_ByteBuffers is
    package Naming is
       case Copying_Mode is
          when "proof" =>
-            for Implementation ("avtas.lmcp.bytebuffers.copying") use "avtas-lmcp-bytebuffers-copying-provable.adb";
+            for Implementation ("avtas.lmcp.bytebuffers.copying") use "avtas-lmcp-bytebuffers-copying-provable_adb";
          when "performance" =>
-            for Implementation ("avtas.lmcp.bytebuffers.copying") use "avtas-lmcp-bytebuffers-copying-performant.adb";
+            for Implementation ("avtas.lmcp.bytebuffers.copying") use "avtas-lmcp-bytebuffers-copying-performant_adb";
       end case;
    end Naming;
 
@@ -59,8 +59,7 @@ project Test_ByteBuffers is
    end Builder;
 
    package Prove is
-      for Proof_Switches ("Ada") use ("--level=4", "--checks-as-errors", "--proof-warnings");
+      for Proof_Switches ("Ada") use ("--level=2", "--checks-as-errors", "--proof-warnings");
    end Prove;
 
 end Test_ByteBuffers;
-

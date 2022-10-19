@@ -5,9 +5,9 @@ with Ada.Strings.Unbounded;  --  use Ada.Strings.Unbounded;
 with Ada.Exceptions;         use Ada.Exceptions;
 with AVTAS.LMCP.Types;       use AVTAS.LMCP.Types;
 
-procedure Test_ByteBuffers with SPARK_Mode is
+procedure Test_ByteBuffers is
    Failed : Natural := 0;
-   
+
    package ASU renames Ada.Strings.Unbounded;
 begin
 
@@ -48,7 +48,7 @@ begin
 
       UInt32_Input  : constant UInt32 := 42;
       Byte_Input    : constant Byte := 42;
-      
+
       Expected_High_Water_Mark : constant := 2 + String_Input'Length + 4 + 1;
       --  2-bytes for string length + length of string + 4 bytes for uint32 + 1 byte for boolean
 
@@ -89,9 +89,9 @@ begin
 
       Expected_High_Water_Mark : constant := 2 + String_Input'Length;
       --  2-bytes for string length + length of string
-      
+
       Invalid_Index : constant Index := Expected_High_Water_Mark + 1;
-      
+
       Buffer : ByteBuffer (Capacity => 100);
    begin
       Put ("Get_UInt32 from absolute index > position and > high water mark: ");
@@ -100,7 +100,7 @@ begin
       Buffer.Rewind;
 
       Assert (Position (Buffer) = 0, "Invalid position in test Get_UInt32 absolute > high water mark");
-      Assert (High_Water_Mark (Buffer) = Expected_High_Water_Mark, 
+      Assert (High_Water_Mark (Buffer) = Expected_High_Water_Mark,
               "Invalid high water mark in test Get_UInt32 absolute > high water mark");
 
       --  now we read back from an index greater than the high water mark, which should fail
