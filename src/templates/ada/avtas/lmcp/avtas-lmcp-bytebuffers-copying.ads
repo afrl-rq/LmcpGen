@@ -36,8 +36,8 @@ is
                     To_String (Destination))                  and then
              Prior_Content_Unchanged (This, Old_Value => This'Old),
      Inline;
- 
- 
+
+
    procedure Copy_String_To_Buffer
      (This : in out ByteBuffer'Class;
       From : String)

@@ -18,7 +18,7 @@ begin
       B : ByteBuffer (Capacity => C);
       V : UInt16 := 42;
    begin
-      Put ("Get UInt16 at absolute index: ");
+      Put ("Get (first) value after rewind: ");
       B.Put_Uint16 (V);
       B.Rewind;
       V := 0;

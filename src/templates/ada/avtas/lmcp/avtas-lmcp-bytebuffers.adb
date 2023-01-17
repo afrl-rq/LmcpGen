@@ -7,19 +7,19 @@ is
 
    pragma Unevaluated_Use_Of_Old (Allow);
 
-   ---------------
-   -- Raw_Bytes --
-   ---------------
+   -------------------------
+   -- Raw_Bytes_As_String --
+   -------------------------
 
-   function Raw_Bytes (This : ByteBuffer'Class) return String is
-      Length : constant Natural := Natural (Index'Min (Max_String_Length, This.Highest_Write_Pos));
+   function Raw_Bytes_As_String (This : ByteBuffer'Class) return String is
+      Length : constant Natural := Natural (This.Highest_Write_Pos);  -- safe due to precondition
       Result : String (1 .. Length);
    begin
       for K in Result'Range loop
          Result (K) := Character'Val (This.Content (Index (K - 1)));
       end loop;
       return Result;
-   end Raw_Bytes;
+   end Raw_Bytes_As_String;
 
    ------------
    -- Rewind --
