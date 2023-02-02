@@ -476,9 +476,7 @@ private
    ---------------
 
    function Raw_Bytes (This : ByteBuffer'Class) return Byte_Array is
-     (if This.Highest_Write_Pos > 0
-      then This.Content (0 .. This.Highest_Write_Pos - 1)
-      else This.Content (1 .. 0));
+      (This.Content (0 .. This.Highest_Write_Pos - 1));
 
    ---------------
    -- Remaining --
