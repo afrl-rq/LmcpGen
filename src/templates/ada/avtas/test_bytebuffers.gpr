@@ -2,7 +2,7 @@ project Test_ByteBuffers is
 
    for Source_Dirs use (".", "lmcp");
 
-   for Main use ("test_bytebuffers.adb");
+   for Main use ("prove_bytebuffers.adb", "test_bytebuffers.adb");
 
    type Modes is ("debug", "release");
    Mode : Modes := external ("Build", "debug");

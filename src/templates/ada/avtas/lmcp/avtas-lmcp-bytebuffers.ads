@@ -41,8 +41,9 @@ is
    --  back to 0 by a call to Reset.
 
    procedure Rewind (This : in out ByteBuffer'Class) with
-     Post => Position (This) = 0 and
-             High_Water_Mark (This) = High_Water_Mark (This)'Old;
+     Post => Position (This) = 0                                 and then
+             High_Water_Mark (This) = High_Water_Mark (This)'Old and then
+             Raw_Bytes (This) = Raw_Bytes (This)'Old;
    --  Rewinding the buffer position allows reading of existing content from
    --  the beginning, presumably after writing values into it (via the Put_*
    --  routines).
@@ -101,12 +102,13 @@ is
       Value : out UInt32;
       First : Index)
    with
-     Pre  => First <= This.Capacity      and then
-             High_Water_Mark (This) >= First + 3,
-     Post => Position (This) = Position (This)'Old                         and then
-             High_Water_Mark (This) = High_Water_Mark (This)'Old           and then
-             Remaining (This) = Remaining (This)'Old                       and then
-             Raw_Bytes (This) = Raw_Bytes (This)'Old;
+     Pre  => First <= This.Capacity - 3 and then
+             First + 3 <= High_Water_Mark (This) - 1,
+     Post => Position (This) = Position (This)'Old               and then
+             High_Water_Mark (This) = High_Water_Mark (This)'Old and then
+             Remaining (This) = Remaining (This)'Old             and then
+             Raw_Bytes (This) = Raw_Bytes (This)'Old             and then
+             Raw_Bytes (This) (First .. First + 3) = As_Four_Bytes (Value);
    --  Gets the four bytes comprising a UInt32 value from This buffer, starting
    --  at absolute index First (rather than from This.Position)
 
@@ -175,7 +177,6 @@ is
        Position (This) <= High_Water_Mark (This) - 2,
        --  The string content is preceded in the buffer by a two-byte length,
        --  even when the string length is zero (ie when the string is empty).
-
      Post =>
        High_Water_Mark (This) = High_Water_Mark (This)'Old and then
        Stored_Length <= Max_String_Length                  and then
@@ -377,13 +378,13 @@ is
              Prior_Content_Unchanged (This, Old_Value => This'Old);
 
    function Raw_Bytes (This : ByteBuffer'Class) return Byte_Array;
-   --  Returns the internal byte array content, up to High_Water_Mark (This)
+   --  Returns the entire internal byte array content, up to High_Water_Mark (This)
 
-   function Raw_Bytes (This : ByteBuffer'Class) return String with
-     Post => Raw_Bytes'Result'First = 1 and then
-             Raw_Bytes'Result'Length = Index'Min (Max_String_Length, High_Water_Mark (This));
-   --  Returns the internal byte array content, up to High_Water_Mark (This),
-   --  as a String
+   function Raw_Bytes_As_String (This : ByteBuffer'Class) return String with
+     Pre  => High_Water_Mark (This) <= Index (Positive'Last),
+     Post => Raw_Bytes_As_String'Result'First = 1 and then
+             Raw_Bytes_As_String'Result'Length = High_Water_Mark (This);
+   --  Returns the entire internal byte array content, as a String
 
    function Checksum (This : ByteBuffer'Class;  Last : Index) return UInt32 with
      Pre => Last <= This.Capacity;
@@ -475,9 +476,7 @@ private
    ---------------
 
    function Raw_Bytes (This : ByteBuffer'Class) return Byte_Array is
-     (if This.Highest_Write_Pos > 0
-      then This.Content (0 .. This.Highest_Write_Pos - 1)
-      else This.Content (1 .. 0));
+      (This.Content (0 .. This.Highest_Write_Pos - 1));
 
    ---------------
    -- Remaining --
