@@ -2,6 +2,8 @@ package body AVTAS.LMCP.ByteBuffers.Copying with
    SPARK_Mode
 is
 
+   package ASU renames Ada.Strings.Unbounded;
+
    ---------------------------
    -- Copy_Buffer_To_String --
    ---------------------------
@@ -17,8 +19,6 @@ is
          Destination (Destination'First + Integer (K)) := Character'Val (This.Content (This.Position));
 
          pragma Loop_Invariant (This.Position = This.Position'Loop_Entry + K);
-         pragma Loop_Invariant (This.Position <= This.Capacity - Length + K);
-         pragma Loop_Invariant (This.Position < This.Highest_Write_Pos);
          pragma Loop_Invariant
            (for all J in 0 .. K =>
               Destination (Destination'First + Integer (J)) = Character'Val (This.Content (Old_Pos + J)));
@@ -39,19 +39,15 @@ is
       Old_Pos : constant Index := Position (This) with Ghost;
    begin
       Destination := Null_Unbounded_String;
-      pragma Assume (Ada.Strings.Unbounded.Length (Destination) = 0);
+      pragma Assume (ASU.Length (Destination) = 0);
       for K in 0 .. Length - 1 loop
          Append (Destination, Character'Val (This.Content (This.Position)));
 
-         pragma Loop_Invariant (This.Position = Old_Pos + K);
-         pragma Loop_Invariant (This.Position <= This.Capacity - Length + K);
-         pragma Loop_Invariant (This.Position < This.Highest_Write_Pos);
-         pragma Loop_Invariant (Ada.Strings.Unbounded.Length (Destination) = Integer (K) + 1);
-         pragma Loop_Invariant (Ada.Strings.Unbounded.Length (Destination) < Natural'Last);
-         pragma Loop_Invariant (Ada.Strings.Unbounded.Length (Destination) <= Max_String_Length);
+         pragma Loop_Invariant (ASU.Length (Destination) = 1 + Integer (K));
          pragma Loop_Invariant
            (for all J in 0 .. K =>
               Element (Destination, 1 + Integer (J)) = Character'Val (This.Content (Old_Pos + J)));
+         pragma Loop_Invariant (This.Position = Old_Pos + K);
 
          This.Position := This.Position + 1;
       end loop;

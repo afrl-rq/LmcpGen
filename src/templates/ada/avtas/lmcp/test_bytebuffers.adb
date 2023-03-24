@@ -1,7 +1,7 @@
 with AVTAS.LMCP.ByteBuffers; use AVTAS.LMCP.ByteBuffers;
 with Ada.Text_IO;            use Ada.Text_IO;
 with Ada.Assertions;         use Ada.Assertions;
-with Ada.Strings.Unbounded;  --  use Ada.Strings.Unbounded;
+with Ada.Strings.Unbounded;
 with Ada.Exceptions;         use Ada.Exceptions;
 with AVTAS.LMCP.Types;       use AVTAS.LMCP.Types;
 
@@ -18,7 +18,7 @@ begin
       B : ByteBuffer (Capacity => C);
       V : UInt16 := 42;
    begin
-      Put ("Get UInt16 at absolute index: ");
+      Put ("Get (first) value after rewind: ");
       B.Put_Uint16 (V);
       B.Rewind;
       V := 0;
@@ -26,7 +26,7 @@ begin
       if V = 42 then
          Put_Line ("passed");
       else
-         Put_Line ("failed, wrong value read");
+         Put_Line ("FAILED, wrong value read");
       end if;
    exception
       when Assertion_Error =>
@@ -49,8 +49,13 @@ begin
       UInt32_Input  : constant UInt32 := 42;
       Byte_Input    : constant Byte := 42;
 
-      Expected_High_Water_Mark : constant := 2 + String_Input'Length + 4 + 1;
-      --  2-bytes for string length + length of string + 4 bytes for uint32 + 1 byte for boolean
+      Bytes_for_String_Length : constant := 2; -- bytes
+      Bytes_for_UInt32_Value  : constant := 4; -- bytes
+      Bytes_for_Boolean_Value : constant := 1; -- bytes
+
+      Expected_High_Water_Mark : constant := Bytes_for_String_Length + String_Input'Length
+                                             + Bytes_for_UInt32_Value
+                                             + Bytes_for_Boolean_Value;
 
       Buffer : ByteBuffer (Capacity => 100);
    begin
@@ -155,11 +160,11 @@ begin
    end;
 
    declare
-      C : constant := UInt16'Last;
+      C : constant := Max_String_Length;
       B : ByteBuffer (Capacity => C + 2);
-      S : constant String (1 .. Integer (UInt16'Last) + 1) := (others => 'x');
+      S : constant String (1 .. Max_String_Length + 1) := (others => 'x');
    begin
-      Put ("Inserting string with length > UInt16'Last, with sufficient capacity: ");
+      Put ("Inserting string with length > Max_String_Length, with sufficient capacity: ");
       B.Put_String (S);
       Put_Line ("FAILED (should have raised Assertion_Error)");
       Failed := Failed + 1;
@@ -172,11 +177,11 @@ begin
    end;
 
    declare
-      C : constant := UInt16'Last;
+      C : constant := Max_String_Length;
       B : ByteBuffer (Capacity => C + 2);
-      S : constant String (1 .. Integer (UInt16'Last)) := (others => 'x');
+      S : constant String (1 .. Max_String_Length) := (others => 'x');
    begin
-      Put ("Inserting string with length = UInt16'Last, with sufficient capacity: ");
+      Put ("Inserting string with length = Max_String_Length, with sufficient capacity: ");
       B.Put_String (S);
       Put_Line ("passed");
    exception
@@ -234,10 +239,10 @@ begin
       B.Get_String (Read, Last, Stored_Length);
 
       if Last /= -1 then
-         Put_Line ("failed (incorrect value for Last)");
+         Put_Line ("FAILED (incorrect value for Last)");
          Failed := Failed + 1;
       elsif B.Position /= 2 then
-         Put_Line ("failed (wrong Position)");
+         Put_Line ("FAILED (wrong Position)");
          Failed := Failed + 1;
       else
          Put_Line ("passed");
@@ -264,12 +269,12 @@ begin
       B.Get_String (Read, Last, Unused);
 
       if Last /= Written'Length then
-         Put_Line ("failed (incorrect value for Last)");
+         Put_Line ("FAILED (incorrect value for Last)");
          Failed := Failed + 1;
       elsif Read (1 .. Last) = Written then
          Put_Line ("passed");
       else
-         Put_Line ("failed (incorrect value read)");
+         Put_Line ("FAILED (incorrect value read)");
          Failed := Failed + 1;
       end if;
    exception
@@ -314,12 +319,12 @@ begin
    end;
 
    declare
-      C : constant := UInt16'Last;
+      C : constant := Max_String_Length;
       B : ByteBuffer (Capacity => C + 2);
       L : constant := Integer (C) + 1;
       S : constant ASU.Unbounded_String := ASU.To_Unbounded_String (Source => String'(1 .. L => 'x'));
    begin
-      Put ("Inserting unbounded string with length > UInt16'Last, with sufficient capacity: ");
+      Put ("Inserting unbounded string with length > Max_String_Length, with sufficient capacity: ");
       B.Put_Unbounded_String (S);
       Put_Line ("FAILED (should have raised Assertion_Error)");
       Failed := Failed + 1;
@@ -398,10 +403,10 @@ begin
       B.Rewind;
       B.Get_Unbounded_String (O, Num_Stored);
       if Num_Stored /= Max_String_Length then
-         Put_Line ("failed (num stored mismatch)");
+         Put_Line ("FAILED (num stored mismatch)");
          Failed := Failed + 1;
       elsif O /= S then
-         Put_Line ("failed (content mismatch)");
+         Put_Line ("FAILED (content mismatch)");
          Failed := Failed + 1;
       else
          Put_Line ("passed");
@@ -447,16 +452,13 @@ begin
    end;
 
    declare
-      B : ByteBuffer (Capacity => Index (UInt16'Last) + 2);
-      S : constant String (1 .. Integer (UInt16'Last) + 1) := (others => 'x');
+      B : ByteBuffer (Capacity => Max_String_Length + 2);
+      S : constant String (1 .. Max_String_Length + 1) := (others => 'x');
    begin
-      Put ("Inserting raw bytes from String with length > UInt16'Last, with sufficient capacity: ");
+      Put ("Inserting raw bytes from String with length > Max_String_Length, with sufficient capacity: ");
       B.Put_Raw_Bytes (S);
-      Put_Line ("failed");
-      Failed := Failed + 1;
+      Put_Line ("passed");
    exception
-      when Assertion_Error =>
-         Put_Line ("passed");
       when Error : others =>
          Put_Line (Exception_Information (Error));
          Failed := Failed + 1;
@@ -468,7 +470,7 @@ begin
       L : constant := C - 2;  -- leave room for length inserted into buffer too
       S : constant Byte_Array (1 .. L) := (others => Character'Pos ('x'));
    begin
-      Put ("Inserting raw bytes with length < capacity: ");
+      Put ("Inserting raw bytes from Byte_Array with length < capacity: ");
       B.Put_Raw_Bytes (S);
       Put_Line ("passed");
    exception
@@ -485,7 +487,9 @@ begin
       type Byte_Array_Pointer is access Byte_Array (1 .. L);
       BAP : constant Byte_Array_Pointer := new Byte_Array'(1 .. L => Character'Pos ('x'));
    begin
-      Put ("Inserting raw bytes with length = Positive'Last: ");
+      Put ("Inserting raw bytes from Byte_Array with length = Positive'Last: ");
+      --  note that this is the Put_Raw_Bytes that takes a Byte_Array, not a
+      --  String, so there is no issue with Max_String_Length
       BBP.Put_Raw_Bytes (BAP.all);
       Put_Line ("passed");
    exception
@@ -506,7 +510,7 @@ begin
 
       Buffer : ByteBuffer (Capacity => 1024);
    begin
-      Put ("Multiple writes folowed by reads of those written values: ");
+      Put ("Multiple writes followed by reads of those written values: ");
 
       --  NB: the order of the following must match the order of the calls to Get_* below
       Buffer.Put_Byte (Byte_Input);

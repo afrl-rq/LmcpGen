@@ -1,55 +1,75 @@
 with System.Storage_Elements;  use System.Storage_Elements;
 
 package body AVTAS.LMCP.ByteBuffers.Copying with
-   SPARK_Mode => Off
+   SPARK_Mode
 is
 
    -----------------
    -- Overlapping --
    -----------------
 
-   function Overlapping (Destination, Source : Address; Count : Storage_Count) return Boolean is
-     (for some Location in To_Integer (Destination) .. To_Integer (Destination + Count - 1) =>
-        Location in To_Integer (Source) .. To_Integer (Source + Count - 1))
-   with Pre => Source /= Null_Address and
-               Destination /= Null_Address;
+   function Overlapping (Block_1, Block_2 : Address; Count : Storage_Count) return Boolean is
+     (declare
+        Block_1_First : constant Integer_Address := To_Integer (Block_1);
+        Block_2_First : constant Integer_Address := To_Integer (Block_2);
+        Block_1_Last  : constant Integer_Address := To_Integer (Block_1 + Count - 1);
+        Block_2_Last  : constant Integer_Address := To_Integer (Block_2 + Count - 1);
+      begin
+        (for some Location in Block_1_First .. Block_1_Last =>
+           Location in Block_2_First .. Block_2_Last))
+   with
+      Pre => Block_2 /= Null_Address and
+             Block_1 /= Null_Address;
 
    -------------
    -- MemCopy --
    -------------
 
-   function MemCopy (Destination, Source : Address; Length : Storage_Count) return Address with
+   function MemCopy
+     (Destination      : Address;
+      Destination_Size : Storage_Count;
+      Source           : Address;
+      Count            : Storage_Count)
+   return Integer
+   with
      Inline,
      Import,
      Convention => C,
-     Link_Name => "memcpy",
-     Pre => Source /= Null_Address and then
-            Destination /= Null_Address and then
-            Source /= Destination and then  --- covered by Overlapping but aids comprehension
-            not Overlapping (Destination, Source, Length),
-     Post => MemCopy'Result = Destination;
+     Link_Name => "memcpy_s",
+     Pre  => Source /= Null_Address and then
+             Destination /= Null_Address and then
+             Destination_Size >= Count and then
+             not Overlapping (Destination, Source, Count),
+     Post => MemCopy'Result = 0;
    --  Copies Length bytes from the object designated by Source to the object
-   --  designated by Destination. Note the order of the address parameters is
-   --  critical so use the named association format for specifying actuals in
-   --  calls.
+   --  designated by Destination. Note the order of the address parameters
+   --  is critical so callers should use the named association format for
+   --  specifying actuals in calls.
+   --
+   --  If the result is non-zero but Destination and Destination_Size are
+   --  valid, the region starting at Destination, of Destination_Size bytes,
+   --  will be zeroed. However, the necessary causes of that failure are
+   --  precluded via the preconditions, so we don't check that in the
+   --  postcondition.
 
    ---------------------------
    -- Copy_Buffer_To_String --
    ---------------------------
-   
+
    procedure Copy_Buffer_To_String
      (This        : in out ByteBuffer'Class;
       Length      : Index;
       Destination : in out String)
    is
-      Result : System.Address with Unreferenced;
+      Result : Integer with Unreferenced;  -- checked by postcondition
    begin
-      Result := MemCopy (Source      => This.Content (This.Position)'Address,
-                         Destination => Destination'Address,
-                         Length      => Storage_Count (Length));
+      Result := MemCopy (Source           => This.Content (This.Position)'Address,
+                         Destination      => Destination'Address,
+                         Destination_Size => Destination'Length,
+                         Count            => Storage_Count (Length));
       This.Position := This.Position + Length;
-   end Copy_Buffer_To_String;   
-   
+   end Copy_Buffer_To_String;
+
    -------------------------------------
    -- Copy_Buffer_To_Unbounded_String --
    -------------------------------------
@@ -59,50 +79,52 @@ is
       Length      : Index;
       Destination : out Unbounded_String)
    is
-      Temp    : String (1 .. Integer (Length));
-      Old_Pos : constant Index := This.Position with Ghost;
-      Result  : System.Address with Unreferenced;
+      Buffer_As_String : String (1 .. Integer (Length));
+      Result           : Integer with Unreferenced;  -- checked by postcondition
    begin
-      Result := MemCopy (Source      => This.Content (This.Position)'Address,
-                         Destination => Temp'Address,
-                         Length      => Storage_Count (Length));
+      Result := MemCopy (Source           => This.Content (This.Position)'Address,
+                         Destination      => Buffer_As_String'Address,
+                         Destination_Size => Buffer_As_String'Length,
+                         Count            => Storage_Count (Length));
+      pragma Assert (Equal (Raw_Bytes (This) (This.Position .. This.Position + Length - 1), Buffer_As_String));
       This.Position := This.Position + Length;
-      pragma Assert (Equal (Raw_Bytes (This) (Old_Pos .. Position (This) - 1), Temp));
-      Destination := To_Unbounded_String (Temp);
-   end Copy_Buffer_To_Unbounded_String;   
-     
+      Destination := To_Unbounded_String (Buffer_As_String);
+   end Copy_Buffer_To_Unbounded_String;
+
    ---------------------------
    -- Copy_String_To_Buffer --
    ---------------------------
-   
+
    procedure Copy_String_To_Buffer
      (This : in out ByteBuffer'Class;
       From : String)
    is
-      Result : System.Address with Unreferenced;
+      Result : Integer with Unreferenced;  -- checked by postcondition
    begin
-      Result := MemCopy (Source      => From'Address,
-                         Destination => This.Content (This.Position)'Address,
-                         Length      => Storage_Count (From'Length));
+      Result := MemCopy (Source           => From'Address,
+                         Destination      => This.Content (This.Position)'Address,
+                         Destination_Size => Storage_Count (This.Capacity - This.Position + 1),
+                         Count            => Storage_Count (From'Length));
       This.Highest_Write_Pos := This.Highest_Write_Pos + From'Length;
       This.Position := This.Position + From'Length;
    end Copy_String_To_Buffer;
-   
+
    --------------------------
    -- Copy_Bytes_To_Buffer --
    --------------------------
-   
+
    procedure Copy_Bytes_To_Buffer
      (This : in out ByteBuffer'Class;
       From : Byte_Array)
    is
-      Result : System.Address with Unreferenced;
+      Result : Integer with Unreferenced;  -- checked by postcondition
    begin
-      Result := MemCopy (Source      => From'Address,
-                         Destination => This.Content (This.Position)'Address,
-                         Length      => Storage_Count (From'Length));
+      Result := MemCopy (Source           => From'Address,
+                         Destination      => This.Content (This.Position)'Address,
+                         Destination_Size => Storage_Count (This.Capacity - This.Position + 1),
+                         Count            => Storage_Count (From'Length));
       This.Highest_Write_Pos := This.Highest_Write_Pos + From'Length;
       This.Position := This.Position + From'Length;
    end Copy_Bytes_To_Buffer;
-   
+
 end AVTAS.LMCP.ByteBuffers.Copying;

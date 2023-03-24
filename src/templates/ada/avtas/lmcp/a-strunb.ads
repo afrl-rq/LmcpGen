@@ -6,7 +6,7 @@
 --                                                                          --
 --                                 S p e c                                  --
 --                                                                          --
---          Copyright (C) 1992-2021, Free Software Foundation, Inc.         --
+--          Copyright (C) 1992-2023, Free Software Foundation, Inc.         --
 --                                                                          --
 -- This specification is derived from the Ada Reference Manual for use with --
 -- GNAT. The copyright notice above, and the license provisions that follow --
@@ -33,12 +33,20 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
+--  Preconditions in this unit are meant for analysis only, not for run-time
+--  checking, so that the expected exceptions are raised. This is enforced by
+--  setting the corresponding assertion policy to Ignore.
+
+pragma Assertion_Policy (Pre => Ignore);
+
 --  This package provides an implementation of Ada.Strings.Unbounded that uses
 --  reference counts to implement copy on modification (rather than copy on
 --  assignment). This is significantly more efficient on many targets.
 
 --  This version is supported on:
 --    - all Alpha platforms
+--    - all AARCH64 platforms
+--    - all ARM platforms
 --    - all ia64 platforms
 --    - all PowerPC platforms
 --    - all SPARC V9 platforms
@@ -78,9 +86,11 @@ package Ada.Strings.Unbounded with
   Initial_Condition => Length (Null_Unbounded_String) = 0
 is
    pragma Preelaborate;
+   pragma Annotate (GNATprove, Always_Return, Unbounded);
    pragma Unevaluated_Use_Of_Old (Allow);
 
-   type Unbounded_String is private;
+   type Unbounded_String is private with
+     Default_Initial_Condition => Length (Unbounded_String) = 0;
    pragma Preelaborable_Initialization (Unbounded_String);
 
    Null_Unbounded_String : constant Unbounded_String;
@@ -99,20 +109,14 @@ is
    function To_Unbounded_String
      (Source : String)  return Unbounded_String
    with
-     Post   =>
-       Length (To_Unbounded_String'Result) = Source'Length
-         and then
-       (for all J in 1 .. Length (To_Unbounded_String'Result) =>
-          Element (To_Unbounded_String'Result, J)
-          = Source (Source'First - 1 + J)),
+     Post   => To_String (To_Unbounded_String'Result) = Source,
      Global => null;
 
    function To_Unbounded_String
      (Length : Natural) return Unbounded_String
    with
-     Post   =>
-       Ada.Strings.Unbounded.Length (To_Unbounded_String'Result) = Length,
-     Global => null;
+     SPARK_Mode => Off,
+     Global     => null;
 
    function To_String (Source : Unbounded_String) return String with
      Post   =>
@@ -127,6 +131,7 @@ is
      (Target : out Unbounded_String;
       Source : String)
    with
+     Post   => To_String (Target) = Source,
      Global => null;
    pragma Ada_05 (Set_Unbounded_String);
 
@@ -240,12 +245,8 @@ is
       Low    : Positive;
       High   : Natural) return String
    with
-     Pre  => Low - 1 <= Length (Source) and then High <= Length (Source),
-     Post =>
-       Slice'Result'Length = Natural'Max (0, High - Low + 1) and then
-       Slice'Result'First = Low and then
-       Slice'Result'Last = High and then
-       (for all J in Low .. High => Element (Source, J) = Slice'Result (J)),
+     Pre    => Low - 1 <= Length (Source) and then High <= Length (Source),
+     Post   => Slice'Result'Length = Natural'Max (0, High - Low + 1),
      Global => null;
 
    function Unbounded_Slice
@@ -255,10 +256,7 @@ is
    with
      Pre    => Low - 1 <= Length (Source) and then High <= Length (Source),
      Post   =>
-       Length (Unbounded_Slice'Result) = Natural'Max (0, High - Low + 1)
-       and then
-       (for all J in 0 .. High - Low =>
-          Element (Source, Low + J) = Element (Unbounded_Slice'Result, 1 + J)),
+       Length (Unbounded_Slice'Result) = Natural'Max (0, High - Low + 1),
      Global => null;
    pragma Ada_05 (Unbounded_Slice);
 
@@ -277,18 +275,21 @@ is
      (Left  : Unbounded_String;
       Right : Unbounded_String) return Boolean
    with
+     Post   => "="'Result = (To_String (Left) = To_String (Right)),
      Global => null;
 
    function "="
      (Left  : Unbounded_String;
       Right : String) return Boolean
    with
+     Post   => "="'Result = (To_String (Left) = Right),
      Global => null;
 
    function "="
      (Left  : String;
       Right : Unbounded_String) return Boolean
    with
+     Post   => "="'Result = (Left = To_String (Right)),
      Global => null;
 
    function "<"
@@ -400,9 +401,8 @@ is
       Going   : Direction := Forward;
       Mapping : Maps.Character_Mapping := Maps.Identity) return Natural
    with
-     Pre    => (if Length (Source) /= 0
-                then From <= Length (Source))
-                       and then Pattern'Length /= 0,
+     Pre    => (if Length (Source) /= 0 then From <= Length (Source))
+               and then Pattern'Length /= 0,
      Global => null;
    pragma Ada_05 (Index);
 
@@ -413,11 +413,9 @@ is
       Going   : Direction := Forward;
       Mapping : Maps.Character_Mapping_Function) return Natural
    with
-     Pre    => (if Length (Source) /= 0
-                then From <= Length (Source))
-                       and then Pattern'Length /= 0,
+     Pre    => (if Length (Source) /= 0 then From <= Length (Source))
+               and then Pattern'Length /= 0,
      Global => null;
-
    pragma Ada_05 (Index);
 
    function Index
