@@ -57,7 +57,7 @@ is
    ---------------------------
 
    procedure Copy_Buffer_To_String
-     (This        : in out ByteBuffer'Class;
+     (This        : in out ByteBuffer;
       Length      : Index;
       Destination : in out String)
    is
@@ -75,7 +75,7 @@ is
    -------------------------------------
 
    procedure Copy_Buffer_To_Unbounded_String
-     (This        : in out ByteBuffer'Class;
+     (This        : in out ByteBuffer;
       Length      : Index;
       Destination : out Unbounded_String)
    is
@@ -96,7 +96,7 @@ is
    ---------------------------
 
    procedure Copy_String_To_Buffer
-     (This : in out ByteBuffer'Class;
+     (This : in out ByteBuffer;
       From : String)
    is
       Result : Integer with Unreferenced;  -- checked by postcondition
@@ -114,7 +114,7 @@ is
    --------------------------
 
    procedure Copy_Bytes_To_Buffer
-     (This : in out ByteBuffer'Class;
+     (This : in out ByteBuffer;
       From : Byte_Array)
    is
       Result : Integer with Unreferenced;  -- checked by postcondition

@@ -18,13 +18,13 @@ begin
 
    declare
       C : constant := 100; -- arbitrary
-      B : ByteBuffer (Capacity => C);
+      Buffer : ByteBuffer (Capacity => C);
       V : UInt16;
    begin
       Put_Line ("Get (first) value after rewind");
-      B.Put_Uint16 (42);
-      B.Rewind;
-      B.Get_UInt16 (V);
+      Put_Uint16 (Buffer, 42);
+      Rewind (Buffer);
+      Get_UInt16 (Buffer, V);
       pragma Assert (V = 42);
    end;
 
@@ -46,11 +46,11 @@ begin
       Buffer : ByteBuffer (Capacity => 100);
    begin
       Put_Line ("Get_UInt32 from absolute index > position and <= high water mark");
-      Buffer.Put_String (String_Input);
-      Buffer.Put_UInt32 (UInt32_Input);
-      Buffer.Put_Byte (Byte_Input);
+      Put_String (Buffer, String_Input);
+      Put_UInt32 (Buffer, UInt32_Input);
+      Put_Byte (Buffer, Byte_Input);
 
-      Buffer.Rewind;
+      Rewind (Buffer);
 
       Assert (Position (Buffer) = 0);
       Assert (High_Water_Mark (Buffer) = Expected_High_Water_Mark);
@@ -61,7 +61,7 @@ begin
       declare
          Output : UInt32;
       begin
-         Buffer.Get_UInt32 (Output, First => Index_After_String);
+         Get_UInt32 (Buffer, Output, First => Index_After_String);
          pragma Assert (Output = UInt32_Input);
       end;
    end;
@@ -70,28 +70,28 @@ begin
 
    declare
       C : constant := 100; -- arbitrary
-      B : ByteBuffer (Capacity => C);
+      Buffer : ByteBuffer (Capacity => C);
       L : constant := C - 2;  -- leave room for length inserted into buffer too
       S : constant String (1 .. L) := (others => 'x');
    begin
       Put_Line ("Inserting string with length < capacity");
-      B.Put_String (S);
+      Put_String (Buffer, S);
    end;
 
    declare
       C : constant := UInt16'Last;
-      B : ByteBuffer (Capacity => C + 2);
+      Buffer : ByteBuffer (Capacity => C + 2);
       S : constant String (1 .. Integer (UInt16'Last)) := (others => 'x');
    begin
       Put_Line ("Inserting string with length = UInt16'Last, with sufficient capacity");
-      B.Put_String (S);
+      Put_String (Buffer, S);
    end;
 
 --  getting Strings ----------------------------------------------------------
 
    declare
       C : constant := 100; -- arbitrary
-      B : ByteBuffer (Capacity => C);
+      Buffer : ByteBuffer (Capacity => C);
       Corrupted_String_Length : constant := C + 1; -- anything > C will do
       S : String (1 .. Corrupted_String_Length) := (others => ' ');
       Last : Integer;
@@ -100,54 +100,54 @@ begin
       Put_Line ("Getting string with stored length > remaining bytes in message");
       --  Write a value that Get_String is going to read as the length of the
       --  string in the message. The value must be > buffer capacity.
-      B.Put_UInt16 (Corrupted_String_Length);
+      Put_UInt16 (Buffer, Corrupted_String_Length);
       --  Prepare to start getting values as if a message is in the buffer,
       --  starting with a string. The actual characters are immaterial so we
-      --  don't bother to insert them into the buffer.
+      --  don't bother to insert them into the
       --
       --  Note that this wouldn't happen without some sort of buffer
       --  corruption because Put_String would have failed when attempting to
       --  write that any chars into the buffer (since we know the buffer isn't
       --  big enough in this test, on purpose).
 
-      B.Rewind;
-      B.Get_String (S, Last, Unused);
-      pragma Assert (B.Position = 2);
+      Rewind (Buffer);
+      Get_String (Buffer, S, Last, Unused);
+      pragma Assert (Position (Buffer) = 2);
       pragma Assert (Last = -1);
    end;
 
    -- the case in which stored length > string arg length AND we just set Last to -1
    declare
       C : constant := 10; -- arbitrary
-      B : ByteBuffer (Capacity => C);
+      Buffer : ByteBuffer (Capacity => C);
       Written : constant String (1 .. 8) := "helloyou";
       Read : String (1 .. 5) := (others => ' ');
       Last : Integer;
       Stored_Length : UInt32;
    begin
       Put_Line ("Getting string with stored length > arg length");
-      B.Put_String (Written);
-      B.Rewind;
-      B.Get_String (Read, Last, Stored_Length);
+      Put_String (Buffer, Written);
+      Rewind (Buffer);
+      Get_String (Buffer, Read, Last, Stored_Length);
 
       pragma Assert (Last = -1);
-      pragma Assert (B.Position = 2);
+      pragma Assert (Position (Buffer) = 2);
    end;
 
    declare
       C : constant := 100; -- arbitrary
-      B : ByteBuffer (Capacity => C);
+      Buffer : ByteBuffer (Capacity => C);
       Written : constant String (1 .. 5) := "world";
       Read : String (1 .. 10) := (others => ' ');
       Last : Integer;
       Unused : UInt32;
    begin
       Put_Line ("Getting string with stored length < arg length");
-      B.Put_String (Written);
+      Put_String (Buffer, Written);
       --  prepare to start getting values as if a message is in the buffer,
       --  starting with a string
-      B.Rewind;
-      B.Get_String (Read, Last, Unused);
+      Rewind (Buffer);
+      Get_String (Buffer, Read, Last, Unused);
       pragma Assert (Last = Written'Length);
       pragma Assert (Read (1 .. Last) = Written);
    end;
@@ -157,38 +157,38 @@ begin
    declare
       C : constant := 100; -- arbitrary
       L : constant := C - 2;  -- leave room for length inserted into buffer too
-      B : ByteBuffer (Capacity => C);
+      Buffer : ByteBuffer (Capacity => C);
       S : constant ASU.Unbounded_String := ASU.To_Unbounded_String (Source => String'(1 .. L => 'x'));
    begin
       Put_Line ("Inserting unbounded string with length < capacity");
-      B.Put_Unbounded_String (S);
+      Put_Unbounded_String (Buffer, S);
    end;
 
    declare
       C : constant := 2;  -- the 2 bytes for the string's bounds
-      B : ByteBuffer (Capacity => C);
+      Buffer : ByteBuffer (Capacity => C);
       L : constant := 0;
       S : constant ASU.Unbounded_String := ASU.To_Unbounded_String (Source => String'(1 .. L => 'x'));
    begin
       Put_Line ("Inserting unbounded string with length = 0, with sufficient capacity");
-      B.Put_Unbounded_String (S);
+      Put_Unbounded_String (Buffer, S);
    end;
 
    declare
       C : constant := 100; -- arbitrary
       L : constant := C - 2;  -- leave room for length inserted into buffer too
-      B : ByteBuffer (Capacity => C);
+      Buffer : ByteBuffer (Capacity => C);
       S : constant ASU.Unbounded_String := ASU.To_Unbounded_String (Source => String'(1 .. L => 'x'));
    begin
       Put_Line ("Inserting unbounded string with length < capacity");
-      B.Put_Unbounded_String (S);
+      Put_Unbounded_String (Buffer, S);
    end;
 
 --  reading unbounded strings -------------------------------------------------
 
    declare
       C : constant := Max_String_Length;
-      B : ByteBuffer (Capacity => C + 2);
+      Buffer : ByteBuffer (Capacity => C + 2);
       L : constant := Integer (C);
       S : constant ASU.Unbounded_String := ASU.To_Unbounded_String (Source => String'(1 .. L => 'x'));
       O : ASU.Unbounded_String := ASU.To_Unbounded_String (Length => L);
@@ -196,9 +196,9 @@ begin
       use ASU;
    begin
       Put_Line ("Getting unbounded string with length = Max_String_Length, with sufficient capacity");
-      B.Put_Unbounded_String (S);
-      B.Rewind;
-      B.Get_Unbounded_String (O, Num_Stored);
+      Put_Unbounded_String (Buffer, S);
+      Rewind (Buffer);
+      Get_Unbounded_String (Buffer, O, Num_Stored);
       pragma Assert (Num_Stored = Max_String_Length);
       pragma Assert (O = S);
    end;
@@ -207,22 +207,22 @@ begin
 
    declare
       C : constant := 100; -- arbitrary
-      B : ByteBuffer (Capacity => C);
+      Buffer : ByteBuffer (Capacity => C);
       L : constant := C - 2;  -- leave room for length inserted into buffer too
       S : constant String (1 .. L) := (others => 'x');
    begin
       Put_Line ("Inserting raw bytes from String with length < capacity");
-      B.Put_Raw_Bytes (S);
+      Put_Raw_Bytes (Buffer, S);
    end;
 
    declare
       C : constant := 100; -- arbitrary
-      B : ByteBuffer (Capacity => C);
+      Buffer : ByteBuffer (Capacity => C);
       L : constant := C - 2;  -- leave room for length inserted into buffer too
       S : constant Byte_Array (1 .. L) := (others => Character'Pos ('x'));
    begin
       Put_Line ("Inserting raw bytes with length < capacity");
-      B.Put_Raw_Bytes (S);
+      Put_Raw_Bytes (Buffer, S);
    end;
 
    declare
@@ -241,7 +241,7 @@ begin
         (Object => Constrained_Byte_Array, Name => Byte_Array_Pointer);
    begin
       Put_Line ("Inserting raw bytes with length = Positive'Last");
-      BBP.Put_Raw_Bytes (BAP.all);
+      Put_Raw_Bytes (BBP.all, BAP.all);
       --  and free them to keep SPARK happy
       Free (BAP);
       Free (BBP);
@@ -262,22 +262,22 @@ begin
       Put_Line ("Multiple writes folowed by reads of those written values");
 
       --  NB: the order of the following must match the order of the calls to Get_* below
-      Buffer.Put_Byte (Byte_Input);
-      Buffer.Put_String (String_Input);
-      Buffer.Put_UInt32 (UInt32_Input);
-      Buffer.Put_Unbounded_String (ASU.To_Unbounded_String (String_Input));
-      Buffer.Put_Real32 (Real32_Input);
-      Buffer.Put_Boolean (Boolean_Input);
-      Buffer.Put_UInt64 (UInt64_Input);
+      Put_Byte (Buffer, Byte_Input);
+      Put_String (Buffer, String_Input);
+      Put_UInt32 (Buffer, UInt32_Input);
+      Put_Unbounded_String (Buffer, ASU.To_Unbounded_String (String_Input));
+      Put_Real32 (Buffer, Real32_Input);
+      Put_Boolean (Buffer, Boolean_Input);
+      Put_UInt64 (Buffer, UInt64_Input);
 
       --  now we read back what was written
 
-      Buffer.Rewind;
+      Rewind (Buffer);
 
       declare
          Output : Byte;
       begin
-         Buffer.Get_Byte (Output);
+         Get_Byte (Buffer, Output);
          pragma Assert (Output = Byte_Input);
       end;
 
@@ -286,7 +286,7 @@ begin
          Last   : Integer;  -- because result can be -1 to signal a problem
          Unused : UInt32;
       begin
-         Buffer.Get_String (Output, Last, Unused);
+         Get_String (Buffer, Output, Last, Unused);
          pragma Assert (Last = String_Input'Length);
          pragma Assert (Output (1 .. Last) = String_Input);
       end;
@@ -294,7 +294,7 @@ begin
       declare
          Output : UInt32;
       begin
-         Buffer.Get_UInt32 (Output);
+         Get_UInt32 (Buffer, Output);
          pragma Assert (Output = UInt32_Input);
       end;
 
@@ -302,7 +302,7 @@ begin
          Output : ASU.Unbounded_String;
          Num_Stored : UInt32;
       begin
-         Buffer.Get_Unbounded_String (Output, Num_Stored);
+         Get_Unbounded_String (Buffer, Output, Num_Stored);
          pragma Assert (Num_Stored = String_Input'Length);
          pragma Assert (ASU.To_String (Output) = String_Input);
       end;
@@ -310,21 +310,21 @@ begin
       declare
          Output : Real32;
       begin
-         Buffer.Get_Real32 (Output);
+         Get_Real32 (Buffer, Output);
          pragma Assert (Output = Real32_Input);
       end;
 
       declare
          Output : Boolean;
       begin
-         Buffer.Get_Boolean (Output);
+         Get_Boolean (Buffer, Output);
          pragma Assert (Output = Boolean_Input);
       end;
 
       declare
          Output : UInt64;
       begin
-         Buffer.Get_UInt64 (Output);
+         Get_UInt64 (Buffer, Output);
          pragma Assert (Output = UInt64_Input);
       end;
    end;
