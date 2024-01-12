@@ -42,20 +42,16 @@ begin
    declare
       --                                  123456789ABC
       String_Input  : constant String := "Hello World!";
-      Index_After_String : constant := 2 + String_Input'Length;
+      Index_After_String : constant := Stored_Length_Size + String_Input'Length;
       --  the 2-byte length of the string precedes the actual string content so
       --  we add 2
 
       UInt32_Input  : constant UInt32 := 42;
       Byte_Input    : constant Byte := 42;
 
-      Bytes_for_String_Length : constant := 2; -- bytes
-      Bytes_for_UInt32_Value  : constant := 4; -- bytes
-      Bytes_for_Boolean_Value : constant := 1; -- bytes
-
-      Expected_High_Water_Mark : constant := Bytes_for_String_Length + String_Input'Length
-                                             + Bytes_for_UInt32_Value
-                                             + Bytes_for_Boolean_Value;
+      Expected_High_Water_Mark : constant := Stored_Length_Size + String_Input'Length
+                                             + UInt32_Size
+                                             + Boolean_Size;
 
       Buffer : ByteBuffer (Capacity => 100);
    begin
@@ -66,8 +62,8 @@ begin
 
       Rewind (Buffer);
 
-      Assert (Position (Buffer) = 0, "Invalid position in test Get_UInt32 absolute");
-      Assert (High_Water_Mark (Buffer) = Expected_High_Water_Mark, "Invalid high water mark in test Get_UInt32 absolute");
+      pragma Assert (Position (Buffer) = 0, "Invalid position in test Get_UInt32 absolute");
+      pragma Assert (High_Water_Mark (Buffer) = Expected_High_Water_Mark, "Invalid high water mark in test Get_UInt32 absolute");
 
       --  now we read back one of the written values at an absolute position
       --  that is greater than the current position but not greater than the
@@ -92,7 +88,7 @@ begin
    declare
       String_Input  : constant String := "Hello World!";
 
-      Expected_High_Water_Mark : constant := 2 + String_Input'Length;
+      Expected_High_Water_Mark : constant := Stored_Length_Size + String_Input'Length;
       --  2-bytes for string length + length of string
 
       Invalid_Index : constant Index := Expected_High_Water_Mark + 1;
@@ -147,7 +143,7 @@ begin
    declare
       C : constant := 100; -- arbitrary
       Buffer : ByteBuffer (Capacity => C);
-      L : constant := C - 2;  -- leave room for length inserted into buffer too
+      L : constant := C - Stored_Length_Size;  -- leave room for length inserted into buffer too
       S : constant String (1 .. L) := (others => 'x');
    begin
       Put ("Inserting string with length < capacity: ");
@@ -161,7 +157,7 @@ begin
 
    declare
       C : constant := Max_String_Length;
-      Buffer : ByteBuffer (Capacity => C + 2);
+      Buffer : ByteBuffer (Capacity => C + Stored_Length_Size);
       S : constant String (1 .. Max_String_Length + 1) := (others => 'x');
    begin
       Put ("Inserting string with length > Max_String_Length, with sufficient capacity: ");
@@ -178,7 +174,7 @@ begin
 
    declare
       C : constant := Max_String_Length;
-      Buffer : ByteBuffer (Capacity => C + 2);
+      Buffer : ByteBuffer (Capacity => C + Stored_Length_Size);
       S : constant String (1 .. Max_String_Length) := (others => 'x');
    begin
       Put ("Inserting string with length = Max_String_Length, with sufficient capacity: ");
@@ -215,7 +211,7 @@ begin
 
       Rewind (Buffer);
       Get_String (Buffer, S, Last, Unused);
-      pragma Assert (Position (Buffer) = 2);
+      pragma Assert (Position (Buffer) = Stored_Length_Size);
       pragma Assert (Last = -1);
       Put_Line ("passed");
    exception
@@ -228,8 +224,8 @@ begin
    declare
       C : constant := 10; -- arbitrary
       Buffer : ByteBuffer (Capacity => C);
-      Written : constant String (1 .. 8) := "helloyou";
-      Read : String (1 .. 5) := (others => ' ');
+      Written : constant String (1 .. 8) := "helloyou";  -- arbitrary bounds & value
+      Read : String (1 .. Written'Last - 1) := (others => ' ');
       Last : Integer;
       Stored_Length : UInt32;
    begin
@@ -241,7 +237,7 @@ begin
       if Last /= -1 then
          Put_Line ("FAILED (incorrect value for Last)");
          Failed := Failed + 1;
-      elsif Position (Buffer) /= 2 then
+      elsif Position (Buffer) /= Stored_Length_Size then
          Put_Line ("FAILED (wrong Position)");
          Failed := Failed + 1;
       else
@@ -256,8 +252,8 @@ begin
    declare
       C : constant := 100; -- arbitrary
       Buffer : ByteBuffer (Capacity => C);
-      Written : constant String (1 .. 5) := "world";
-      Read : String (1 .. 10) := (others => ' ');
+      Written : constant String (1 .. 5) := "world";  -- arbitrary bounds & value
+      Read : String (1 .. Written'Last * 2) := (others => ' ');
       Last : Integer;
       Unused : UInt32;
    begin
@@ -305,7 +301,7 @@ begin
 
    declare
       C : constant := 100; -- arbitrary
-      L : constant := C - 2;  -- leave room for length inserted into buffer too
+      L : constant := C - Stored_Length_Size;  -- leave room for length inserted into buffer too
       Buffer : ByteBuffer (Capacity => C);
       S : constant ASU.Unbounded_String := ASU.To_Unbounded_String (Source => String'(1 .. L => 'x'));
    begin
@@ -320,7 +316,7 @@ begin
 
    declare
       C : constant := Max_String_Length;
-      Buffer : ByteBuffer (Capacity => C + 2);
+      Buffer : ByteBuffer (Capacity => C + Stored_Length_Size);
       L : constant := Integer (C) + 1;
       S : constant ASU.Unbounded_String := ASU.To_Unbounded_String (Source => String'(1 .. L => 'x'));
    begin
@@ -337,7 +333,7 @@ begin
    end;
 
    declare
-      C : constant := 2;  -- the 2 bytes for the string's bounds
+      C : constant := Stored_Length_Size;  -- the 2 bytes for the string's bounds
       Buffer : ByteBuffer (Capacity => C);
       L : constant := 0;
       S : constant ASU.Unbounded_String := ASU.To_Unbounded_String (Source => String'(1 .. L => 'x'));
@@ -374,7 +370,7 @@ begin
 
    declare
       C : constant := 100; -- arbitrary
-      L : constant := C - 2;  -- leave room for length inserted into buffer too
+      L : constant := C - Stored_Length_Size;  -- leave room for length inserted into buffer too
       Buffer : ByteBuffer (Capacity => C);
       S : constant ASU.Unbounded_String := ASU.To_Unbounded_String (Source => String'(1 .. L => 'x'));
    begin
@@ -391,7 +387,7 @@ begin
 
    declare
       C : constant := Max_String_Length;
-      Buffer : ByteBuffer (Capacity => C + 2);
+      Buffer : ByteBuffer (Capacity => C + Stored_Length_Size);
       L : constant := Integer (C);
       S : constant ASU.Unbounded_String := ASU.To_Unbounded_String (Source => String'(1 .. L => 'x'));
       O : ASU.Unbounded_String := ASU.To_Unbounded_String (Length => L);
@@ -439,7 +435,7 @@ begin
    declare
       C : constant := 100; -- arbitrary
       Buffer : ByteBuffer (Capacity => C);
-      L : constant := C - 2;  -- leave room for length inserted into buffer too
+      L : constant := C - Stored_Length_Size;  -- leave room for length inserted into buffer too
       S : constant String (1 .. L) := (others => 'x');
    begin
       Put ("Inserting raw bytes from String with length < capacity: ");
@@ -452,7 +448,7 @@ begin
    end;
 
    declare
-      Buffer : ByteBuffer (Capacity => Max_String_Length + 2);
+      Buffer : ByteBuffer (Capacity => Max_String_Length + Stored_Length_Size);
       S : constant String (1 .. Max_String_Length + 1) := (others => 'x');
    begin
       Put ("Inserting raw bytes from String with length > Max_String_Length, with sufficient capacity: ");
@@ -467,7 +463,7 @@ begin
    declare
       C : constant := 100; -- arbitrary
       Buffer : ByteBuffer (Capacity => C);
-      L : constant := C - 2;  -- leave room for length inserted into buffer too
+      L : constant := C - Stored_Length_Size;  -- leave room for length inserted into buffer too
       S : constant Byte_Array (1 .. L) := (others => Character'Pos ('x'));
    begin
       Put ("Inserting raw bytes from Byte_Array with length < capacity: ");
