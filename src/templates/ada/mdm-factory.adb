@@ -17,12 +17,12 @@ package body -<full_series_name_dots>-.Factory is
       Buffer  : ByteBuffer (HEADER_SIZE + Index (MsgSize) + CHECKSUM_SIZE);
    begin
       -- add header values
-      Buffer.Put_Int32 (LMCP_CONTROL_STR);
-      Buffer.Put_UInt32 (MsgSize);
+      Put_Int32 (Buffer, LMCP_CONTROL_STR);
+      Put_UInt32 (Buffer, MsgSize);
       -- add root object
       PutObject (RootObject, Buffer);
       -- add checksum if enabled
-      Buffer.Put_UInt32 (if EnableChecksum then CalculatedChecksum (Buffer, Buffer.Capacity) else 0);
+      Put_UInt32 (Buffer, (if EnableChecksum then CalculatedChecksum (Buffer, High_Water_Mark (Buffer) - 1) else 0));
       return Buffer;
    end PackMessage;
 
@@ -34,12 +34,12 @@ package body -<full_series_name_dots>-.Factory is
    begin
       -- If object is null, pack a 0; otherwise, add root object
       if Object = null then
-         Buffer.Put_Boolean (False);
+         Put_Boolean (Buffer, False);
       else
-         Buffer.Put_Boolean (True);
-         Buffer.Put_Int64 (Object.GetSeriesNameAsLong);
-         Buffer.Put_UInt32 (Object.GetLmcpType);
-         Buffer.Put_UInt16 (Object.GetSeriesVersion);
+         Put_Boolean (Buffer, True);
+         Put_Int64 (Buffer, Object.GetSeriesNameAsLong);
+         Put_UInt32 (Buffer, Object.GetLmcpType);
+         Put_UInt16 (Buffer, Object.GetSeriesVersion);
          Object.Pack (Buffer);
       end if;
    end PutObject;
@@ -65,7 +65,7 @@ package body -<full_series_name_dots>-.Factory is
          --  return;
       end if;
       
-      Buffer.Get_Int32 (CtrlStr);
+      Get_Int32 (Buffer, CtrlStr);
       if CtrlStr /= LMCP_CONTROL_STR then
          Put_Line ("-<full_series_name_dots>-.Factory.GetObject error: Not a proper LMCP message.");
          Put_Line ("   Expected: " & LMCP_CONTROL_STR'Image & "   Received: " & CtrlStr'Image);
@@ -73,7 +73,7 @@ package body -<full_series_name_dots>-.Factory is
          --  return;
       end if;
       
-      Buffer.Get_UInt32 (MsgSize);
+      Get_UInt32 (Buffer, MsgSize);
       if Buffer.Capacity < Index (MsgSize) then
          Put_Line ("-<full_series_name_dots>-.Factory.GetObject error: Buffer size too small for packed object.");
          Put_Line ("   MsgSize: " & MsgSize'Image & "    Capacity: " & Buffer.Capacity'Image);
@@ -87,16 +87,16 @@ package body -<full_series_name_dots>-.Factory is
          --  return;
       end if;
       
-      Buffer.Get_Boolean (MsgExists);
+      Get_Boolean (Buffer, MsgExists);
       if not MsgExists then
          Put_Line ("-<full_series_name_dots>-.Factory.GetObject error: Message indicated it was packed as NULL");
          raise Program_Error;  -- for the moment
          --  return;
       end if;
 
-      Buffer.Get_Int64 (SeriesId);
-      Buffer.Get_UInt32 (MsgType);
-      Buffer.Get_UInt16 (Version);
+      Get_Int64 (Buffer, SeriesId);
+      Get_UInt32 (Buffer, MsgType);
+      Get_UInt16 (Buffer, Version);
       Output := CreateObject (SeriesId, MsgType, Version);
       if Output /= null then
          Output.Unpack (Buffer);
@@ -119,7 +119,7 @@ package body -<full_series_name_dots>-.Factory is
    ------------------------
 
    function CalculatedChecksum (Buffer : in ByteBuffer; Size : Index) return UInt32 is
-     (Buffer.Checksum (Last => Size - 1));
+     (Checksum (Buffer, Last => Size));
 
    -------------------
    -- GetObjectSize --
@@ -130,7 +130,7 @@ package body -<full_series_name_dots>-.Factory is
       Second_HalfWord_Start : constant Index := 4;  -- the buffer array is zero-based
    begin
       --  get the second UInt32 value in the buffer
-      Buffer.Get_UInt32 (Result, First => Second_HalfWord_Start);  
+      Get_UInt32 (Buffer, Result, First => Second_HalfWord_Start);  
       return Result;
    end getObjectSize;
 
@@ -141,12 +141,12 @@ package body -<full_series_name_dots>-.Factory is
    function Validated (Buffer : in ByteBuffer) return Boolean is
       Stored_Checksum : UInt32;
    begin
-      if Buffer.High_Water_Mark < HEADER_SIZE + CHECKSUM_SIZE then
+      if High_Water_Mark (Buffer) < HEADER_SIZE + CHECKSUM_SIZE then
          Put_Line ("-<full_series_name_dots>-.Factory.Validated: Buffer size < HEADER_SIZE + CHECKSUM_SIZE.");
          return False;
       end if;
-      Buffer.Get_UInt32 (Stored_Checksum, First => Buffer.High_Water_Mark - Checksum_Size);
-      return Stored_Checksum = 0 or else Stored_Checksum = CalculatedChecksum (Buffer, Buffer.High_Water_Mark - Checksum_Size);
+      Get_UInt32 (Buffer, Stored_Checksum, First => High_Water_Mark (Buffer) - Checksum_Size);
+      return Stored_Checksum = 0 or else Stored_Checksum = CalculatedChecksum (Buffer, High_Water_Mark (Buffer) - Checksum_Size);
    end Validated;
 
 end -<full_series_name_dots>-.Factory;

@@ -12,7 +12,7 @@ is
    -------------------------
 
    function Raw_Bytes_As_String (This : ByteBuffer) return String is
-      Length : constant Natural := Natural (This.Highest_Write_Pos);  -- safe due to precondition
+      Length : constant Natural := Natural (This.Highest_Write_Pos);
       Result : String (1 .. Length);
    begin
       for K in Result'Range loop
@@ -92,10 +92,10 @@ is
          To_Bytes   => As_Two_Bytes);
 
    begin
-      Value := As_Int16 (This.Content (This.Position .. This.Position + Int16_Size - 1));
+      Value := As_Int16 (Byte_Array (This.Content (This.Position .. This.Position + Int16_Size - 1)));
       Lemma_Two_Bytes_Equal_Int16
         (This_Numeric => Value,
-         These_Bytes  => This.Content (This.Position .. This.Position + Int16_Size - 1));
+         These_Bytes  => Byte_Array (This.Content (This.Position .. This.Position + Int16_Size - 1)));
       This.Position := This.Position + Int16_Size;
    end Get_Int16;
 
@@ -114,10 +114,10 @@ is
          To_Bytes   => As_Two_Bytes);
 
    begin
-      Value := As_UInt16 (This.Content (This.Position .. This.Position + UInt16_Size - 1));
+      Value := As_UInt16 (Byte_Array (This.Content (This.Position .. This.Position + UInt16_Size - 1)));
       Lemma_Two_Bytes_Equal_UInt16
         (This_Numeric => Value,
-         These_Bytes  => This.Content (This.Position .. This.Position + UInt16_Size - 1));
+         These_Bytes  => Byte_Array (This.Content (This.Position .. This.Position + UInt16_Size - 1)));
       This.Position := This.Position + UInt16_Size;
    end Get_UInt16;
 
@@ -136,10 +136,10 @@ is
          To_Bytes   => As_Four_Bytes);
 
    begin
-      Value := As_Int32 (This.Content (This.Position .. This.Position + Int32_Size - 1));
+      Value := As_Int32 (Byte_Array (This.Content (This.Position .. This.Position + Int32_Size - 1)));
       Lemma_Four_Bytes_Equal_Int32
         (This_Numeric => Value,
-         These_Bytes  => This.Content (This.Position .. This.Position + Int32_Size - 1));
+         These_Bytes  => Byte_Array (This.Content (This.Position .. This.Position + Int32_Size - 1)));
       This.Position := This.Position + Int32_Size;
    end Get_Int32;
 
@@ -158,10 +158,10 @@ is
          To_Bytes   => As_Four_Bytes);
 
    begin
-      Value := As_UInt32 (This.Content (This.Position .. This.Position + UInt32_Size - 1));
+      Value := As_UInt32 (Byte_Array (This.Content (This.Position .. This.Position + UInt32_Size - 1)));
       Lemma_Four_Bytes_Equal_UInt32
         (This_Numeric => Value,
-         These_Bytes  => This.Content (This.Position .. This.Position + UInt32_Size - 1));
+         These_Bytes  => Byte_Array (This.Content (This.Position .. This.Position + UInt32_Size - 1)));
       This.Position := This.Position + UInt32_Size;
    end Get_UInt32;
 
@@ -184,10 +184,10 @@ is
          To_Bytes   => As_Four_Bytes);
 
    begin
-      Value := As_UInt32 (This.Content (First .. First + UInt32_Size - 1));
+      Value := As_UInt32 (Byte_Array (This.Content (First .. First + UInt32_Size - 1)));
       Lemma_Four_Bytes_Equal_UInt32
         (This_Numeric => Value,
-         These_Bytes  => This.Content (First .. First + UInt32_Size - 1));
+         These_Bytes  => Byte_Array (This.Content (First .. First + UInt32_Size - 1)));
    end Get_UInt32;
 
    ---------------
@@ -205,10 +205,10 @@ is
          To_Bytes   => As_Eight_Bytes);
 
    begin
-      Value := As_Int64 (This.Content (This.Position .. This.Position + Int64_Size - 1));
+      Value := As_Int64 (Byte_Array (This.Content (This.Position .. This.Position + Int64_Size - 1)));
       Lemma_Eight_Bytes_Equal_Int64
         (This_Numeric => Value,
-         These_Bytes  => This.Content (This.Position .. This.Position + Int64_Size - 1));
+         These_Bytes  => Byte_Array (This.Content (This.Position .. This.Position + Int64_Size - 1)));
       This.Position := This.Position + Int64_Size;
    end Get_Int64;
 
@@ -227,10 +227,10 @@ is
          To_Bytes   => As_Eight_Bytes);
 
    begin
-      Value := As_UInt64 (This.Content (This.Position .. This.Position + UInt64_Size - 1));
+      Value := As_UInt64 (Byte_Array (This.Content (This.Position .. This.Position + UInt64_Size - 1)));
       Lemma_Eight_Bytes_Equal_UInt64
         (This_Numeric => Value,
-         These_Bytes  => This.Content (This.Position .. This.Position + UInt64_Size - 1));
+         These_Bytes  => Byte_Array (This.Content (This.Position .. This.Position + UInt64_Size - 1)));
       This.Position := This.Position + UInt64_Size;
    end Get_UInt64;
 
@@ -266,11 +266,11 @@ is
       --  floating-point type, to ensure the compiler does not see the byte
       --  swapping (in the As_UInt32 instance) as producing an invalid
       --  floating-point value.
-      Value := As_Real32 (This.Content (This.Position .. This.Position + Real32_Size - 1));
+      Value := As_Real32 (Byte_Array (This.Content (This.Position .. This.Position + Real32_Size - 1)));
 
       Lemma_Four_Bytes_Equal_Real32
         (This_Numeric => Value,
-         These_Bytes  => This.Content (This.Position .. This.Position + Real32_Size - 1));
+         These_Bytes  => Byte_Array (This.Content (This.Position .. This.Position + Real32_Size - 1)));
 
       This.Position := This.Position + Real32_Size;
    end Get_Real32;
@@ -307,11 +307,11 @@ is
       -- floating-point type, to ensure the compiler does not see the byte
       -- swapping (in the As_UInt64 instance) as producing an invalid
       -- floating-point value.
-      Value := As_Real64 (This.Content (This.Position .. This.Position + Real64_Size - 1));
+      Value := As_Real64 (Byte_Array (This.Content (This.Position .. This.Position + Real64_Size - 1)));
 
       Lemma_Eight_Bytes_Equal_Real64
         (This_Numeric => Value,
-         These_Bytes  => This.Content (This.Position .. This.Position + Real64_Size - 1));
+         These_Bytes  => Byte_Array (This.Content (This.Position .. This.Position + Real64_Size - 1)));
 
       This.Position := This.Position + Real64_Size;
    end Get_Real64;
@@ -380,8 +380,10 @@ is
    procedure Put_Byte (This : in out ByteBuffer; Value : Byte) is
    begin
       This.Content (This.Position) := Value;
-      This.Highest_Write_Pos := This.Highest_Write_Pos + Byte_Size;
       This.Position := This.Position + Byte_Size;
+      if This.Highest_Write_Pos < This.Position then
+         This.Highest_Write_Pos := This.Position;
+      end if;
    end Put_Byte;
 
    -----------------
@@ -391,8 +393,10 @@ is
    procedure Put_Boolean (This : in out ByteBuffer; Value : Boolean) is
    begin
       This.Content (This.Position) := Boolean'Pos (Value);
-      This.Highest_Write_Pos := This.Highest_Write_Pos + Boolean_Size;
       This.Position := This.Position + Boolean_Size;
+      if This.Highest_Write_Pos < This.Position then
+         This.Highest_Write_Pos := This.Position;
+      end if;
    end Put_Boolean;
 
    ---------------
@@ -401,9 +405,11 @@ is
 
    procedure Put_Int16 (This : in out ByteBuffer; Value : Int16) is
    begin
-      This.Content (This.Position .. This.Position + Int16_Size - 1) := As_Two_Bytes (Value);
-      This.Highest_Write_Pos := This.Highest_Write_Pos + Int16_Size;
+      This.Content (This.Position .. This.Position + Int16_Size - 1) := Byte_Data (As_Two_Bytes (Value));
       This.Position := This.Position + Int16_Size;
+      if This.Highest_Write_Pos < This.Position then
+         This.Highest_Write_Pos := This.Position;
+      end if;
    end Put_Int16;
 
    ----------------
@@ -412,9 +418,11 @@ is
 
    procedure Put_UInt16 (This : in out ByteBuffer; Value : UInt16) is
    begin
-      This.Content (This.Position .. This.Position + UInt16_Size - 1) := As_Two_Bytes (Value);
-      This.Highest_Write_Pos := This.Highest_Write_Pos + UInt16_Size;
+      This.Content (This.Position .. This.Position + UInt16_Size - 1) := Byte_Data (As_Two_Bytes (Value));
       This.Position := This.Position + UInt16_Size;
+      if This.Highest_Write_Pos < This.Position then
+         This.Highest_Write_Pos := This.Position;
+      end if;
    end Put_UInt16;
 
    ---------------
@@ -423,9 +431,11 @@ is
 
    procedure Put_Int32 (This : in out ByteBuffer; Value : Int32) is
    begin
-      This.Content (This.Position .. This.Position + Int32_Size - 1) := As_Four_Bytes (Value);
-      This.Highest_Write_Pos := This.Highest_Write_Pos + Int32_Size;
+      This.Content (This.Position .. This.Position + Int32_Size - 1) := Byte_Data (As_Four_Bytes (Value));
       This.Position := This.Position + Int32_Size;
+      if This.Highest_Write_Pos < This.Position then
+         This.Highest_Write_Pos := This.Position;
+      end if;
    end Put_Int32;
 
    ----------------
@@ -434,9 +444,11 @@ is
 
    procedure Put_UInt32 (This : in out ByteBuffer; Value : UInt32) is
    begin
-      This.Content (This.Position .. This.Position + UInt32_Size - 1) := As_Four_Bytes (Value);
-      This.Highest_Write_Pos := This.Highest_Write_Pos + UInt32_Size;
+      This.Content (This.Position .. This.Position + UInt32_Size - 1) := Byte_Data (As_Four_Bytes (Value));
       This.Position := This.Position + UInt32_Size;
+      if This.Highest_Write_Pos < This.Position then
+         This.Highest_Write_Pos := This.Position;
+      end if;
    end Put_UInt32;
 
    ---------------
@@ -445,9 +457,11 @@ is
 
    procedure Put_Int64 (This : in out ByteBuffer; Value : Int64) is
    begin
-      This.Content (This.Position .. This.Position + Int64_Size - 1) := As_Eight_Bytes (Value);
-      This.Highest_Write_Pos := This.Highest_Write_Pos + Int64_Size;
+      This.Content (This.Position .. This.Position + Int64_Size - 1) := Byte_Data (As_Eight_Bytes (Value));
       This.Position := This.Position + Int64_Size;
+      if This.Highest_Write_Pos < This.Position then
+         This.Highest_Write_Pos := This.Position;
+      end if;
    end Put_Int64;
 
    ----------------
@@ -456,9 +470,11 @@ is
 
    procedure Put_UInt64 (This : in out ByteBuffer; Value : UInt64) is
    begin
-      This.Content (This.Position .. This.Position + UInt64_Size - 1) := As_Eight_Bytes (Value);
-      This.Highest_Write_Pos := This.Highest_Write_Pos + UInt64_Size;
+      This.Content (This.Position .. This.Position + UInt64_Size - 1) := Byte_Data (As_Eight_Bytes (Value));
       This.Position := This.Position + UInt64_Size;
+      if This.Highest_Write_Pos < This.Position then
+         This.Highest_Write_Pos := This.Position;
+      end if;
    end Put_UInt64;
 
    ----------------
@@ -467,9 +483,11 @@ is
 
    procedure Put_Real32 (This : in out ByteBuffer; Value : Real32) is
    begin
-      This.Content (This.Position .. This.Position + Real32_Size - 1) := As_Four_Bytes (Value);
-      This.Highest_Write_Pos := This.Highest_Write_Pos + Real32_Size;
+      This.Content (This.Position .. This.Position + Real32_Size - 1) := Byte_Data (As_Four_Bytes (Value));
       This.Position := This.Position + Real32_Size;
+      if This.Highest_Write_Pos < This.Position then
+         This.Highest_Write_Pos := This.Position;
+      end if;
   end Put_Real32;
 
    ----------------
@@ -478,9 +496,11 @@ is
 
    procedure Put_Real64 (This : in out ByteBuffer; Value : Real64) is
    begin
-      This.Content (This.Position .. This.Position + Real64_Size - 1) := As_Eight_Bytes (Value);
-      This.Highest_Write_Pos := This.Highest_Write_Pos + Real64_Size;
+      This.Content (This.Position .. This.Position + Real64_Size - 1) := Byte_Data (As_Eight_Bytes (Value));
       This.Position := This.Position + Real64_Size;
+      if This.Highest_Write_Pos < This.Position then
+         This.Highest_Write_Pos := This.Position;
+      end if;
   end Put_Real64;
 
    ----------------

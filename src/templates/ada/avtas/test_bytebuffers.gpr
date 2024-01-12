@@ -15,9 +15,9 @@ project Test_ByteBuffers is
    for Object_Dir use "objs/" & Mode;
 
    Unconditional_Compiler_Switches :=
-     ("-gnatyO",       -- check that overriding subprograms are explicitly marked as such
-      "-gnatwJ",     -- suppress warnings on obsolescent features, esp. parentheses in aggregates
-      "-gnat2022"   -- enable Ada 2022
+     ("-gnatyO",    -- check that overriding subprograms are explicitly marked as such
+      "-gnatwJ"    -- suppress warnings on obsolescent features, esp. parentheses in aggregates
+      --  "-gnat2022"   -- enable Ada 2022
       );
 
    Debug_Switches := ("-g",
@@ -59,9 +59,5 @@ project Test_ByteBuffers is
    package Builder is
       for Switches ("Ada") use ("-g");
    end Builder;
-
-   package Prove is
-      for Proof_Switches ("Ada") use ("--level=2", "--checks-as-errors", "--proof-warnings");
-   end Prove;
 
 end Test_ByteBuffers;

@@ -26,7 +26,8 @@ is
 
    type ByteBuffer (Capacity : NonZero_Index) is private with
      Default_Initial_Condition =>
-       Position (ByteBuffer) = 0 and
+       Position (ByteBuffer) = 0 and then
+       High_Water_Mark (ByteBuffer) = 0 and then
        Remaining (ByteBuffer) = Capacity;
 
    function Remaining (This : ByteBuffer) return Index;
@@ -38,7 +39,7 @@ is
    function High_Water_Mark (This : ByteBuffer) return Index;
    --  Returns the number of data bytes currently written into This buffer.
    --  This value is never decremented by a Get_* routine, and is only set
-   --  back to 0 by a call to Reset.
+   --  back to zero by a call to Reset.
 
    procedure Rewind (This : in out ByteBuffer) with
      Post => Position (This) = 0                                 and then
@@ -52,16 +53,17 @@ is
      Post => Position (This) = 0 and
              High_Water_Mark (This) = 0;
 
-   Byte_Size    : constant := 1;  -- bytes
-   Boolean_Size : constant := 1;  -- bytes
-   Int16_Size   : constant := 2;  -- bytes
-   UInt16_Size  : constant := 2;  -- bytes
-   Int32_Size   : constant := 4;  -- bytes
-   UInt32_Size  : constant := 4;  -- bytes
-   Int64_Size   : constant := 8;  -- bytes
-   UInt64_Size  : constant := 8;  -- bytes
-   Real32_Size  : constant := 4;  -- bytes
-   Real64_Size  : constant := 8;  -- bytes
+   Byte_Size     : constant := 1;  -- bytes
+   Boolean_Size  : constant := 1;  -- bytes
+   Int16_Size    : constant := 2;  -- bytes
+   UInt16_Size   : constant := 2;  -- bytes
+   Int32_Size    : constant := 4;  -- bytes
+   UInt32_Size   : constant := 4;  -- bytes
+   Int64_Size    : constant := 8;  -- bytes
+   UInt64_Size   : constant := 8;  -- bytes
+   Real32_Size   : constant := 4;  -- bytes
+   Real64_Size   : constant := 8;  -- bytes
+   Checksum_Size : constant := 4;  -- bytes
 
    Max_String_Length : constant := UInt16'Last; -- ie, 65_535
    --  Like the C++ version, this is as large as a serialized (stored) string
@@ -74,8 +76,7 @@ is
    --  the length is zero.
 
    procedure Get_Byte (This : in out ByteBuffer;  Value : out Byte) with
-     Pre  => Remaining (This) >= Byte_Size and then
-             Position (This) <= High_Water_Mark (This) - Byte_Size,
+     Pre  => Position (This) <= High_Water_Mark (This) - Byte_Size,
      Post => Position (This) = Position (This)'Old + Byte_Size   and then
              High_Water_Mark (This) = High_Water_Mark (This)'Old and then
              Remaining (This) + Byte_Size = Remaining (This)'Old and then
@@ -83,8 +84,7 @@ is
              Prior_Content_Unchanged (This, This'Old);
 
    procedure Get_Boolean (This : in out ByteBuffer;  Value : out Boolean) with
-     Pre  => Remaining (This) >= Boolean_Size and then
-             Position (This) <= High_Water_Mark (This) - Boolean_Size,
+     Pre  => Position (This) <= High_Water_Mark (This) - Boolean_Size,
      Post => Position (This) = Position (This)'Old + Boolean_Size   and then
              High_Water_Mark (This) = High_Water_Mark (This)'Old    and then
              Remaining (This) + Boolean_Size = Remaining (This)'Old and then
@@ -92,8 +92,7 @@ is
              Prior_Content_Unchanged (This, This'Old);
 
    procedure Get_Int16 (This : in out ByteBuffer;  Value : out Int16) with
-     Pre  => Remaining (This) >= Int16_Size and then
-             Position (This) <= High_Water_Mark (This) - Int16_Size,
+     Pre  => Position (This) <= High_Water_Mark (This) - Int16_Size,
      Post => Position (This) = Position (This)'Old + Int16_Size   and then
              High_Water_Mark (This) = High_Water_Mark (This)'Old  and then
              Remaining (This) + Int16_Size = Remaining (This)'Old and then
@@ -101,8 +100,7 @@ is
              Prior_Content_Unchanged (This, This'Old);
 
    procedure Get_UInt16 (This : in out ByteBuffer;  Value : out UInt16) with
-     Pre  => Remaining (This) >= UInt16_Size and then
-             Position (This) <= High_Water_Mark (This) - UInt16_Size,
+     Pre  => Position (This) <= High_Water_Mark (This) - UInt16_Size,
      Post => Position (This) = Position (This)'Old + UInt16_Size   and then
              High_Water_Mark (This) = High_Water_Mark (This)'Old   and then
              Remaining (This) + UInt16_Size = Remaining (This)'Old and then
@@ -110,8 +108,7 @@ is
              Prior_Content_Unchanged (This, This'Old);
 
    procedure Get_Int32 (This : in out ByteBuffer;  Value : out Int32) with
-     Pre  => Remaining (This) >= Int32_Size and then
-             Position (This) <= High_Water_Mark (This) - Int32_Size,
+     Pre  => Position (This) <= High_Water_Mark (This) - Int32_Size,
      Post => Position (This) = Position (This)'Old + Int32_Size   and then
              High_Water_Mark (This) = High_Water_Mark (This)'Old  and then
              Remaining (This) + Int32_Size = Remaining (This)'Old and then
@@ -123,7 +120,7 @@ is
       Value : out UInt32;
       First : Index)
    with
-     Pre  => First <= This.Capacity - UInt32_Size - 1 and then
+     Pre  => First <= This.Capacity - (UInt32_Size - 1) and then
              First + UInt32_Size - 1 <= High_Water_Mark (This) - 1,
      Post => Position (This) = Position (This)'Old               and then
              High_Water_Mark (This) = High_Water_Mark (This)'Old and then
@@ -134,8 +131,7 @@ is
    --  at absolute index First (rather than from This.Position)
 
    procedure Get_UInt32 (This : in out ByteBuffer;  Value : out UInt32) with
-     Pre  => Remaining (This) >= UInt32_Size and then
-             Position (This) <= High_Water_Mark (This) - UInt32_Size,
+     Pre  => Position (This) <= High_Water_Mark (This) - UInt32_Size,
      Post => Position (This) = Position (This)'Old + UInt32_Size   and then
              High_Water_Mark (This) = High_Water_Mark (This)'Old    and then
              Remaining (This) + UInt32_Size = Remaining (This)'Old and then
@@ -143,8 +139,7 @@ is
              Prior_Content_Unchanged (This, This'Old);
 
    procedure Get_Int64  (This : in out ByteBuffer;  Value : out Int64) with
-     Pre  => Remaining (This) >= Int64_Size and then
-             Position (This) <= High_Water_Mark (This) - Int64_Size,
+     Pre  => Position (This) <= High_Water_Mark (This) - Int64_Size,
      Post => Position (This) = Position (This)'Old + Int64_Size   and then
              High_Water_Mark (This) = High_Water_Mark (This)'Old   and then
              Remaining (This) + Int64_Size = Remaining (This)'Old and then
@@ -152,8 +147,7 @@ is
              Prior_Content_Unchanged (This, This'Old);
 
    procedure Get_UInt64 (This : in out ByteBuffer;  Value : out UInt64) with
-     Pre  => Remaining (This) >= UInt64_Size and then
-             Position (This) <= High_Water_Mark (This) - UInt64_Size,
+     Pre  => Position (This) <= High_Water_Mark (This) - UInt64_Size,
      Post => Position (This) = Position (This)'Old + UInt64_Size   and then
              High_Water_Mark (This) = High_Water_Mark (This)'Old   and then
              Remaining (This) + UInt64_Size = Remaining (This)'Old and then
@@ -161,8 +155,7 @@ is
              Prior_Content_Unchanged (This, This'Old);
 
    procedure Get_Real32 (This : in out ByteBuffer;  Value : out Real32) with
-     Pre  => Remaining (This) >= Real32_Size and then
-             Position (This) <= High_Water_Mark (This) - Real32_Size,
+     Pre  => Position (This) <= High_Water_Mark (This) - Real32_Size,
      Post => Position (This) = Position (This)'Old + Real32_Size   and then
              High_Water_Mark (This) = High_Water_Mark (This)'Old    and then
              Remaining (This) + Real32_Size = Remaining (This)'Old and then
@@ -170,8 +163,7 @@ is
              Prior_Content_Unchanged (This, This'Old);
 
    procedure Get_Real64 (This : in out ByteBuffer;  Value : out Real64) with
-     Pre  => Remaining (This) >= Real64_Size and then
-             Position (This) <= High_Water_Mark (This) - Real64_Size,
+     Pre  => Position (This) <= High_Water_Mark (This) - Real64_Size,
      Post => Position (This) = Position (This)'Old + Real64_Size   and then
              High_Water_Mark (This) = High_Water_Mark (This)'Old    and then
              Remaining (This) + Real64_Size = Remaining (This)'Old and then
@@ -190,7 +182,6 @@ is
        Value'First  in Positive               and then
        Value'Last   in Positive               and then
        Value'Length in 1 .. Max_String_Length and then
-       Remaining (This) >= Stored_Length_Size and then
        Position (This) <= High_Water_Mark (This) - Stored_Length_Size,
        --  The string content is preceded in the buffer by a two-byte length,
        --  even when the string length is zero (ie when the string is empty).
@@ -232,8 +223,7 @@ is
       Value         : out Unbounded_String;
       Stored_Length : out UInt32)
    with
-     Pre  => Remaining (This) >= Stored_Length_Size  and then
-             Position (This) <= High_Water_Mark (This) - Stored_Length_Size,
+     Pre  => Position (This) <= High_Water_Mark (This) - Stored_Length_Size,
              --  The string content is preceded in the buffer by a two-byte length,
              --  even when the string length is zero (ie when the string is empty).
      Post => High_Water_Mark (This) = High_Water_Mark (This)'Old and then
@@ -254,101 +244,153 @@ is
    procedure Put_Byte (This : in out ByteBuffer;  Value : Byte) with
      Pre  => Remaining (This) >= Byte_Size and then
              High_Water_Mark (This) <= This.Capacity - Byte_Size,
-     Post => Position (This) = Position (This)'Old + Byte_Size               and then
-             High_Water_Mark (This) = High_Water_Mark (This)'Old + Byte_Size and then
-             Remaining (This) + Byte_Size = Remaining (This)'Old             and then
-             Raw_Bytes (This) (Position (This)'Old) = Value                  and then
-             Prior_Content_Unchanged (This, This'Old);
+     Post => Position (This) = Position (This)'Old + Byte_Size                 and then
+             --  High_Water_Mark is incremented iff new Position would exceed it
+             High_Water_Mark (This) >= High_Water_Mark (This)'Old              and then
+             High_Water_Mark (This) <= High_Water_Mark (This)'Old + Byte_Size  and then
+             --  We have the expected bytes remaining available
+             Remaining (This) = Remaining (This)'Old - Byte_Size               and then
+             --  The new value in the model is as expected ...
+             Raw_Bytes (This) (Position (This)'Old) = Value                    and then
+             --  Nothing else has changed
+             Prior_Content_Unchanged (This, Old_Value => This'Old);
 
    procedure Put_Boolean (This : in out ByteBuffer;  Value : Boolean) with
      Pre  => Remaining (This) >= Boolean_Size and then
              High_Water_Mark (This) <= This.Capacity - Boolean_Size,
-     Post => Position (This) = Position (This)'Old + Boolean_Size               and then
-             High_Water_Mark (This) = High_Water_Mark (This)'Old + Boolean_Size and then
-             Remaining (This) + Boolean_Size = Remaining (This)'Old             and then
-             Raw_Bytes (This) (Position (This)'Old) = Boolean'Pos (Value)       and then
-             Prior_Content_Unchanged (This, This'Old);
+     Post => Position (This) = Position (This)'Old + Boolean_Size                 and then
+             --  High_Water_Mark is incremented iff new Position would exceed it
+             High_Water_Mark (This) >= High_Water_Mark (This)'Old                 and then
+             High_Water_Mark (This) <= High_Water_Mark (This)'Old + Boolean_Size  and then
+             --  We have the expected bytes remaining available
+             Remaining (This) = Remaining (This)'Old - Boolean_Size               and then
+             --  The new value in the model is as expected ...
+             Raw_Bytes (This) (Position (This)'Old) = Boolean'Pos (Value)         and then
+             --  Nothing else has changed
+             Prior_Content_Unchanged (This, Old_Value => This'Old);
 
    procedure Put_Int16 (This : in out ByteBuffer;  Value : Int16) with
      Pre  => Remaining (This) >= Int16_Size and then
              High_Water_Mark (This) <= This.Capacity - Int16_Size,
-     Post => Position (This) = Position (This)'Old + Int16_Size               and then
-             High_Water_Mark (This) = High_Water_Mark (This)'Old + Int16_Size and then
-             Remaining (This) + Int16_Size = Remaining (This)'Old             and then
+     Post => Position (This) = Position (This)'Old + Int16_Size                 and then
+             --  High_Water_Mark is incremented iff new Position would exceed it
+             High_Water_Mark (This) >= High_Water_Mark (This)'Old               and then
+             High_Water_Mark (This) <= High_Water_Mark (This)'Old + Int16_Size  and then
+             --  We have the expected bytes remaining available
+             Remaining (This) = Remaining (This)'Old - Int16_Size               and then
+             --  The new value in the model is as expected ...
              Raw_Bytes (This) (Position (This)'Old .. Position (This) - 1) = As_Two_Bytes (Value) and then
-             Prior_Content_Unchanged (This, This'Old);
+             --  Nothing else has changed
+             Prior_Content_Unchanged (This, Old_Value => This'Old);
 
    procedure Put_UInt16 (This : in out ByteBuffer;  Value : UInt16) with
      Pre  => Remaining (This) >= UInt16_Size and then
              High_Water_Mark (This) <= This.Capacity - UInt16_Size,
-     Post => Position (This) = Position (This)'Old + UInt16_Size               and then
-             High_Water_Mark (This) = High_Water_Mark (This)'Old + UInt16_Size and then
-             Remaining (This) + UInt16_Size = Remaining (This)'Old             and then
+     Post => Position (This) = Position (This)'Old + UInt16_Size                 and then
+             --  High_Water_Mark is incremented iff new Position would exceed it
+             High_Water_Mark (This) >= High_Water_Mark (This)'Old                and then
+             High_Water_Mark (This) <= High_Water_Mark (This)'Old + UInt16_Size  and then
+             --  We have the expected bytes remaining available
+             Remaining (This) = Remaining (This)'Old - UInt16_Size               and then
+             --  The new value in the model is as expected ...
              Raw_Bytes (This) (Position (This)'Old .. Position (This) - 1) = As_Two_Bytes (Value) and then
-             Prior_Content_Unchanged (This, This'Old);
+             --  Nothing else has changed
+             Prior_Content_Unchanged (This, Old_Value => This'Old);
 
    procedure Put_Int32 (This : in out ByteBuffer;  Value : Int32) with
      Pre  => Remaining (This) >= Int32_Size and then
              High_Water_Mark (This) <= This.Capacity - Int32_Size,
-     Post => Position (This) = Position (This)'Old + Int32_Size               and then
-             High_Water_Mark (This) = High_Water_Mark (This)'Old + Int32_Size and then
-             Remaining (This) + Int32_Size = Remaining (This)'Old             and then
+     Post => Position (This) = Position (This)'Old + Int32_Size                 and then
+             --  High_Water_Mark is incremented iff new Position would exceed it
+             High_Water_Mark (This) >= High_Water_Mark (This)'Old               and then
+             High_Water_Mark (This) <= High_Water_Mark (This)'Old + Int32_Size  and then
+             --  We have the expected bytes remaining available
+             Remaining (This) = Remaining (This)'Old - Int32_Size               and then
+             --  The new value in the model is as expected ...
              Raw_Bytes (This) (Position (This)'Old .. Position (This) - 1) = As_Four_Bytes (Value) and then
-             Prior_Content_Unchanged (This, This'Old);
+             --  Nothing else has changed
+             Prior_Content_Unchanged (This, Old_Value => This'Old);
 
    procedure Put_UInt32 (This : in out ByteBuffer;  Value : UInt32) with
      Pre  => Remaining (This) >= UInt32_Size and then
              High_Water_Mark (This) <= This.Capacity - UInt32_Size,
-     Post => Position (This) = Position (This)'Old + UInt32_Size               and then
-             High_Water_Mark (This) = High_Water_Mark (This)'Old + UInt32_Size and then
-             Remaining (This) + UInt32_Size = Remaining (This)'Old             and then
+     Post => Position (This) = Position (This)'Old + UInt32_Size                 and then
+             --  High_Water_Mark is incremented iff new Position would exceed it
+             High_Water_Mark (This) >= High_Water_Mark (This)'Old                and then
+             High_Water_Mark (This) <= High_Water_Mark (This)'Old + UInt32_Size  and then
+             --  We have the expected bytes remaining available
+             Remaining (This) = Remaining (This)'Old - UInt32_Size               and then
+             --  The new value in the model is as expected ...
              Raw_Bytes (This) (Position (This)'Old .. Position (This) - 1) = As_Four_Bytes (Value) and then
-             Prior_Content_Unchanged (This, This'Old);
+             --  Nothing else has changed
+             Prior_Content_Unchanged (This, Old_Value => This'Old);
 
    procedure Put_Int64 (This : in out ByteBuffer;  Value : Int64) with
      Pre  => Remaining (This) >= Int64_Size and then
              High_Water_Mark (This) <= This.Capacity - Int64_Size,
-     Post => Position (This) = Position (This)'Old + Int64_Size               and then
-             High_Water_Mark (This) = High_Water_Mark (This)'Old + Int64_Size and then
-             Remaining (This) + Int64_Size = Remaining (This)'Old             and then
+     Post => Position (This) = Position (This)'Old + Int64_Size                 and then
+             --  High_Water_Mark is incremented iff new Position would exceed it
+             High_Water_Mark (This) >= High_Water_Mark (This)'Old               and then
+             High_Water_Mark (This) <= High_Water_Mark (This)'Old + Int64_Size  and then
+             --  We have the expected bytes remaining available
+             Remaining (This) = Remaining (This)'Old - Int64_Size               and then
+             --  The new value in the model is as expected ...
              Raw_Bytes (This) (Position (This)'Old .. Position (This) - 1) = As_Eight_Bytes (Value) and then
-             Prior_Content_Unchanged (This, This'Old);
+             --  Nothing else has changed
+             Prior_Content_Unchanged (This, Old_Value => This'Old);
 
    procedure Put_UInt64 (This : in out ByteBuffer;  Value : UInt64) with
      Pre  => Remaining (This) >= UInt64_Size and then
              High_Water_Mark (This) <= This.Capacity - UInt64_Size,
-     Post => Position (This) = Position (This)'Old + UInt64_Size               and then
-             High_Water_Mark (This) = High_Water_Mark (This)'Old + UInt64_Size and then
-             Remaining (This) + UInt64_Size = Remaining (This)'Old             and then
+     Post => Position (This) = Position (This)'Old + UInt64_Size                 and then
+             --  High_Water_Mark is incremented iff new Position would exceed it
+             High_Water_Mark (This) >= High_Water_Mark (This)'Old                and then
+             High_Water_Mark (This) <= High_Water_Mark (This)'Old + UInt64_Size  and then
+             --  We have the expected bytes remaining available
+             Remaining (This) = Remaining (This)'Old - UInt64_Size               and then
+             --  The new value in the model is as expected ...
              Raw_Bytes (This) (Position (This)'Old .. Position (This) - 1) = As_Eight_Bytes (Value) and then
-             Prior_Content_Unchanged (This, This'Old);
+             --  Nothing else has changed
+             Prior_Content_Unchanged (This, Old_Value => This'Old);
 
    procedure Put_Real32 (This : in out ByteBuffer;  Value : Real32) with
      Pre  => Remaining (This) >= Real32_Size and then
              High_Water_Mark (This) <= This.Capacity - Real32_Size,
-     Post => Position (This) = Position (This)'Old + Real32_Size               and then
-             High_Water_Mark (This) = High_Water_Mark (This)'Old + Real32_Size and then
-             Remaining (This) + Real32_Size = Remaining (This)'Old             and then
+     Post => Position (This) = Position (This)'Old + Real32_Size                 and then
+             --  High_Water_Mark is incremented iff new Position would exceed it
+             High_Water_Mark (This) >= High_Water_Mark (This)'Old                and then
+             High_Water_Mark (This) <= High_Water_Mark (This)'Old + Real32_Size  and then
+             --  We have the expected bytes remaining available
+             Remaining (This) = Remaining (This)'Old - Real32_Size               and then
+             --  The new value in the model is as expected ...
              Raw_Bytes (This) (Position (This)'Old .. Position (This) - 1) = As_Four_Bytes (Value) and then
-             Prior_Content_Unchanged (This, This'Old);
+             --  Nothing else has changed
+             Prior_Content_Unchanged (This, Old_Value => This'Old);
 
    procedure Put_Real64 (This : in out ByteBuffer;  Value : Real64) with
      Pre  => Remaining (This) >= Real64_Size and then
              High_Water_Mark (This) <= This.Capacity - Real64_Size,
-     Post => Position (This) = Position (This)'Old + Real64_Size               and then
-             High_Water_Mark (This) = High_Water_Mark (This)'Old + Real64_Size and then
-             Remaining (This) + Real64_Size = Remaining (This)'Old             and then
+     Post => Position (This) = Position (This)'Old + Real64_Size                 and then
+             --  High_Water_Mark is incremented iff new Position would exceed it
+             High_Water_Mark (This) >= High_Water_Mark (This)'Old                and then
+             High_Water_Mark (This) <= High_Water_Mark (This)'Old + Real64_Size  and then
+             --  We have the expected bytes remaining available
+             Remaining (This) = Remaining (This)'Old - Real64_Size               and then
+             --  The new value in the model is as expected ...
              Raw_Bytes (This) (Position (This)'Old .. Position (This) - 1) = As_Eight_Bytes (Value) and then
-             Prior_Content_Unchanged (This, This'Old);
+             --  Nothing else has changed
+             Prior_Content_Unchanged (This, Old_Value => This'Old);
 
    procedure Put_String (This : in out ByteBuffer;  Value : String) with
-     Pre  => Value'First = 1                      and then
-             Value'Length <= Max_String_Length    and then
+     Pre  => Value'First = 1                                       and then
+             Value'Length <= Max_String_Length                     and then
              Remaining (This) >= Value'Length + Stored_Length_Size and then
              High_Water_Mark (This) <= This.Capacity - Value'Length - Stored_Length_Size,
-     Post => Position (This) = Position (This)'Old + Value'Length + Stored_Length_Size               and then
-             High_Water_Mark (This) = High_Water_Mark (This)'Old + Value'Length + Stored_Length_Size and then
-             Remaining (This) = Remaining (This)'Old - Value'Length - Stored_Length_Size             and then
+     Post => Position (This) = Position (This)'Old + Value'Length + Stored_Length_Size                 and then
+             --  High_Water_Mark is incremented iff new Position would exceed it
+             High_Water_Mark (This) >= High_Water_Mark (This)'Old                                      and then
+             High_Water_Mark (This) <= High_Water_Mark (This)'Old + Value'Length + Stored_Length_Size  and then
+             Remaining (This) = Remaining (This)'Old - Value'Length - Stored_Length_Size               and then
              New_Content_Equal (This, Position (This)'Old + Stored_Length_Size, Value)                 and then
              Prior_Content_Unchanged (This, Old_Value => This'Old);
 
@@ -356,10 +398,12 @@ is
      Pre  => Length (Value) <= Max_String_Length and then
              Remaining (This) >= Index (Length (Value)) + Stored_Length_Size and then
              High_Water_Mark (This) <= This.Capacity - Index (Length (Value)) - Stored_Length_Size,
-     Post => Position (This) = Position (This)'Old + Index (Length (Value)) + Stored_Length_Size               and then
-             High_Water_Mark (This) = High_Water_Mark (This)'Old + Index (Length (Value)) + Stored_Length_Size and then
-             Remaining (This) = Remaining (This)'Old - Index (Length (Value)) - Stored_Length_Size             and then
-             New_Content_Equal (This, Position (This)'Old + Stored_Length_Size, To_String (Value))               and then
+     Post => Position (This) = Position (This)'Old + Index (Length (Value)) + Stored_Length_Size                and then
+             --  High_Water_Mark is incremented iff new Position would exceed it
+             High_Water_Mark (This) >= High_Water_Mark (This)'Old                                               and then
+             High_Water_Mark (This) <= High_Water_Mark (This)'Old + Index (Length (Value)) + Stored_Length_Size and then
+             Remaining (This) = Remaining (This)'Old - Index (Length (Value)) - Stored_Length_Size              and then
+             New_Content_Equal (This, Position (This)'Old + Stored_Length_Size, To_String (Value))              and then
              Prior_Content_Unchanged (This, Old_Value => This'Old);
 
    --  The following two Put_Raw_Bytes routines populate the ByteBuffer from
@@ -375,26 +419,31 @@ is
    procedure Put_Raw_Bytes (This : in out ByteBuffer; Value : String) with
      Pre  => Remaining (This) >= Value'Length  and then
              High_Water_Mark (This) + Value'Length <= This.Capacity,
-     Post => Position (This) = Position (This)'Old + Value'Length               and then
-             High_Water_Mark (This) = High_Water_Mark (This)'Old + Value'Length and then
-             Remaining (This) = Remaining (This)'Old - Value'Length             and then
-             New_Content_Equal (This, Position (This)'Old, Value)                 and then
+     Post => Position (This) = Position (This)'Old + Value'Length                and then
+             --  High_Water_Mark is incremented iff new Position would exceed it
+             High_Water_Mark (This) >= High_Water_Mark (This)'Old                and then
+             High_Water_Mark (This) <= High_Water_Mark (This)'Old + Value'Length and then
+             Remaining (This) = Remaining (This)'Old - Value'Length              and then
+             New_Content_Equal (This, Position (This)'Old, Value)                and then
              Prior_Content_Unchanged (This, Old_Value => This'Old);
 
-   type Byte_Array is array (Index range <>) of aliased Byte with
+   type Byte_Array is array (Index range <>) of Byte with
      Component_Size => Byte'Size;
 
    procedure Put_Raw_Bytes (This : in out ByteBuffer; Value : Byte_Array) with
      Pre  => Remaining (This) >= Value'Length and then
              High_Water_Mark (This) + Value'Length <= This.Capacity,
-     Post => Position (This) = Position (This)'Old + Value'Length               and then
-             High_Water_Mark (This) = High_Water_Mark (This)'Old + Value'Length and then
-             Remaining (This) = Remaining (This)'Old - Value'Length             and then
-             New_Content_Equal (This, Position (This)'Old, Value)                 and then
+     Post => Position (This) = Position (This)'Old + Value'Length                and then
+             --  High_Water_Mark is incremented iff new Position would exceed it
+             High_Water_Mark (This) >= High_Water_Mark (This)'Old                and then
+             High_Water_Mark (This) <= High_Water_Mark (This)'Old + Value'Length and then
+             Remaining (This) = Remaining (This)'Old - Value'Length              and then
+             New_Content_Equal (This, Position (This)'Old, Value)                and then
              Prior_Content_Unchanged (This, Old_Value => This'Old);
 
    function Raw_Bytes (This : ByteBuffer) return Byte_Array;
-   --  Returns the entire internal byte array content, up to High_Water_Mark (This)
+   --  Returns the entire internal byte array content, up to but not including
+   --  High_Water_Mark (This)
 
    function Raw_Bytes_As_String (This : ByteBuffer) return String with
      Pre  => High_Water_Mark (This) <= Index (Positive'Last),
@@ -403,9 +452,9 @@ is
    --  Returns the entire internal byte array content, as a String
 
    function Checksum (This : ByteBuffer;  Last : Index) return UInt32 with
-     Pre => Last <= This.Capacity;
+     Pre => Last <= High_Water_Mark (This) - 1;
    --  Computes the checksum of the slice of the internal byte array from the
-   --  first byte up to Last
+   --  first byte up to Last (inclusive). 
 
    subtype Two_Bytes   is Byte_Array (0 .. 1) with Object_Size => 16;
    subtype Four_Bytes  is Byte_Array (0 .. 3) with Object_Size => 32;
@@ -436,20 +485,17 @@ is
 
    function Prior_Content_Unchanged (New_Value, Old_Value : ByteBuffer) return Boolean with
      Ghost,
-     Pre  => New_Value.Capacity = Old_Value.Capacity;
+     Pre => High_Water_Mark (New_Value) >= High_Water_Mark (Old_Value);
    --  Returns whether the content of Old_Value was unchanged in New_Value
 
    function New_Content_Equal
      (This      : ByteBuffer;
       Start     : Index;
       Comparand : String)
-   return
-      Boolean
+   return Boolean
    with
      Ghost,
-     Pre => This.Capacity >= Comparand'Length      and then
-            Start <= Index'Last - Comparand'Length and then
-            Start <= This.Capacity - Comparand'Length;
+     Pre => Start <= High_Water_Mark (This) - Comparand'Length;
    --  Returns whether the slice of This, starting at Start, equals the
    --  Comparand of type String
 
@@ -457,15 +503,10 @@ is
      (This      : ByteBuffer;
       Start     : Index;
       Comparand : Byte_Array)
-   return
-      Boolean
+   return Boolean
    with
      Ghost,
-     Pre => Comparand'Length <= Position (This)         and then
-            This.Capacity >= Comparand'Length           and then
-            Start <= Index'Last - Comparand'Length      and then
-            Start <= Position (This) - Comparand'Length and then
-            Start <= This.Capacity - Comparand'Length;
+     Pre => Start <= High_Water_Mark (This) - Comparand'Length;
    --  Returns whether the slice of This, starting at Start, equals the
    --  Comparand of type Byte_Array
 
@@ -477,21 +518,30 @@ is
 
 private
 
+   type Byte_Data is array (Index range <>) of Byte with
+     Component_Size => Byte'Size,
+     Relaxed_Initialization;
+
    type ByteBuffer (Capacity : NonZero_Index) is record
-      Content           : Byte_Array (0 .. Capacity) := (others => 0);
+      Content           : Byte_Data (0 .. Capacity);
       Position          : Index := 0;
       Highest_Write_Pos : Index := 0;
    end record with
-      Predicate => Position <= Capacity          and then
-                   Highest_Write_Pos <= Capacity and then
-                   Position <= Highest_Write_Pos;
+      Type_Invariant =>
+        Highest_Write_Pos <= Capacity and then
+        Position <= Highest_Write_Pos and then
+        (for all K in 0 .. Highest_Write_Pos - 1 => Content (K)'Initialized);
+   pragma Annotate (GNATProve,
+                    False_Positive,
+                    "type ""ByteBuffer"" is not fully initialized",
+                    "bogus interaction between DIC and Relaxed_Init");
 
    ---------------
    -- Raw_Bytes --
    ---------------
 
    function Raw_Bytes (This : ByteBuffer) return Byte_Array is
-      (This.Content (0 .. This.Highest_Write_Pos - 1));
+      (Byte_Array (This.Content (0 .. This.Highest_Write_Pos - 1)));
 
    ---------------
    -- Remaining --
@@ -653,13 +703,13 @@ private
    -- As_Two_Bytes --
    ------------------
 
-   pragma Warnings (Off, "Unreachable branch");
+   --  pragma Warnings (Off, "Unreachable branch");
    function As_Two_Bytes (Value : Int16) return Two_Bytes is
      (if Standard'Default_Scalar_Storage_Order /= High_Order_First then -- not a Big Endian machine
         To_Two_Bytes (Swapped (Value))
       else
         To_Two_Bytes (Value));
-   pragma Warnings (On, "Unreachable branch");
+   --  pragma Warnings (On, "Unreachable branch");
 
    ------------------
    -- As_Two_Bytes --
@@ -766,7 +816,7 @@ private
    is
      (if Comparand'Length > 0 then
        (for all K in 1 .. Comparand'Length =>
-          This.Content (Start + Index (K) - 1) = Character'Pos (Comparand (Comparand'First - 1 + K))));
+           This.Content (Start + Index (K) - 1) = Character'Pos (Comparand (Comparand'First - 1 + K))));
 
    -----------------------
    -- New_Content_Equal --
@@ -780,7 +830,7 @@ private
       Boolean
    is
      (if Comparand'Length > 0 then
-         This.Content (Start .. Start + Comparand'Length - 1) = Comparand);
+         Byte_Array (This.Content (Start .. Start + Comparand'Length - 1)) = Comparand);
 
    -----------
    -- Equal --

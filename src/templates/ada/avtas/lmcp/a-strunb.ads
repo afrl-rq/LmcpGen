@@ -83,10 +83,10 @@ private with System.Atomic_Counters;
 private with Ada.Strings.Text_Buffers;
 
 package Ada.Strings.Unbounded with
-  Initial_Condition => Length (Null_Unbounded_String) = 0
+  Initial_Condition => Length (Null_Unbounded_String) = 0,
+  Always_Terminates
 is
    pragma Preelaborate;
-   pragma Annotate (GNATprove, Always_Return, Unbounded);
    pragma Unevaluated_Use_Of_Old (Allow);
 
    type Unbounded_String is private with

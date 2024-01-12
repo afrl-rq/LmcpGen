@@ -14,6 +14,7 @@ is
       These_Bytes  : Bytes)
    with
      Ghost,
+     Always_Terminates,
      Post => These_Bytes = To_Bytes (This_Numeric)   and  -- this conversion
              To_Bytes (This_Numeric) = These_Bytes   and  -- and the other order too
              This_Numeric = To_Numeric (These_Bytes) and  -- and this conversion

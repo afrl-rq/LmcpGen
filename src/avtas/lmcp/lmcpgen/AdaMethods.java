@@ -943,10 +943,10 @@ public class AdaMethods {
             String fieldname = getDeconflictedName(st.fields[i].name);
             switch (getAdaTypeCategory(infos,st.fields[i])) {
                 case SINGLE_PRIMITIVE:
-                        str += ws + "   Buffer.Put_" + getAdaPrimativeType(infos, st.fields[i]) + "(This." + fieldname + ");\n";
+                        str += ws + "   Put_" + getAdaPrimativeType(infos, st.fields[i]) + "(Buffer, This." + fieldname + ");\n";
                     break;
                 case SINGLE_ENUM:
-                    str += ws + "   Buffer.Put_Int32(toInt32(This." + fieldname + "));\n";
+                    str += ws + "   Put_Int32(Buffer, toInt32(This." + fieldname + "));\n";
                     break;
                 case SINGLE_NODE_STRUCT:
                 case SINGLE_LEAF_STRUCT:
@@ -954,33 +954,33 @@ public class AdaMethods {
                     break;
                 case VECTOR_PRIMITIVE:
                     if (st.fields[i].isLargeArray) {
-                        str += ws + "   Buffer.Put_UInt32(UInt32(This." + fieldname + ".Length));\n";
+                        str += ws + "   Put_UInt32(Buffer, UInt32(This." + fieldname + ".Length));\n";
                     }
                     else {
-                        str += ws + "   Buffer.Put_UInt16(UInt16(This." + fieldname + ".Length));\n";
+                        str += ws + "   Put_UInt16(Buffer, UInt16(This." + fieldname + ".Length));\n";
                     }
                     str += ws + "   for i of This." + fieldname + ".all loop\n";
-                    str += ws + "      Buffer.Put_" + getAdaPrimativeType(infos, st.fields[i]) + "(i);\n";
+                    str += ws + "      Put_" + getAdaPrimativeType(infos, st.fields[i]) + "(Buffer, i);\n";
                     str += ws + "   end loop;\n";
                     break;
                 case VECTOR_ENUM:
                     if (st.fields[i].isLargeArray) {
-                        str += ws + "   Buffer.Put_UInt32(UInt32(This." + fieldname + ".Length));\n";
+                        str += ws + "   Put_UInt32(Buffer, UInt32(This." + fieldname + ".Length));\n";
                     }
                     else {
-                        str += ws + "   Buffer.Put_UInt16(UInt16(This." + fieldname + ".Length));\n";
+                        str += ws + "   Put_UInt16(Buffer, UInt16(This." + fieldname + ".Length));\n";
                     }
                     str += ws + "   for i of This." + fieldname + ".all loop\n";
-                    str += ws + "      Buffer.Put_Int32(toInt32(i));\n";
+                    str += ws + "      Put_Int32(Buffer, toInt32(i));\n";
                     str += ws + "   end loop;\n";
                     break;
                 case VECTOR_NODE_STRUCT:
                 case VECTOR_LEAF_STRUCT:
                     if (st.fields[i].isLargeArray) {
-                        str += ws + "   Buffer.Put_UInt32(UInt32(This." + fieldname + ".Length));\n";
+                        str += ws + "   Put_UInt32(Buffer, UInt32(This." + fieldname + ".Length));\n";
                     }
                     else {
-                        str += ws + "   Buffer.Put_UInt16(UInt16(This." + fieldname + ".Length));\n";
+                        str += ws + "   Put_UInt16(Buffer, UInt16(This." + fieldname + ".Length));\n";
                     }
                     str += ws + "   for i of This." + fieldname + ".all loop\n";
                     str += ws + "      AVTAS.LMCP.Factory.putObject(AVTAS.LMCP.Object.Object_Any(i), Buffer);\n";
@@ -989,13 +989,13 @@ public class AdaMethods {
                 case FIXED_ARRAY_PRIMITIVE:
                     //str += ws + "   Put_UInt32(UInt32(This." + fieldname + "'Length), Buffer);\n";
                     str += ws + "   for i of This." + fieldname + ".all loop\n";
-                    str += ws + "      Buffer.Put_" + getAdaPrimativeType(infos, st.fields[i]) + "(i);\n";
+                    str += ws + "      Put_" + getAdaPrimativeType(infos, st.fields[i]) + "(Buffer, i);\n";
                     str += ws + "   end loop;\n";
                     break;
                 case FIXED_ARRAY_ENUM:
                     //str += ws + "   Put_UInt32(UInt32(This." + fieldname + "'Length), Buffer);\n";
                     str += ws + "   for i of This." + fieldname + ".all loop\n";
-                    str += ws + "      Buffer.Put_Int32(toInt32(i));\n";
+                    str += ws + "      Put_Int32(Buffer, toInt32(i));\n";
                     str += ws + "   end loop;\n";
                     break;
                 case FIXED_ARRAY_NODE_STRUCT:
@@ -1029,17 +1029,17 @@ public class AdaMethods {
                         str += ws + "   declare\n";
                         str += ws + "      Unused : UInt32;\n";
                         str += ws + "   begin\n";
-                        str += ws + "      Buffer.Get_Unbounded_String (This." + fieldname + ", Unused);\n";
+                        str += ws + "      Get_Unbounded_String (Buffer, This." + fieldname + ", Unused);\n";
                         str += ws + "   end;\n";
                     } else {
-                        str += ws + "   Buffer.Get_" + getAdaPrimativeType(infos, st.fields[i]) + "(This." + fieldname + ");\n";
+                        str += ws + "   Get_" + getAdaPrimativeType(infos, st.fields[i]) + "(Buffer, This." + fieldname + ");\n";
                     }
                     break;
                 case SINGLE_ENUM:
                     str += ws + "   declare\n";
                     str += ws + "      i32 : Int32;\n";
                     str += ws + "   begin\n";
-                    str += ws + "      Buffer.Get_Int32(i32);\n";
+                    str += ws + "      Get_Int32(Buffer, i32);\n";
                     str += ws + "      This." + fieldname + " := toEnum(i32);\n";
                     str += ws + "   end;\n";
                     break;
@@ -1054,11 +1054,11 @@ public class AdaMethods {
                     str += ws + "      msgType : UInt32;\n";
                     str += ws + "      version : UInt16;\n";
                     str += ws + "   begin\n";
-                    str += ws + "      Buffer.Get_Boolean(fieldExists);\n";
+                    str += ws + "      Get_Boolean(Buffer, fieldExists);\n";
                     str += ws + "      if fieldExists then\n";
-                    str += ws + "         Buffer.Get_Int64(seriesId);\n";
-                    str += ws + "         Buffer.Get_UInt32(msgType);\n";
-                    str += ws + "         Buffer.Get_UInt16(version);\n";
+                    str += ws + "         Get_Int64(Buffer, seriesId);\n";
+                    str += ws + "         Get_UInt32(Buffer, msgType);\n";
+                    str += ws + "         Get_UInt16(Buffer, version);\n";
                     str += ws + "         " + component_name + " := " + fieldtype + "(AVTAS.LMCP.Factory.createObject(seriesId, msgType, version));\n";
                     str += ws + "         " + component_name + ".Unpack (Buffer);\n";
                     str += ws + "      end if;\n";
@@ -1070,16 +1070,16 @@ public class AdaMethods {
                     if (st.fields[i].isLargeArray) {
                         str += ws + "      length : UInt32;\n";
                         str += ws + "   begin\n";
-                        str += ws + "      Buffer.Get_UInt32(length);\n";
+                        str += ws + "      Get_UInt32(Buffer, length);\n";
                     }
                     else {
                         str += ws + "      length : UInt16;\n";
                         str += ws + "   begin\n";
-                        str += ws + "      Buffer.Get_UInt16(length);\n";
+                        str += ws + "      Get_UInt16(Buffer, length);\n";
                     }
                     str += ws + "      This.get" + fieldname + ".Clear;  -- delete old content\n";
                     str += ws + "      for i in 1 .. length loop\n";
-                    str += ws + "         Buffer.Get_" + getAdaPrimativeType(infos, st.fields[i]) + "(item);\n";
+                    str += ws + "         Get_" + getAdaPrimativeType(infos, st.fields[i]) + "(Buffer, item);\n";
                     str += ws + "         This.get" + fieldname + ".Append(item);\n";
                     str += ws + "      end loop;\n";
                     str += ws + "   end;\n";
@@ -1090,16 +1090,16 @@ public class AdaMethods {
                     if (st.fields[i].isLargeArray) {
                         str += ws + "      length : UInt32;\n";
                         str += ws + "   begin\n";
-                        str += ws + "      Buffer.Get_UInt32(length);\n";
+                        str += ws + "      Get_UInt32(Buffer, length);\n";
                     }
                     else {
                         str += ws + "      length : UInt16;\n";
                         str += ws + "   begin\n";
-                        str += ws + "      Buffer.Get_UInt16(length);\n";
+                        str += ws + "      Get_UInt16(Buffer, length);\n";
                     }
                     str += ws + "      This.get" + fieldname + ".Clear;  -- delete old content\n";
                     str += ws + "      for i in 1 .. length loop\n";
-                    str += ws + "         Buffer.Get_Int32(item);\n";
+                    str += ws + "         Get_Int32(Buffer, item);\n";
                     str += ws + "         This.get" + fieldname + ".Append(ToEnum(item));\n";
                     str += ws + "      end loop;\n";
                     str += ws + "   end;\n";
@@ -1117,14 +1117,14 @@ public class AdaMethods {
                     str += ws + "      item : " + fieldType + ";\n";
                     str += ws + "      length : " + lengthType + ";\n";
                     str += ws + "   begin\n";
-                    str += ws + "      Buffer.Get_" + lengthType + "(length);\n";
+                    str += ws + "      Get_" + lengthType + "(Buffer, length);\n";
                     str += ws + "      This.get" + fieldname + ".Clear;  -- delete old content\n";
                     str += ws + "      for i in 1 .. length loop\n";
-                    str += ws + "         Buffer.Get_Boolean(fieldExists);\n";
+                    str += ws + "         Get_Boolean(Buffer, fieldExists);\n";
                     str += ws + "         if fieldExists then\n";
-                    str += ws + "            Buffer.Get_Int64(seriesId);\n";
-                    str += ws + "            Buffer.Get_UInt32(msgType);\n";
-                    str += ws + "            Buffer.Get_UInt16(version);\n";
+                    str += ws + "            Get_Int64(Buffer, seriesId);\n";
+                    str += ws + "            Get_UInt32(Buffer, msgType);\n";
+                    str += ws + "            Get_UInt16(Buffer, version);\n";
                     str += ws + "            item := " + fieldType + "(AVTAS.LMCP.Factory.createObject(seriesId, msgType, version));\n";
                     str += ws + "            item.unpack(Buffer);\n";
                     str += ws + "         end if;\n";
@@ -1137,7 +1137,7 @@ public class AdaMethods {
                     str += ws + "      item : " + getAdaPrimativeType(infos, st.fields[i]) + ";\n";
                     str += ws + "   begin\n";
                     str += ws + "      for i in This.get" + fieldname + "\'Range loop\n";
-                    str += ws + "         Buffer.Get_" + getAdaPrimativeType(infos, st.fields[i]) + "(item);\n";
+                    str += ws + "         Get_" + getAdaPrimativeType(infos, st.fields[i]) + "(Buffer, item);\n";
                     str += ws + "         This.get" + fieldname + "(i) := item;\n";
                     str += ws + "      end loop;\n";
                     str += ws + "   end;\n";
@@ -1147,7 +1147,7 @@ public class AdaMethods {
                     str += ws + "      item : Int32;\n";
                     str += ws + "   begin\n";
                     str += ws + "      for i in This.get" + fieldname + "\'Range loop\n";
-                    str += ws + "         Buffer.Get_Int32(item);\n";
+                    str += ws + "         Get_Int32(Buffer, item);\n";
                     str += ws + "         This.get" + fieldname + "(i) := toEnum(item);\n";
                     str += ws + "      end loop;\n";
                     str += ws + "   end;\n";
@@ -1165,11 +1165,11 @@ public class AdaMethods {
                     str += ws + "      item : " + fieldType + ";\n";
                     str += ws + "   begin\n";
                     str += ws + "      for i in This.get" + fieldname + "\'Range loop\n";
-                    str += ws + "         Buffer.Get_Boolean(fieldExists);\n";
+                    str += ws + "         Get_Boolean(Buffer, fieldExists);\n";
                     str += ws + "         if fieldExists then\n";
-                    str += ws + "            Buffer.Get_Int64(seriesId);\n";
-                    str += ws + "            Buffer.Get_UInt32(msgType);\n";
-                    str += ws + "            Buffer.Get_UInt16(version);\n";
+                    str += ws + "            Get_Int64(Buffer, seriesId);\n";
+                    str += ws + "            Get_UInt32(Buffer, msgType);\n";
+                    str += ws + "            Get_UInt16(Buffer, version);\n";
                     str += ws + "            item := " + fieldType + "(AVTAS.LMCP.Factory.createObject(seriesId, msgType, version));\n";
                     str += ws + "            item.unpack(Buffer);\n";
                     str += ws + "         else\n";

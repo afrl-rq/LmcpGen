@@ -44,9 +44,11 @@ is
    with
      Pre  => Remaining (This) >= From'Length  and then
              High_Water_Mark (This) + From'Length <= This.Capacity,
-     Post => Position (This) = Position (This)'Old + From'Length               and then
-             High_Water_Mark (This) = High_Water_Mark (This)'Old + From'Length and then
-             Remaining (This) = Remaining (This)'Old - From'Length             and then
+     Post => Position (This) = Position (This)'Old + From'Length                 and then
+             --  High_Water_Mark is incremented iff new Position would exceed it
+             High_Water_Mark (This) >= High_Water_Mark (This)'Old                and then
+             High_Water_Mark (This) <= High_Water_Mark (This)'Old + From'Length  and then
+             Remaining (This) = Remaining (This)'Old - From'Length               and then
              New_Content_Equal (This, Position (This)'Old, From)                 and then
              Prior_Content_Unchanged (This, Old_Value => This'Old),
      Inline;
@@ -58,7 +60,9 @@ is
      Pre  => Remaining (This) >= From'Length and then
              High_Water_Mark (This) + From'Length <= This.Capacity,
      Post => Position (This) = Position (This)'Old + From'Length                   and then
-             High_Water_Mark (This) = High_Water_Mark (This)'Old + From'Length     and then
+             --  High_Water_Mark is incremented iff new Position would exceed it
+             High_Water_Mark (This) >= High_Water_Mark (This)'Old                  and then
+             High_Water_Mark (This) <= High_Water_Mark (This)'Old + From'Length    and then
              Raw_Bytes (This) (Position (This)'Old .. Position (This) - 1) = From  and then
              Prior_Content_Unchanged (This, Old_Value => This'Old),
      Inline;

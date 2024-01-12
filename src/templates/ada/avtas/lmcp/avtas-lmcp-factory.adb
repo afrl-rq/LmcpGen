@@ -20,7 +20,7 @@ package body AVTAS.LMCP.Factory is
       -- add root object
       PutObject (RootObject, Buffer);
       -- add checksum if enabled
-      Put_UInt32 (Buffer, (if EnableChecksum then CalculatedChecksum (Buffer, Buffer.Capacity) else 0));
+      Put_UInt32 (Buffer, (if EnableChecksum then CalculatedChecksum (Buffer, High_Water_Mark (Buffer) - 1) else 0));
       return Buffer;
    end PackMessage;
 
@@ -117,7 +117,7 @@ package body AVTAS.LMCP.Factory is
    ------------------------
 
    function CalculatedChecksum (Buffer : in ByteBuffer; Size : Index) return UInt32 is
-     (Checksum (Buffer, Last => Size - 1));
+     (Checksum (Buffer, Last => Size));
 
    -------------------
    -- GetObjectSize --
