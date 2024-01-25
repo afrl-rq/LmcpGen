@@ -492,7 +492,7 @@ public class JuliaMethods {
     }
     
     public static String define_defaults(MDMInfo[] infos, MDMInfo info, final File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
-        String str = ws;
+        String str = "";
         
         List<FieldInfo> fields = getParentFields(infos, st.extends_name, st.extends_series);
         fields.addAll(Arrays.asList(st.fields));
@@ -577,12 +577,14 @@ public class JuliaMethods {
         if (fields.isEmpty()) {
             return "";
         }
+        ws = "    ";
+        String emptyws = "";
         
-        str += typeName(infos, info, outfile, st, en, ws) + "(;\n";
+        str += typeName(infos, info, outfile, st, en, emptyws) + "(;\n";
         str += define_defaults(infos, info, outfile, st, en, ws);
-        str += ") = " + series_name(infos, info, outfile, st, en, ws) + ".";
-        str += typeName(infos, info, outfile, st, en, ws);
-        str += "(" + list_vars(infos, info, outfile, st, en, ws) + ")";
+        str += ") = " + series_name(infos, info, outfile, st, en, emptyws) + ".";
+        str += typeName(infos, info, outfile, st, en, emptyws);
+        str += "(" + list_vars(infos, info, outfile, st, en, emptyws) + ")";
         
         return str;
     }
