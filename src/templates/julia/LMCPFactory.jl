@@ -95,9 +95,10 @@ function unpack_messages(msgs::String)
     return unpack_messages(bytes)
 end
 
-function to_xml(o::AbstractLmcpMessage)
+function to_xml(o::AbstractLmcpMessage; extraAttributes...)
     xdoc = LightXML.XMLDocument()
     xroot = LightXML.create_root(xdoc, lmcp_type(o))
+    LightXML.set_attributes(xroot, extraAttributes)
     xroot = _to_xml(xroot, o)
     ret = string(xdoc)
     LightXML.free(xdoc)
