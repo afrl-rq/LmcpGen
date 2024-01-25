@@ -30,8 +30,8 @@ mutable struct -<typeName>- <: Abstract-<typeName>-
 end
 
 
-#empty default constructor for ease of use if needed
--<define_defaults>-
+#kwarg constructor for ease of use if needed
+-<build_constructor>-
 
 
 full_lmcp_type_name(::Type{-<typeName>-}) = "-<full_datatype_name>-"

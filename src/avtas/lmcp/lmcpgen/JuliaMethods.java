@@ -291,15 +291,24 @@ public class JuliaMethods {
             String qualifier = f.isEnum ? f.seriesName + "." : "";
             if (f.isArray) {
                 //String qualifier = isTypePrimitive(f.type) ? "" : type + "Module.";
+                String qualifiedName = type;
+
                 if (f.isEnum) {
                     str += ws + name + "::Vector{" + qualifier + type + "Module." + type + "}";
+                    qualifiedName = qualifier + type + "Module." + type;
                 }
                 else if (f.isStruct){
                     type = f.seriesName + ".Abstract" + type;
                     str += ws + name + "::Vector{" + type + "}";
+                    qualifiedName = f.seriesName + "." + type;
+
                 }
                 else {
                     str += ws + name + "::Vector{" + type + "}";
+                }
+                if (f.length < 0) {
+                } else {
+                    String initializer = isTypePrimitive(f.type) ? "0" : "";
                 }
             }
             else if (f.isEnum) {
@@ -312,9 +321,15 @@ public class JuliaMethods {
                 }
                 str += ws + name + "::" + type;
             }
-            else 
-            {
+            else if (f.type.equalsIgnoreCase("string")) {
                 str += ws + name + "::" + type;
+            }
+            else {
+                str += ws + name + "::" + type;
+                String defaultVal = f.defaultVal;
+                if (defaultVal.isBlank()) {
+                    defaultVal = getDefaultValue(f.type);
+                }
             }
             str += "\n";
         }
@@ -482,53 +497,95 @@ public class JuliaMethods {
         List<FieldInfo> fields = getParentFields(infos, st.extends_name, st.extends_series);
         fields.addAll(Arrays.asList(st.fields));
         
-        if (fields.isEmpty()) {
-            return str;
-        }
-        
         for (FieldInfo f : fields) {
+            String name = f.name;
             String type = getJuliaType(f.type);
             String qualifier = f.isEnum ? f.seriesName + "." : "";
-            if (!f.isArray) {
-                if (f.type.equalsIgnoreCase("string")) {
-                    str += f.defaultVal.isBlank() ? "\"\"," : "\"" + f.defaultVal + "\", ";
-                }
-                else if (f.isStruct) {
-                    str += f.defaultVal.equalsIgnoreCase("null") || f.isOptional ? "nothing, " : f.seriesName + "." + f.type + "(),";
-                }
-                else if (f.isEnum) {
-                    str += qualifier + f.type + "Module." + f.defaultVal + ", ";
-                }
-                else {
-                    String defaultVal = f.defaultVal;
-                    if (defaultVal.isBlank()) {
-                        defaultVal = getDefaultValue(f.type);
-                    }
-                    str += defaultVal + ", ";
-                }
-            
-            // variable length array
-            } else  {
+            if (f.isArray) {
+                //String qualifier = isTypePrimitive(f.type) ? "" : type + "Module.";
                 String qualifiedName = type;
+
                 if (f.isEnum) {
+                    str += ws + name + "::Vector{" + qualifier + type + "Module." + type + "}";
                     qualifiedName = qualifier + type + "Module." + type;
                 }
-                else if (f.isStruct) {
+                else if (f.isStruct){
+                    type = f.seriesName + ".Abstract" + type;
+                    str += ws + name + "::Vector{" + type + "}";
                     qualifiedName = f.seriesName + "." + type;
+
+                }
+                else {
+                    str += ws + name + "::Vector{" + type + "}";
                 }
                 if (f.length < 0) {
-                    str += "Vector{" + qualifiedName + "}(), ";
+                    str += " = Vector{" + qualifiedName + "}()";
                 } else {
                     String initializer = isTypePrimitive(f.type) ? "0" : "";
-                    str += String.format("[%s(%s) for x in 1:%s], ", qualifiedName, initializer, f.length);
-                    //str += "Vector{" + qualifiedName + "}(undef, "+ f.length + "), ";
+                    str += String.format(" = [%s(%s) for x in 1:%s]", qualifiedName, initializer, f.length);
                 }
             }
+            else if (f.isEnum) {
+                str += ws + name + "::" + qualifier + type + "Module." + type;
+                str += " = " + qualifier + f.type + "Module." + f.defaultVal;
+            }
+            else if (f.isStruct) {
+                type = f.seriesName + ".Abstract" + type;
+                if (f.isOptional || f.defaultVal.equalsIgnoreCase("null")) {
+                    type = "Union{" + type + ", Nothing}";
+                }
+                str += ws + name + "::" + type;
+                str += " = " + (f.defaultVal.equalsIgnoreCase("null") || f.isOptional ? "nothing " : f.seriesName + "." + f.type + "()");
+            }
+            else if (f.type.equalsIgnoreCase("string")) {
+                str += ws + name + "::" + type;
+                str += " = " + (f.defaultVal.isBlank() ? "\"\"" : "\"" + f.defaultVal + "\"");
+            }
+            else {
+                str += ws + name + "::" + type;
+                String defaultVal = f.defaultVal;
+                if (defaultVal.isBlank()) {
+                    defaultVal = getDefaultValue(f.type);
+                }
+                str += " = " + type + "(" + defaultVal + ")";
+            }
+            str += ",\n";
         }
-        str = String.format("%s() = %s(%s)", st.name, st.name, str);
         return str;
     }
     
+    public static String list_vars(MDMInfo[] infos, MDMInfo info, final File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        String str = ws;
+        
+        List<FieldInfo> fields = getParentFields(infos, st.extends_name, st.extends_series);
+        fields.addAll(Arrays.asList(st.fields));
+        
+        for (FieldInfo f : fields) {
+            str += f.name + ", ";
+        }
+        return str;    
+    }
+    
+    public static String build_constructor(MDMInfo[] infos, MDMInfo info, final File outfile, StructInfo st, EnumInfo en, String ws) throws Exception {
+        String str = ws;
+                
+        List<FieldInfo> fields = getParentFields(infos, st.extends_name, st.extends_series);
+        fields.addAll(Arrays.asList(st.fields));
+        
+        //This section is done in code for the below check. Otherwise we get 
+        //a redefinition and stack overflow
+        if (fields.isEmpty()) {
+            return "";
+        }
+        
+        str += typeName(infos, info, outfile, st, en, ws) + "(;\n";
+        str += define_defaults(infos, info, outfile, st, en, ws);
+        str += ") = " + series_name(infos, info, outfile, st, en, ws) + ".";
+        str += typeName(infos, info, outfile, st, en, ws);
+        str += "(" + list_vars(infos, info, outfile, st, en, ws) + ")";
+        
+        return str;
+    }
     private static boolean isTypePrimitive(String type) {
         return type.toLowerCase().matches("(bool)|(string)|(byte)|(char)|(real64)|(real32)|(int64)|(int32)|(int16)|(uint32)|(uint16)");
     }
