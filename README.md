@@ -41,6 +41,7 @@ specification of LMCP. Currently, *LmcpGen* creates libraries for the following 
 - C++
 - C#
 - Python
+- Julia
 
 Additionally, *LmcpGen* can create HTML documentation in the form of an easy-to-navigate webpage for viewing the
 messages described in source MDMs.
@@ -72,6 +73,7 @@ command line options are as follows:
  - `-cpp` Adds proper template and method name for C++ output. Note: creates c++11 compatible code.
  - `-cs` Adds proper template and method name for C# output.
  - `-py` Adds proper template and method name for Python output.
+ - `-jl` Adds proper template and method name for Julia output. 
  - `-xsd` Adds proper template and method name for XML schema output.
  - `-doc` Adds proper template and method name for documentation output.
  - `-dir <directory path>` path to the directory where files are to be written.
