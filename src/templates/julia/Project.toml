@@ -2,7 +2,7 @@ name = "LMCP"
 uuid = "5f2853af-5fcd-4df5-818b-ccf2a074bbd0"
 authors = ["Adam R Gerlach <adam.gerlach.1@us.af.mil>",
            "Colin Taylor <colin.taylor@parallaxresearch.org.>"]
-version = "0.1.0"
+version = "1.0.0"
 
 [deps]
 LightXML = "9c8b4983-aa76-5018-a973-4c85ecc9e179"
