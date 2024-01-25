@@ -1,5 +1,5 @@
 name = "LMCP"
-uuid = "5f2853af-5fcd-4df5-818b-ccf2a074bbd0"
+uuid = "8137e754-b8b5-4699-a81f-8f4ab81b79e2"
 authors = ["Adam R Gerlach <adam.gerlach.1@us.af.mil>",
            "Colin Taylor <colin.taylor@parallaxresearch.org.>"]
 version = "1.0.0"
