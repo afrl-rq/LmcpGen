@@ -1,0 +1,58 @@
+
+<html>
+    <head>
+        <title>LMCP / Julia Code Package Readme</title>
+    </head>
+    <body>
+        <h1>Using the LMCP Julia Code Package</h1>
+        <h3 align=center>Created on -<creation_date>-</h3>
+
+        <h2>Introduction</h2>
+
+        <P ALIGN=LEFT>
+            This document describes how to use Julia files generated for the
+            Lightweight Message Construction Protocol (LMCP) system. The Julia
+            source code is produced using the LmcpGen utility, part of the
+            LMCP package available from the AVTAS laboratory at AFRL.
+        </P>
+
+        <P ALIGN=LEFT>The LMCP Julia source package includes classes to handle
+            the creation, recognition, serialization, and de-serialization of
+            LMCP objects.  The source package contains two top-level directories.
+            The <code>LMCP</code> directory contains base classes from which all LMCP
+            classes are derived.  These files enable interface-style access to
+            LMCP objects regardless of the MDM namespace.  When implementing
+            tools to handle LMCP classes, it is recommended that one uses these
+            base-classes in methods. The <code>Test</code> directory contains basis
+            tests.
+        </P>
+
+        <H2 ALIGN=LEFT>Creating LMCP Objects</H2>
+
+        <P ALIGN=LEFT>Every LMCP struct listed in the MDM file has a
+            corresponding class found in the namespace directory.
+            These classes are based on <I>AbstractLmcpMessage</I> found in the AbstractLmcpMessage.jl file.
+            Enums are placed in submodules to avoid common namespace collisions. 
+            LMCP allows for subclassing of objects, however Julia does not allow subclassing concrete types.
+            Each concrete type has an abstract type it subclasses. and thosse abstract types properly follow the
+            subclassing defined in the MDM. We then add all fields of superclasses to stuctures as needed.
+        </P>
+
+        <H2 ALIGN=LEFT>Serializing</H2>
+
+        <P ALIGN=LEFT>LMCP-Julia allows serialization of objects.
+            Objects are serialized using the <code>pack()</code> method. calling
+            <code>pack_message()</code> will apply the necessary header and checksum for
+            transmission. <code>unpack_message()</code> can then be used to receive messages. The contruction of LMCP <I>messages</I> are
+            described next.
+        </P>
+
+        <H2 ALIGN=LEFT>Creating LMCP Messages</H2>
+
+        <P ALIGN=LEFT>Each MDM becomes a submodule under LMCP. Desires strucutre definitions  are then located under 
+            their respective submodule. Default constructores are provided for convenience for all messages. When
+            setting fields that are LMCP objects themselves, deepcopy should be used to avoid copy by reference.
+        </P>
+
+    </body>
+</html>

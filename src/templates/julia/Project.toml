@@ -1,0 +1,12 @@
+name = "LMCP"
+uuid = "8137e754-b8b5-4699-a81f-8f4ab81b79e2"
+authors = ["Adam R Gerlach <adam.gerlach.1@us.af.mil>",
+           "Colin Taylor <colin.taylor@parallaxresearch.org.>"]
+version = "1.0.0"
+
+[deps]
+LightXML = "9c8b4983-aa76-5018-a973-4c85ecc9e179"
+PrecompileTools = "aea7be01-6a6a-4083-8856-8a6e6704d82a"
+
+[compat]
+julia = "1.9"

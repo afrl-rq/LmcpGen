@@ -350,7 +350,7 @@ public class MDMReader {
             for (StructInfo s : info.structs) {
                 info.mdmDependencies.add(s.extends_series);
                 for (int i = 0; i < s.fields.length; i++) {
-                    if (s.fields[i].isStruct) {
+                    if (s.fields[i].isStruct || s.fields[i].isEnum) {
                         info.mdmDependencies.add(s.fields[i].seriesName);
                     }
                 }
