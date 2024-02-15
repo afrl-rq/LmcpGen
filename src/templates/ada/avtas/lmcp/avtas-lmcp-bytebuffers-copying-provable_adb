@@ -2,12 +2,14 @@ package body AVTAS.LMCP.ByteBuffers.Copying with
    SPARK_Mode
 is
 
+   package ASU renames Ada.Strings.Unbounded;
+
    ---------------------------
    -- Copy_Buffer_To_String --
    ---------------------------
 
    procedure Copy_Buffer_To_String
-     (This        : in out ByteBuffer'Class;
+     (This        : in out ByteBuffer;
       Length      : Index;
       Destination : in out String)
    is
@@ -17,8 +19,6 @@ is
          Destination (Destination'First + Integer (K)) := Character'Val (This.Content (This.Position));
 
          pragma Loop_Invariant (This.Position = This.Position'Loop_Entry + K);
-         pragma Loop_Invariant (This.Position <= This.Capacity - Length + K);
-         pragma Loop_Invariant (This.Position < This.Highest_Write_Pos);
          pragma Loop_Invariant
            (for all J in 0 .. K =>
               Destination (Destination'First + Integer (J)) = Character'Val (This.Content (Old_Pos + J)));
@@ -32,26 +32,22 @@ is
    -------------------------------------
 
    procedure Copy_Buffer_To_Unbounded_String
-     (This        : in out ByteBuffer'Class;
+     (This        : in out ByteBuffer;
       Length      : Index;
       Destination : out Unbounded_String)
    is
       Old_Pos : constant Index := Position (This) with Ghost;
    begin
       Destination := Null_Unbounded_String;
-      pragma Assume (Ada.Strings.Unbounded.Length (Destination) = 0);
+      pragma Assume (ASU.Length (Destination) = 0);
       for K in 0 .. Length - 1 loop
          Append (Destination, Character'Val (This.Content (This.Position)));
 
-         pragma Loop_Invariant (This.Position = Old_Pos + K);
-         pragma Loop_Invariant (This.Position <= This.Capacity - Length + K);
-         pragma Loop_Invariant (This.Position < This.Highest_Write_Pos);
-         pragma Loop_Invariant (Ada.Strings.Unbounded.Length (Destination) = Integer (K) + 1);
-         pragma Loop_Invariant (Ada.Strings.Unbounded.Length (Destination) < Natural'Last);
-         pragma Loop_Invariant (Ada.Strings.Unbounded.Length (Destination) <= Max_String_Length);
+         pragma Loop_Invariant (ASU.Length (Destination) = 1 + Integer (K));
          pragma Loop_Invariant
            (for all J in 0 .. K =>
               Element (Destination, 1 + Integer (J)) = Character'Val (This.Content (Old_Pos + J)));
+         pragma Loop_Invariant (This.Position = Old_Pos + K);
 
          This.Position := This.Position + 1;
       end loop;
@@ -62,29 +58,39 @@ is
    ---------------------------
 
    procedure Copy_String_To_Buffer
-     (This : in out ByteBuffer'Class;
+     (This : in out ByteBuffer;
       From : String)
    is
    begin
-      This.Highest_Write_Pos := This.Highest_Write_Pos + From'Length;
-      for J in Integer range 1 .. From'Length loop
-         This.Content (This.Position) := Character'Pos (From (From'First + (J - 1)));
+      for J in 0 .. From'Length - 1 loop
+         This.Content (This.Position) := Character'Pos (From (From'First + J));
          This.Position := This.Position + 1;
+         if This.Position > This.Highest_Write_Pos then
+            This.Highest_Write_Pos := This.Position;
+         end if;
 
-         pragma Loop_Invariant (This.Position = This.Position'Loop_Entry + Index (J));
-         pragma Loop_Invariant (This.Position <= This.Capacity - From'Length + Index (J));
+         pragma Loop_Invariant (This.Position = This.Position'Loop_Entry + Index (J) + 1);
+         pragma Loop_Invariant (This.Highest_Write_Pos = Index'Max (This.Highest_Write_Pos'Loop_Entry, This.Position));
 
-         --  all the new content assigned so far matches that slice of Value
+         --  no Content before the newly updated part has been changed
          pragma Loop_Invariant
-           (for all K in 1 .. J =>
-              This.Content (This.Position'Loop_Entry + Index (K) - 1) = Character'Pos (From (From'First + (K - 1))));
+           (for all K in 0 .. This.Position'Loop_Entry - 1 =>
+              This.Content (K) = This.Content'Loop_Entry (K));
 
-         --  no content before the newly inserted content has been changed
+         --  all Content updated so far matches component values in From
          pragma Loop_Invariant
-           (if This.Position'Loop_Entry > 0 then -- not empty prior to call
-              (for all K in 0 .. This.Position'Loop_Entry - 1 =>
-                 This.Content (K) = This.Content'Loop_Entry (K)));
+           (for all K in This.Position'Loop_Entry .. This.Position'Loop_Entry + Index (J) =>
+              This.Content (K) = Character'Pos (From (From'First + Natural (K - This.Position'Loop_Entry))));
 
+         --  no Content after the currently updated part, if any exists, is changed
+         pragma Loop_Invariant
+           (for all K in This.Position .. This.Highest_Write_Pos - 1 =>
+              This.Content (K) = This.Content'Loop_Entry (K));
+
+         --  all written Content is initialized
+         pragma Loop_Invariant
+           (for all K in 0 .. This.Highest_Write_Pos - 1 =>
+              This.Content (K)'Initialized);
       end loop;
    end Copy_String_To_Buffer;
 
@@ -93,13 +99,15 @@ is
    --------------------------
 
    procedure Copy_Bytes_To_Buffer
-     (This : in out ByteBuffer'Class;
+     (This : in out ByteBuffer;
       From : Byte_Array)
    is
    begin
-      This.Content (This.Position .. This.Position + From'Length - 1) := From;
-      This.Highest_Write_Pos := This.Highest_Write_Pos + From'Length;
+      This.Content (This.Position .. This.Position + From'Length - 1) := Byte_Data (From);
       This.Position := This.Position + From'Length;
+      if This.Position > This.Highest_Write_Pos then
+         This.Highest_Write_Pos := This.Position;
+      end if;
    end Copy_Bytes_To_Buffer;
 
 end AVTAS.LMCP.ByteBuffers.Copying;

@@ -12,9 +12,7 @@ package -<full_series_name_dots>-.Factory is
    function createObject(seriesId : in Int64;  msgType : in UInt32; version: in UInt16) return avtas.lmcp.object.Object_Any;
 
    function CalculatedChecksum (Buffer : in ByteBuffer; Size : Index) return UInt32;
-   --  Computes the modular checksum for the Buffer contents, ignoring the
-   --  last 4 bytes in which the checksum may or may not be stored. Assumes
-   --  Big Endian byte order.
+   --  Computes the modular checksum for the Buffer contents.
 
    function getObjectSize(buffer : in ByteBuffer) return UInt32;
 

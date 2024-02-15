@@ -2,7 +2,7 @@ project Test_ByteBuffers is
 
    for Source_Dirs use (".", "lmcp");
 
-   for Main use ("test_bytebuffers.adb");
+   for Main use ("prove_bytebuffers.adb", "test_bytebuffers.adb");
 
    type Modes is ("debug", "release");
    Mode : Modes := external ("Build", "debug");
@@ -15,7 +15,9 @@ project Test_ByteBuffers is
    for Object_Dir use "objs/" & Mode;
 
    Unconditional_Compiler_Switches :=
-     ("-gnatyO"    -- check that overriding subprograms are explicitly marked as such
+     ("-gnatyO",    -- check that overriding subprograms are explicitly marked as such
+      "-gnatwJ"    -- suppress warnings on obsolescent features, esp. parentheses in aggregates
+      --  "-gnat2022"   -- enable Ada 2022
       );
 
    Debug_Switches := ("-g",
@@ -57,9 +59,5 @@ project Test_ByteBuffers is
    package Builder is
       for Switches ("Ada") use ("-g");
    end Builder;
-
-   package Prove is
-      for Proof_Switches ("Ada") use ("--level=2", "--checks-as-errors", "--proof-warnings");
-   end Prove;
 
 end Test_ByteBuffers;
