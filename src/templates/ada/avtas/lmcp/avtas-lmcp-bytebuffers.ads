@@ -441,20 +441,40 @@ is
              New_Content_Equal (This, Position (This)'Old, Value)                and then
              Prior_Content_Unchanged (This, Old_Value => This'Old);
 
-   function Raw_Bytes (This : ByteBuffer) return Byte_Array;
-   --  Returns the entire internal byte array content, up to but not including
-   --  High_Water_Mark (This)
+   function Raw_Bytes (This : ByteBuffer) return Byte_Array with
+     Post => Raw_Bytes'Result'First = 0 and then
+             Raw_Bytes'Result'Length = High_Water_Mark (This);
+   --  Returns the internal byte array content
 
    function Raw_Bytes_As_String (This : ByteBuffer) return String with
      Pre  => High_Water_Mark (This) <= Index (Positive'Last),
      Post => Raw_Bytes_As_String'Result'First = 1 and then
              Raw_Bytes_As_String'Result'Length = High_Water_Mark (This);
-   --  Returns the entire internal byte array content, as a String
+   --  Same as Raw_Bytes, except as a String value (and hence with bounds
+   --  consistent with String's requirements). There is no formatting,
+   --  unlike the result of function As_String.
+
+   function As_String (This : ByteBuffer) return String with
+     Pre  => (High_Water_Mark (This) * 3) + 1 <= Index'Last and then
+             (High_Water_Mark (This) * 3) + 1 <= Index (Positive'Last),
+     Post => As_String'Result'First = 1                                 and then
+             As_String'Result'Length = (High_Water_Mark (This) * 3) + 1 and then
+             (for all K in As_String'Result'Range =>
+                (if K mod 3 = 0 then
+                   As_String'Result (K) = (if K mod 12 = 0 then ASCII.LF else ' ')))
+             and then
+             As_String'Result (As_String'Result'Last) = ASCII.LF;
+   --  Returns the internal byte array content as a formatted String value.
+   --  Each internal byte is represented as two numeric hex characters, with an
+   --  additional blank or linefeed inserted after these two characters. Hence
+   --  there are three characters in the result per contained byte in This.
+   --  After the fourth set of two bytes, a linefeed is inserted instead of
+   --  a blank. This is function toString() in the C++ version.
 
    function Checksum (This : ByteBuffer;  Last : Index) return UInt32 with
      Pre => Last <= High_Water_Mark (This) - 1;
    --  Computes the checksum of the slice of the internal byte array from the
-   --  first byte up to Last (inclusive). 
+   --  first byte up to Last (inclusive).
 
    subtype Two_Bytes   is Byte_Array (0 .. 1) with Object_Size => 16;
    subtype Four_Bytes  is Byte_Array (0 .. 3) with Object_Size => 32;
