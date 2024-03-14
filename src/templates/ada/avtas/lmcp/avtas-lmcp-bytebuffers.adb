@@ -21,6 +21,50 @@ is
       return Result;
    end Raw_Bytes_As_String;
 
+   ---------------
+   -- As_String --
+   ---------------
+
+   function As_String (This : ByteBuffer) return String is
+      Result      : Unbounded_String;
+      Hex_Digit   : constant array (Byte range 0 .. 15) of Character := "0123456789ABCDEF";
+      Nibble_Size : constant := 4; -- bits
+      Nibble      : Byte;
+   begin
+      for K in This.Content'First .. This.Highest_Write_Pos - 1 loop
+         declare
+            Next_Byte : constant Byte := This.Content (K);
+         begin
+            Nibble := Shift_Right (Next_Byte and 2#1111_0000#, Nibble_Size);
+            Append (Result, Hex_Digit (Nibble));
+            Nibble := Next_Byte and 2#0000_1111#;
+            Append (Result, Hex_Digit (Nibble));
+
+            if K mod 4 = 3 then
+               Append (Result, ASCII.LF);
+               --  Hence every fourth byte in Content is followed by a linefeed
+               --  in the resulting string, instead of a blank
+            else
+               Append (Result, ' ');
+               --  Otherwise, every two characters, representing one byte in
+               --  Content, has a blank following them in the resulting string
+            end if;
+
+            pragma Loop_Invariant
+              (Length (Result) = Length (Result'Loop_Entry) + Natural (3 * (K + 1)));
+            --  Every iteration adds three characters to the string. But
+            --  remember K starts at 0, hence the expression above.
+
+            pragma Loop_Invariant
+              (for all J in 1 .. Length (Result) =>
+                 (if J mod 3 = 0 then
+                    (Element (Result, J) = (if J mod 12 = 0 then ASCII.LF else ' '))));
+         end;
+      end loop;
+      Append (Result, ASCII.LF);
+      return To_String (Result);
+   end As_String;
+
    ------------
    -- Rewind --
    ------------
