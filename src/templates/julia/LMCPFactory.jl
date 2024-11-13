@@ -17,7 +17,7 @@ const TEXT_CREATION_REGISTRY = Dict{Tuple{String, String}, DataType}()
 
 const LARGE_ARRAY_REGISTRY = Set{Tuple{DataType, Symbol}}()
 
-function calculate_checksum(bytes::Vector{UInt8})
+function calculate_checksum(bytes::AbstractVector{UInt8})
     checksum::UInt64 = 0
     for byte in bytes
         checksum += byte
@@ -44,7 +44,7 @@ function pack_message(o::AbstractLmcpMessage)
     return buffer.data[1:buffer.size]
 end
 
-function validate(bytes::Vector{UInt8})
+function validate(bytes::AbstractVector{UInt8})
     #retrieves the checksum value in BIG_ENDIAN order
     cs::UInt64 = 0
     len = length(bytes)
@@ -71,7 +71,7 @@ function unpack_message(buffer::IOBuffer)
     return read(messageBuffer, AbstractLmcpMessage)
 end
 
-function unpack_message(bytes::Vector{UInt8})
+function unpack_message(bytes::AbstractVector{UInt8})
     buffer = IOBuffer(bytes)
     return unpack_message(buffer)
 end
@@ -81,7 +81,7 @@ function unpack_message(str::String)
     return unpack_message(buffer)
 end
 
-function unpack_messages(bytes::Vector{UInt8})
+function unpack_messages(bytes::AbstractVector{UInt8})
     buffer = IOBuffer(bytes)
     messages = Vector{LmcpBaseInterface}()
     while bytesavailable(buffer) > 0
