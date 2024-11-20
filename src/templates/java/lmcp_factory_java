@@ -132,43 +132,7 @@ public class LMCPFactory {
         long cs = calculateChecksum ? calculateChecksum(buf.getInternalBuffer()) : 0;
         LMCPUtil.putUint32(buf, cs);
 
-        if(!calculateChecksum)
-            return buf.toByteArray();
-        
-        // every time a checksum is requested, it is going out over the network
-        // so update with sentinelization
-        String attributes = rootObject.getFullLMCPTypeName();
-        attributes += "$lmcp|" + rootObject.getFullLMCPTypeName();
-        attributes += "||0|0$";
-        String sentinel = "+=+=+=+=";
-        sentinel += String.valueOf(attributes.length() + size + HEADER_SIZE + CHECKSUM_SIZE);
-        sentinel += "#@#@#@#@";
-        
-        byte[] attributeBytes = attributes.getBytes();
-        byte[] payloadBytes = buf.toByteArray();
-        byte[] addressedPayload = new byte[attributeBytes.length + payloadBytes.length];
-        System.arraycopy(attributeBytes, 0, addressedPayload, 0, attributeBytes.length);
-        System.arraycopy(payloadBytes, 0, addressedPayload, attributeBytes.length, payloadBytes.length);
-        
-        // sentinelized checksum
-        int val = 0;
-        for(int i=0; i<addressedPayload.length; i++) {
-            val += (addressedPayload[i] & 0xFF);
-        }
-        
-        byte[] sentinelBytes = sentinel.getBytes();
-        byte[] frontBytes = new byte[sentinelBytes.length + addressedPayload.length];
-        System.arraycopy(sentinelBytes, 0, frontBytes, 0, sentinelBytes.length);
-        System.arraycopy(addressedPayload, 0, frontBytes, sentinelBytes.length, addressedPayload.length);
-        
-        // add footer bytes
-        String footer = "!%!%!%!%" + String.valueOf(val) + "?^?^?^?^";
-        byte[] footerBytes = footer.getBytes();
-        byte[] completeMessage = new byte[frontBytes.length + footerBytes.length];
-        System.arraycopy(frontBytes, 0, completeMessage, 0, frontBytes.length);
-        System.arraycopy(footerBytes, 0, completeMessage, frontBytes.length, footerBytes.length);
-        
-        return completeMessage;
+        return buf.toByteArray();
     }
 
     public static void packMessage(OutputStream out, LMCPObject rootObject, 
